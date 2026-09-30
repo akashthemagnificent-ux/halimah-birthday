@@ -1,17 +1,127 @@
 /* ============================================================
-   story — cinematic spine: 14 pinned chapters (todo 7)
-   GSAP ScrollTrigger scrubs; prefers-reduced-motion → plain stack.
+   story — the archive of us
+   Ember-night continuity: one living ambient stack behind a
+   fourteen-chapter spine. Chapters keep their own rhythm, the
+   quotes keep a scrim so the spectacle never costs legibility,
+   and every base state reads on its own if JS never arrives.
+
+   contract notes
+   - the html.js-story gate is preserved exactly: 130dvh + flex
+     only when JS is live, plain block stack otherwise
+   - no rule ever hides a chapter; the no-JS readability floor
+     is the same floor reduced-motion reads
+   - reduced-motion gets the frozen final frame of the gradient
+     (animation: none; opacity: 0.9) and no canvas: zero motion,
+     maximum picture
    ============================================================ */
 
+/* ── Section shell + local palette ───────────────────────────────── */
 .section--story {
+  /* ambient + sticky inners need a clipping box, not a containing
+     one: the chapter card is 130dvh but must never paint a hair
+     beyond the section's horizontal edges. */
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  overflow-y: visible;
   background: var(--color-cine-bg);
-  overflow: hidden;
+
+  /* local layer stack (also the reveal easing for this file) */
+  --story-layer-ambient: 0;
+  --story-layer-content: 2;
+  --story-layer-rail: 50;
+  --story-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --story-rail-dot: 8px;
+  --story-column: 38rem;
+  --story-scrim: linear-gradient(
+    90deg,
+    rgba(10, 10, 15, 0.92) 0%,
+    rgba(10, 10, 15, 0.84) 58%,
+    rgba(10, 10, 15, 0.58) 100%
+  );
+  --story-scrim-flat: rgba(10, 10, 15, 0.9);
+  --story-hairline: rgba(212, 168, 106, 0.26);
 }
 
+/* ── Ambient stack: one gradient plate + one particle canvas ────── */
+/* Both are position:absolute inset:0 inside #story, inert to the
+   pointer, and sit BELOW .story__content (z 2). story.js drives the
+   drift and the particles; the gradient also breathes on its own so
+   the plate is never dead even before the engine starts. */
+.story__atmosphere,
+canvas.story__ambient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--story-layer-ambient);
+  pointer-events: none;
+  user-select: none;
+}
+
+.story__atmosphere {
+  background:
+    radial-gradient(
+      68% 46% at 50% -4%,
+      rgba(224, 124, 62, 0.2) 0%,
+      rgba(224, 124, 62, 0) 62%
+    ),
+    radial-gradient(
+      48% 36% at 88% 34%,
+      rgba(212, 168, 106, 0.14) 0%,
+      rgba(212, 168, 106, 0) 68%
+    ),
+    radial-gradient(
+      56% 40% at 6% 76%,
+      rgba(124, 88, 190, 0.12) 0%,
+      rgba(124, 88, 190, 0) 70%
+    ),
+    linear-gradient(
+      180deg,
+      #14101c 0%,
+      #0a0a0f 38%,
+      #0a0a0f 68%,
+      #170f0b 100%
+    );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 1;
+  /* slow ember breath, transform+opacity only */
+  animation: story-atmosphere-drift 46s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+
+canvas.story__ambient {
+  display: block;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+
+@keyframes story-atmosphere-drift {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 0.86;
+  }
+  38% {
+    transform: scale(1.07) translate3d(-1.2%, -1.8%, 0);
+    opacity: 0.97;
+  }
+  70% {
+    transform: scale(1.03) translate3d(1.4%, 1.1%, 0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 0.86;
+  }
+}
+
+/* ── Content column ─────────────────────────────────────────────── */
 .story__content {
   position: relative;
+  z-index: var(--story-layer-content);
   width: 100%;
-  max-width: var(--content-width);
+  max-width: var(--story-column);
   margin: 0 auto;
   padding: var(--section-padding) var(--gutter);
 }
@@ -30,7 +140,9 @@
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: 500;
+  font-style: italic;
   line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--color-cine-text);
   text-align: center;
 }
@@ -51,42 +163,19 @@
   font-size: var(--text-lg);
   font-weight: 500;
   line-height: 1.25;
+  letter-spacing: -0.01em;
   color: var(--color-cine-text);
   margin-bottom: var(--space-3);
+  text-wrap: balance;
 }
 
 .story__source {
   margin-top: var(--space-4);
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
+  letter-spacing: 0.08em;
   color: var(--color-cine-text-muted);
   opacity: 0.75;
-}
-
-/* ---- Chapter track ---- */
-.story__track {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-  padding-right: var(--space-12);
-  /* each chapter gets its own ScrollTrigger pin span; the track
-     height is the sum of chapter heights + gaps, which ScrollTrigger
-     will use as the scroll distance. */
-}
-
-/* ---- Chapter card ---- */
-html.js-story .story__chapter {
-  min-height: 130dvh;
-  display: flex;
-  /* height varies by content; ScrollTrigger pins each card in turn */
-}
-
-.story__chapter-inner {
-  position: sticky;
-  top: calc(var(--section-padding) + var(--safe-top));
-  align-self: flex-start;
-  width: 100%;
-  /* sticky position + GSAP pin = scrub effect when JS runs;
-     without JS it's just a normal stacked chapter. */
 }
 
 /* Date stamp — top of card */
@@ -102,18 +191,44 @@ html.js-story .story__chapter {
   white-space: nowrap;
 }
 
-/* Quote block — the verbatim line(s) */
+/* ── Chapter track ──────────────────────────────────────────────── */
+.story__track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  /* the rail owns the right edge; the track must not run under it.
+     rail footprint = tap cell + list padding + border:
+     44px + 2*12px + 2px, plus one step breathing room. */
+  padding-right: calc(var(--tap-min) + (2 * var(--space-3)) + 2px + var(--space-2));
+}
+
+/* ── Chapter card ───────────────────────────────────────────────── */
+html.js-story .story__chapter {
+  min-height: 130dvh;
+  display: flex;
+  /* height varies by content; ScrollTrigger pins each card in turn */
+}
+
+.story__chapter-inner {
+  position: sticky;
+  top: calc(var(--section-padding) + var(--safe-top));
+  align-self: flex-start;
+  width: 100%;
+}
+
+/* ── Quote block: the verbatim line(s) ───────────────────────────── */
+/* The scrim is the legibility floor. Whatever the ambient stack is
+   doing behind the card, the text keeps AA contrast. */
 .story__quote {
   position: relative;
   margin: 0 0 var(--space-6);
   padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8);
   border-left: 3px solid var(--color-cine-accent);
-  background: linear-gradient(
-    90deg,
-    var(--color-cine-accent-soft) 0%,
-    transparent 40%
-  );
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--story-scrim);
+  -webkit-backdrop-filter: blur(7px) saturate(115%);
+  backdrop-filter: blur(7px) saturate(115%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
 }
 
 .story__quote::before {
@@ -137,9 +252,12 @@ html.js-story .story__chapter {
   color: var(--color-cine-text);
   font-style: italic;
   margin: 0;
+  /* Timestamps are unbreakable strings ([2026-…+00:00]); wrap them
+     anywhere so 375px quote boxes never clip. Text untouched. */
+  overflow-wrap: anywhere;
 }
 
-/* Voiceover — one line from the narrator */
+/* ── Voiceover: one line from the narrator ───────────────────────── */
 .story__voiceover {
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -156,35 +274,326 @@ html.js-story .story__chapter {
   border-left-color: var(--color-cine-accent);
 }
 
-/* ---- Chapter number / progress indicator ---- */
+.story__chapter:focus-within .story__voiceover {
+  border-left-color: var(--color-cine-accent-glow);
+}
+
+/* ── Speaker differentiation ─────────────────────────────────────────
+   The "me:" / zainab-glyph stamps are paragraph *text*, which no
+   selector can match. So the split rides a gutter thread now, plus a
+   dormant [data-speaker] hook for when the attribute can be exposed.
+   Not a catch-all: it changes nothing until that attribute exists. */
+.story__quote p {
+  border-left: 1px solid rgba(212, 168, 106, 0.16);
+  padding-left: var(--space-4);
+}
+
+.story__quote p[data-speaker="zainab"] {
+  border-left-color: var(--color-cine-accent);
+  color: var(--color-cine-accent-glow);
+}
+
+/* ── Sub-beats: the room the message was said in ────────────────── */
+.story__beat {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.story__beat > p {
+  margin-bottom: var(--space-4);
+}
+
+.story__beat > p:last-child {
+  margin-bottom: 0;
+}
+
+/* the hairline is the breath between two beats */
+.story__beat + .story__beat {
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--story-hairline);
+}
+
+.story__beat + .story__beat::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-8) * -0.42);
+  left: 0;
+  width: var(--space-12);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--color-cine-accent-glow) 0%,
+    rgba(212, 168, 106, 0) 100%
+  );
+  opacity: 0.55;
+}
+
+/* ============================================================
+   FOURTEEN CHAPTER RHYTHM MAP
+   ch1 2 3 5 7 8 9 12 13 14  — tight centered column (the base)
+   ch4                        — two-beat split
+   ch6                        — wide playful chip field
+   ch10                       — three-beat staircase
+   ch11                       — five-beat epic
+   ============================================================ */
+
+/* the base column IS the tight centered reading measure */
+#chapter-1 .story__chapter-inner,
+#chapter-2 .story__chapter-inner,
+#chapter-3 .story__chapter-inner,
+#chapter-5 .story__chapter-inner,
+#chapter-7 .story__chapter-inner,
+#chapter-8 .story__chapter-inner,
+#chapter-9 .story__chapter-inner,
+#chapter-12 .story__chapter-inner,
+#chapter-13 .story__chapter-inner,
+#chapter-14 .story__chapter-inner {
+  max-width: 38rem;
+  margin-inline: auto;
+}
+
+#chapter-1 .story__quote p,
+#chapter-2 .story__quote p,
+#chapter-3 .story__quote p,
+#chapter-5 .story__quote p,
+#chapter-7 .story__quote p,
+#chapter-8 .story__quote p,
+#chapter-9 .story__quote p,
+#chapter-12 .story__quote p,
+#chapter-13 .story__quote p,
+#chapter-14 .story__quote p {
+  font-size: var(--text-lg);
+}
+
+/* ── ch4 — two-beat split ────────────────────────────────────────
+   The ask, then the answer. Beat 1 sits flush; beat 2 is pulled in
+   2rem, so the page itself leans toward the second voice. */
+#chapter-4 .story__chapter-inner {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+#chapter-4 .story__quote p {
+  font-size: var(--text-md);
+}
+
+#chapter-4 .story__beat + .story__beat {
+  margin-top: var(--space-10);
+  padding-top: var(--space-10);
+  margin-left: 2rem;
+  border-top: 1px solid var(--story-hairline);
+}
+
+#chapter-4 .story__beat + .story__beat::before {
+  top: calc(var(--space-10) * -0.42);
+  left: 2rem;
+}
+
+/* ── ch6 — wide playful: the messages as chips ────────────────────
+   Girlfriend Day is a bit, not a confession. The quote opens to
+   52rem and each line becomes a chip, so the whole prank reads as
+   a string of flags rather than a wall of caps. */
+#chapter-6 .story__chapter-inner {
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
+#chapter-6 .story__quote {
+  padding: var(--space-8) var(--space-6);
+  background: var(--story-scrim-flat);
+}
+
+#chapter-6 .story__quote p {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 var(--space-2) var(--space-2) 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  font-style: normal;
+  background: rgba(212, 168, 106, 0.09);
+  border: 1px solid rgba(212, 168, 106, 0.22);
+  border-radius: var(--radius-pill);
+  color: var(--color-cine-text);
+  word-break: break-word;
+}
+
+/* the wrap needs a clear: the last chip must start a new line */
+#chapter-6 .story__quote::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* the pull-quote inside the chip field stays a chip's quieter cousin */
+#chapter-6 .story__quote p.story__pull {
+  font-style: italic;
+  border-color: rgba(212, 168, 106, 0.4);
+  background: rgba(212, 168, 106, 0.16);
+}
+
+/* ── ch10 — three-beat staircase ──────────────────────────────────
+   Prank, escalation, payoff. Each beat steps +1.5rem further in so
+   the joke climbs the way the laughter did. */
+#chapter-10 .story__chapter-inner {
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+#chapter-10 .story__quote p {
+  font-size: var(--text-md);
+}
+
+#chapter-10 .story__beat:nth-of-type(1) {
+  margin-left: 0;
+}
+
+#chapter-10 .story__beat:nth-of-type(2) {
+  margin-left: 1.5rem;
+}
+
+#chapter-10 .story__beat:nth-of-type(3) {
+  margin-left: 3rem;
+}
+
+/* ── ch11 — five-beat epic ────────────────────────────────────────
+   Full width, alternating accent borders left/right, so the page
+   reads as a long breath in and a long breath out. */
+#chapter-11 .story__chapter-inner {
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
+#chapter-11 .story__quote {
+  padding: var(--space-10) var(--space-8);
+  background: var(--story-scrim);
+}
+
+#chapter-11 .story__quote p {
+  font-size: var(--text-md);
+}
+
+#chapter-11 .story__beat {
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+  border-left: 2px solid var(--color-cine-accent);
+  border-right: 2px solid transparent;
+}
+
+#chapter-11 .story__beat:nth-of-type(even) {
+  border-left: 2px solid transparent;
+  border-right: 2px solid var(--color-cine-accent);
+}
+
+#chapter-11 .story__beat + .story__beat {
+  margin-top: var(--space-12);
+  padding-top: var(--space-10);
+  border-top: 1px solid var(--story-hairline);
+}
+
+/* ── Pull-quote: the landmark ─────────────────────────────────────
+   The line the chapter is remembered by, pulled out of the wall and
+   given the whole page. Oversized Fraunces italic, centered, with
+   4rem of air above and below so it lands as a stop, not a shout. */
+/* Compound selector rather than a priority flag: it out-specifies both
+   .story__quote p and .story__beat > p on merit, so the landmark's
+   4rem of air and its borderless box hold without one. */
+.story__quote p.story__pull {
+  display: block;
+  margin: 4rem 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-left: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  color: var(--color-cine-accent-glow);
+  text-shadow: 0 2px 26px rgba(232, 192, 136, 0.28);
+}
+
+.story__pull::before {
+  content: none;
+}
+
+/* ── Staged reveal: base states the page already reads in ─────────
+   The fromTo in story.js scrubs chapter opacity/y; these are the
+   resting and hover states between scrubs. Nothing here is allowed
+   to be a hidden state: with GSAP blocked the very same cascade is
+   what a visitor sees, and it is the finished page. */
+html.js-story .story__chapter {
+  will-change: opacity, transform;
+}
+
+.story__chapter {
+  transform-origin: center bottom;
+}
+
+.story__quote,
+.story__voiceover,
+.story__source,
+.story__kicker,
+.story__date,
+.story__title {
+  opacity: 1;
+  transform: none;
+}
+
+.story__progress-item,
+.story__progress-list {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Nav rail ─────────────────────────────────────────────────────
+   A rail of fourteen links. The container stays inert so it never
+   eats a click meant for the story; every link takes its pointer
+   back and keeps a 44px target. Labels ride data-num and appear on
+   hover/focus, permanently from 901px up.
+
+   The rail is not a staged-reveal surface: it stays hidden until
+   story.js sets body.is-in-story, so its resting state below is
+   deliberately the hidden one. The chapter prose itself is what has
+   to read without JS, and it does. */
 .story__progress {
   position: fixed;
   right: var(--gutter);
   top: 50%;
   transform: translateY(-50%);
-  z-index: 50;
+  z-index: var(--story-layer-rail);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--duration-normal) var(--ease-out),
-              visibility 0s var(--duration-normal);
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    visibility 0s var(--duration-normal);
 }
 
-/* Only show progress when the story section is in view.
-   story.js toggles .is-in-story on <body> via ScrollTrigger. */
 body.is-in-story .story__progress.is-visible {
   opacity: 1;
   visibility: visible;
-  transition: opacity var(--duration-normal) var(--ease-out),
-              visibility 0s 0s;
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    visibility 0s 0s;
 }
 
 .story__progress-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-cine-surface);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: rgba(20, 20, 32, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--color-cine-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -192,63 +601,245 @@ body.is-in-story .story__progress.is-visible {
 
 .story__progress-item {
   position: relative;
-  width: 10px;
-  height: 10px;
+  display: block;
+  /* WCAG 2.2: the target is the whole 44px cell, the dot is drawn
+     inside it. Width/height stay at the dot measure so the rail
+     keeps its hairline presence on a phone. */
+  width: var(--tap-min);
+  height: var(--tap-min);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  pointer-events: auto;
+  border-radius: var(--radius-sm);
+  color: var(--color-cine-text-muted);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.story__progress-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--story-rail-dot);
+  height: var(--story-rail-dot);
   border-radius: 50%;
+  transform: translate(-50%, -50%);
   background: var(--color-cine-border);
-  transition: background var(--duration-fast) var(--ease-out),
-              transform var(--duration-fast) var(--ease-out);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.story__progress-item.is-active {
-  background: var(--color-cine-accent);
-  transform: scale(1.4);
-  box-shadow: 0 0 12px var(--color-cine-accent-glow);
-}
-
+/* the data-num label, revealed on hover/focus */
 .story__progress-item::after {
   content: attr(data-num);
   position: absolute;
-  right: calc(100% + var(--space-3));
+  right: calc(100% + var(--space-2));
   top: 50%;
   transform: translateY(-50%);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  line-height: 1;
   color: var(--color-cine-text-muted);
-  opacity: 0;
+  background: rgba(10, 10, 15, 0.9);
+  border: 1px solid var(--color-cine-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
   white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-.story__progress-item.is-active::after { opacity: 1; }
+.story__progress-item:hover::after,
+.story__progress-item:focus-visible::after {
+  opacity: 1;
+}
 
-/* ---- Reduced motion: plain stacked chapters, no pin, no progress ---- */
+.story__progress-item:hover::before {
+  background: var(--color-cine-accent-glow);
+}
+
+.story__progress-item:focus-visible {
+  outline: 2px solid var(--color-cine-accent-glow);
+  outline-offset: 2px;
+}
+
+/* the active chapter burns: glow, grow, and its label stays up */
+.story__progress-item.is-active {
+  background: rgba(212, 168, 106, 0.08);
+}
+
+.story__progress-item.is-active::before {
+  background: var(--color-cine-accent);
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 14px var(--color-cine-accent-glow);
+}
+
+.story__progress-item.is-active::after {
+  opacity: 1;
+  color: var(--color-cine-accent-glow);
+  border-color: rgba(212, 168, 106, 0.4);
+}
+
+.story__progress-item[aria-current="true"]::before {
+  background: var(--color-cine-accent);
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 14px var(--color-cine-accent-glow);
+}
+
+/* ============================================================
+   VIEWPORTS — 375px-first base, then two widening steps
+   ============================================================ */
+
+/* base (≤480px) is already 375px-first: the quote padding, type
+   scale, voiceover size and rail metrics above ARE the small screen.
+   The rules that used to live in a max-width:480px block are now
+   the defaults, so nothing depends on that query any more. */
+
+/* 481px–900px: a wider page, a fatter dot */
+@media (min-width: 481px) and (max-width: 900px) {
+  .section--story {
+    --story-column: 46rem;
+    --story-rail-dot: 12px;
+    --story-scrim: linear-gradient(
+      90deg,
+      rgba(10, 10, 15, 0.9) 0%,
+      rgba(10, 10, 15, 0.8) 60%,
+      rgba(10, 10, 15, 0.5) 100%
+    );
+  }
+
+  .story__quote {
+    padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8);
+  }
+
+  .story__quote p {
+    font-size: var(--text-lg);
+  }
+
+  #chapter-6 .story__quote p {
+    font-size: var(--text-sm);
+  }
+}
+
+/* 901px+: the full stage */
+@media (min-width: 901px) {
+  .section--story {
+    --story-column: 52rem;
+    --story-rail-dot: 12px;
+  }
+
+  .story__track {
+    padding-right: var(--space-16);
+  }
+
+  /* ch11's five beats become an alternating two-column spread: the
+     confession and the YES hold opposite edges of the page. */
+  #chapter-11 .story__quote {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8) var(--space-10);
+    align-items: start;
+  }
+
+  #chapter-11 .story__beat {
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: var(--space-4);
+    border-top: 0;
+  }
+
+  #chapter-11 .story__beat:nth-of-type(odd) {
+    border-left: 2px solid var(--color-cine-accent);
+    border-right: 2px solid transparent;
+    padding-left: var(--space-6);
+    padding-right: var(--space-4);
+  }
+
+  #chapter-11 .story__beat:nth-of-type(even) {
+    border-left: 2px solid transparent;
+    border-right: 2px solid var(--color-cine-accent);
+    padding-left: var(--space-4);
+    padding-right: var(--space-6);
+  }
+
+  #chapter-11 .story__quote p.story__pull {
+    grid-column: 1 / -1;
+    margin: var(--space-8) 0;
+  }
+
+
+  /* the rail reads as a numbered ladder here, always */
+  .story__progress-item::after {
+    opacity: 0.75;
+  }
+
+  .story__progress-item:hover::after,
+  .story__progress-item:focus-visible::after,
+  .story__progress-item.is-active::after,
+  .story__progress-item[aria-current="true"]::after {
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION — frozen frame, zero movement
+   No animation, no loop, no canvas. The gradient holds the same
+   opacity its final keyframe held (0.9) and the chapter stack
+   un-sticks: a plain, complete, readable archive.
+   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  html.js-story .story__chapter { min-height: 0; display: block; }
+  html.js-story .story__chapter {
+    min-height: 0;
+    display: block;
+  }
+
   .story__chapter-inner {
     position: static;
     top: auto;
   }
-  .story__progress { display: none; }
-  .story__track { gap: var(--space-16); }
-  .story__quote::before { opacity: 0.25; }
-}
 
-/* ---- Small screens ---- */
-@media (max-width: 480px) {
-  .story__quote {
-    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6);
+  .story__track {
+    gap: var(--space-16);
   }
-  .story__quote::before { font-size: calc(var(--text-xl) * 1.5); }
-  .story__quote p { font-size: var(--text-md); }
-  .story__voiceover { font-size: var(--text-xs); }
-  .story__progress-list { gap: var(--space-2); padding: var(--space-3); }
-  .story__progress-item { width: 8px; height: 8px; }
-  .story__progress-item.is-active { transform: scale(1.3); }
-  .story__progress-item::after { display: none; }
-}
 
-/* ---- Focus visible for keyboard nav ---- */
-.story__chapter:focus-within .story__voiceover {
-  border-left-color: var(--color-cine-accent-glow);
+  .story__quote::before {
+    opacity: 0.25;
+  }
+
+  /* the frozen plate: the final keyframe, held still */
+  .story__atmosphere {
+    animation: none;
+    opacity: 0.9;
+    transform: none;
+    will-change: auto;
+  }
+
+  /* the particle layer is the only thing we can truly take away */
+  canvas.story__ambient {
+    display: none;
+  }
+
+  /* the rail is pure navigation, so it stays */
+  .story__progress {
+    display: block;
+  }
+
+  /* matches the base selector's specificity, so the clamped size
+     actually lands instead of losing the cascade to the rule it
+     is meant to soften */
+  .story__quote p.story__pull {
+    font-size: clamp(1.75rem, 5.2vw, 3rem);
+  }
+
+  .story__chapter,
+  .story__quote,
+  .story__quote p.story__pull,
+  .story__progress-item::before {
+    transition: none;
+  }
 }
