@@ -1,0 +1,113 @@
+/* ============================================================
+   halimah-birthday — Design Tokens
+   Dual theme: autumn-warm (default) + cinematic-dark (sections)
+   ============================================================ */
+
+:root {
+  /* ── Colour palette: autumn-warm ── */
+  --color-bg:           #1a1410;
+  --color-surface:      #2a2118;
+  --color-surface-alt:  #342a1f;
+  --color-text:         #f5ebe0;
+  --color-text-muted:   #bfb0a0;
+  --color-accent:       #e07c3e;
+  --color-accent-glow:  #f0984a;
+  --color-accent-soft:  #e07c3e33;
+  --color-secondary:    #c9956b;
+  --color-border:       #4a3d2f;
+  --color-success:      #7dba6a;
+  --color-danger:       #d45d5d;
+
+  /* ── Colour palette: cinematic-dark ── */
+  --color-cine-bg:          #0a0a0f;
+  --color-cine-surface:     #141420;
+  --color-cine-surface-alt: #1e1e30;
+  --color-cine-text:        #e8e0d8;
+  --color-cine-text-muted:  #8a8090;
+  --color-cine-accent:      #d4a86a;
+  --color-cine-accent-glow: #e8c088;
+  --color-cine-border:      #2a2a3a;
+
+  /* ── Typography ── */
+  --font-display:  'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body:     'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Type scale (clamp for fluid) ── */
+  --text-xs:    clamp(0.7rem,  0.65rem + 0.25vw, 0.75rem);
+  --text-sm:    clamp(0.8rem,  0.75rem + 0.25vw, 0.875rem);
+  --text-base:  clamp(0.95rem, 0.9rem  + 0.25vw, 1.0625rem);
+  --text-md:    clamp(1.1rem,  1rem    + 0.5vw,  1.25rem);
+  --text-lg:    clamp(1.3rem,  1.1rem  + 1vw,    1.75rem);
+  --text-xl:    clamp(1.8rem,  1.4rem  + 2vw,    2.75rem);
+  --text-2xl:   clamp(2.4rem,  1.8rem  + 3vw,    4rem);
+
+  /* ── Spacing scale (4px base) ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* ── Layout ── */
+  --content-width:    42rem;
+  --gutter:           clamp(1rem, 4vw, 2rem);
+  --section-padding:  clamp(3rem, 10vh, 6rem);
+
+  /* ── Radius ── */
+  --radius-sm:  0.375rem;
+  --radius-md:  0.625rem;
+  --radius-lg:  1rem;
+  --radius-xl:  1.5rem;
+  --radius-pill: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.45);
+  --shadow-glow: 0 0 24px var(--color-accent-soft);
+
+  /* ── Motion ── */
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   600ms;
+  --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:     cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Tap targets (WCAG 2.2 min 44px) ── */
+  --tap-min: 44px;
+
+  /* ── Safe area (notch / home bar) ── */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast:   0ms;
+    --duration-normal: 0ms;
+    --duration-slow:   0ms;
+  }
+}
+
+/* ── Dark theme override (cinematic sections) ── */
+[data-theme="cinematic"] {
+  --color-bg:           var(--color-cine-bg);
+  --color-surface:      var(--color-cine-surface);
+  --color-surface-alt:  var(--color-cine-surface-alt);
+  --color-text:         var(--color-cine-text);
+  --color-text-muted:   var(--color-cine-text-muted);
+  --color-accent:       var(--color-cine-accent);
+  --color-accent-glow:  var(--color-cine-accent-glow);
+  --color-border:       var(--color-cine-border);
+}

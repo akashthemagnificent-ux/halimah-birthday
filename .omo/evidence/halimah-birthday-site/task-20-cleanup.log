@@ -1,0 +1,13 @@
+TASK 20 — CLEANUP RECEIPT
+checked: 2026-09-29T15:00:51+00:00
+
+[1] browser processes still alive: 0
+0
+    none — every Playwright browser exited
+
+[2] lingering node/bun listeners:
+LISTEN 0      512         127.0.0.1:42219      0.0.0.0:*    users:(("bun",pid=1749,fd=20))      
+LISTEN 0      512         127.0.0.1:34013      0.0.0.0:*    users:(("bun",pid=1749,fd=25))      
+LISTEN 0      512         127.0.0.1:45435      0.0.0.0:*    users:(("bun",pid=1749,fd=18))      
+LISTEN 0      512         127.0.0.1:45975      0.0.0.0:*    users:(("bun",pid=1578,fd=18))      
+VERDICT: RED

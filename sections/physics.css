@@ -1,0 +1,199 @@
+/* ============================================================
+   physics — Physics playground (todo 15)
+   Bonus corner in the gag locker: shovable floating hearts.
+   Progressive enhancement: the static names row is the base state
+   (reduced-motion / over-budget / library-blocked). The canvas +
+   floating hearts layer only appears when matter-js loads and
+   motion is allowed. Heart/canvas sizing is fluid so it fits 375px.
+   ============================================================ */
+
+.section--physics {
+  background:
+    radial-gradient(80% 50% at 50% 100%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
+  overflow: hidden;
+}
+
+.physics__content {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-8) var(--gutter) var(--space-10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.physics__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.physics__headline {
+  margin-top: calc(-1 * var(--space-2));
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.physics__lede {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Stage holds either the canvas or the static row, never both. */
+.physics__stage {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  min-height: 15rem;
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, var(--color-surface-alt) 0%, var(--color-surface) 100%);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.physics__stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+.physics__stage canvas:active {
+  cursor: grabbing;
+}
+
+/* Static names row (the always-available fallback). */
+.physics__static {
+  width: 100%;
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The [hidden] attribute must beat the element's own display, or the static
+   row stays visible underneath the physics hearts. */
+.physics__static[hidden] {
+  display: none;
+}
+
+.physics__chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.physics__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.physics__chip::before {
+  content: "\2665";
+  color: var(--color-accent);
+  font-size: 1em;
+}
+
+.physics__note {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  max-width: 26ch;
+}
+
+.physics__status {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  min-height: 1em;
+}
+
+/* The floating hearts are absolutely-positioned name bubbles on the canvas;
+   physics.js writes their transform each frame. */
+.physics__heart {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-accent);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+.physics__heart::before {
+  content: "\2665";
+  color: var(--color-accent);
+  font-size: 1em;
+}
+
+.physics__play {
+  margin-top: var(--space-2);
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent-glow);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.physics__play:hover,
+.physics__play:focus-visible {
+  background: var(--color-accent-soft);
+}
+
+.physics__play[hidden] {
+  display: none;
+}
+
+/* On very short/narrow viewports keep the stage from dominating. */
+@media (max-width: 420px) {
+  .physics__stage {
+    min-height: 13rem;
+  }
+}

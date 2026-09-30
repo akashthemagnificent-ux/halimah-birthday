@@ -1,0 +1,297 @@
+/* ============================================================
+   world — her-world strip (todo 13)
+   A cozy shelf of eight motif cards: music, horror top-3, games,
+   anime, gothic writing, drawing, badminton, autumn. Titles and
+   names only — zero reproduced lyrics or artwork. Content is plain
+   readable markup; world.js adds only a staggered reveal that
+   degrades to fully-visible under reduced-motion or no-JS.
+   ============================================================ */
+
+.section--world {
+  background:
+    radial-gradient(90% 55% at 50% 12%, var(--color-surface) 0%, var(--color-bg) 58%, var(--color-bg) 100%);
+  overflow: hidden;
+}
+
+.world__content {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.world__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.world__headline {
+  margin-top: calc(-1 * var(--space-4));
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.world__lede {
+  max-width: 34rem;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-accent-glow);
+  text-align: center;
+}
+
+/* ---- Drifting autumn leaves (pure decoration, CSS-only) ---- */
+.world__leaf {
+  position: absolute;
+  top: var(--space-8);
+  font-size: var(--text-md);
+  color: var(--color-accent);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.world__leaf--a { left: var(--space-4); animation: world-drift var(--duration-slow) var(--ease-in-out) infinite alternate; }
+.world__leaf--b { right: var(--space-4); animation: world-drift var(--duration-slow) var(--ease-in-out) infinite alternate-reverse; }
+
+@keyframes world-drift {
+  from { transform: translateY(0) rotate(-12deg); }
+  to   { transform: translateY(var(--space-3)) rotate(10deg); }
+}
+
+/* ---- The shelf: one column on phones, two up past 560px ---- */
+.world__shelf {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+@media (min-width: 35rem) {
+  .world__shelf {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+}
+
+/* ---- Cards ---- */
+.world__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
+  background: linear-gradient(160deg, var(--color-surface) 0%, var(--color-surface-alt) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out),
+    opacity var(--duration-slow) var(--ease-out);
+}
+
+.world__card:hover,
+.world__card:focus-within {
+  transform: translateY(calc(-1 * var(--space-1)));
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+/* Staggered reveal: visible by default; JS hides-then-reveals only
+   when motion is allowed, so no-JS and reduced-motion stay readable. */
+html.js-world .world__card[data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--space-6));
+}
+
+html.js-world .world__card[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.world__kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.world__of { color: var(--color-text-muted); }
+
+.world__title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+
+/* ---- Vinyl art (music motif: abstract disc, no artwork) ---- */
+.world__art {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) 0;
+}
+
+.world__vinyl {
+  width: var(--space-20);
+  height: var(--space-20);
+  border-radius: var(--radius-pill);
+  background:
+    radial-gradient(circle at center, var(--color-accent) 0 var(--space-2), transparent var(--space-2)),
+    repeating-radial-gradient(circle at center, var(--color-surface-alt) 0 var(--space-1), var(--color-bg) var(--space-1) var(--space-2));
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Ticket stubs (horror motif: rank + title text only) ---- */
+.world__stubs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.world__stub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.world__rank {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.world__stub-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-text);
+}
+
+.world__admit {
+  flex: 1 1 100%;
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+/* ---- Game badges ---- */
+.world__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.world__badge {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+}
+
+.world__badge-sub {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* ---- Hand-drawn SVG doodles (our own line art, no artwork copies) ---- */
+.world__doodle {
+  width: var(--space-20);
+  height: auto;
+  color: var(--color-accent);
+  opacity: 0.9;
+}
+
+/* ---- Owner voiceover + verbatim DM evidence ---- */
+.world__note {
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.world__dm {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border-left: var(--space-1) solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.world__dm p { margin: 0; }
+
+/* Her own gothic line gets manuscript treatment: same text, ink feel. */
+.world__dm--manuscript {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+.world__source {
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+/* ---- Closer ---- */
+.world__closer {
+  max-width: 34rem;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-style: italic;
+  color: var(--color-accent-glow);
+  text-align: center;
+}
+
+/* ---- Reduced motion: leaves rest, reveal is instant ---- */
+@media (prefers-reduced-motion: reduce) {
+  .world__leaf { animation: none; }
+
+  html.js-world .world__card[data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .world__card,
+  .world__card:hover,
+  .world__card:focus-within {
+    transform: none;
+    transition: none;
+  }
+}

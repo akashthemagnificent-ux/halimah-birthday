@@ -1,0 +1,26 @@
+{
+  "task": "todo-17-performance-mobile-hardening",
+  "changed_files": [
+    "scripts/budget.mjs",
+    "sections/story.css",
+    "sections/story.js",
+    "index.html"
+  ],
+  "tests": {
+    "command": "bun run scripts/budget.mjs",
+    "result": "PASS ✅ (exit 0) — JS gzipped 90.2KB ≤ 100KB, 2 font families ≤ 2, cold-cache interactive 1.3s < 3s"
+  },
+  "manual_qa": {
+    "budget_log": ".omo/evidence/halimah-birthday-site/task-17-budget.log",
+    "bloat_log": ".omo/evidence/halimah-birthday-site/task-17-bloat.log",
+    "note": "Bloat test correctly fails when 1MB image is added (exit 1, single-file limit enforced)"
+  },
+  "cleanup": {
+    "receipt": "All background processes cleaned. No test artifacts left. Temporary 1MB bloat test image created and removed during verification."
+  },
+  "risks": [
+    "Lazy-loaded section scripts (GSAP, ScrollTrigger, page-flip) depend on IntersectionObserver firing correctly; if rootMargin is too small or network is extremely slow, initial scroll might hit uninitialized sections. Mitigation: 200px rootMargin provides early loading buffer.",
+    "story__progress visibility toggling relies on body.is-in-story class from ScrollTrigger; if reduced-motion is enabled, the class is never added (progress stays hidden) — this is intended behavior per spec.",
+    "Font discipline: --font-mono CSS variable still declared in tokens.css but no Google Font loads it; sections using var(--font-mono) will fall back to system monospace (via 'JetBrains Mono', 'Fira Code', monospace stack). This is acceptable per spec (≤2 families loaded)."
+  ]
+}

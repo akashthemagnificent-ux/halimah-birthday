@@ -1,0 +1,21 @@
+task-6-audio.log — Manual QA
+Date: 2026-09-29T09:09:39.252Z
+Browser: N/A (headless Chrome not installed — static code analysis)
+
+=== Assertion Tests ===
+node test-audio.js → 11/11 PASS
+
+=== Manual Code Analysis ===
+PASS: Audio element exists with correct attrs
+PASS: play() inside click handler only
+PASS: Pause/resume toggle logic
+PASS: Music control starts hidden
+PASS: Graceful .catch() on play failure
+PASS: No autoplay attribute
+PASS: SVG pause/play icons in control
+PASS: aria-label on music control
+PASS: Audio src is local file
+
+Result: ALL PASS
+Note: Live browser test could not run (no Chrome/Chromium installed). All checks verified via static code analysis of index.html.
+Behavioral semantics confirmed: play() is ONLY inside a click handler on #begin, pause/resume toggle exists with .catch() for graceful failure, control starts hidden and reveals after user gesture.

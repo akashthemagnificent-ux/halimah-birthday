@@ -1,0 +1,221 @@
+/* ============================================================
+   scratch — scratch-off secret panel (todo 10)
+   The secret is canvas-drawn; it never touches the DOM as text.
+   ============================================================ */
+
+.section--scratch {
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.scratch__content {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* The story section's progress nav is position:fixed on the right edge
+   (todo 7). Reserve that strip on narrow screens so the centered scratch
+   card never sits underneath it. */
+@media (max-width: 480px) {
+  .scratch__content {
+    padding-right: 3.25rem;
+  }
+}
+
+.scratch__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.scratch__headline {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-8);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+/* ---- Card container ----
+   The story section's progress nav is position:fixed on the right edge
+   (todo 7), so the card is kept narrow and centred with extra right
+   clearance on small screens to stop the two from colliding. */
+.scratch__card {
+  position: relative;
+  width: min(280px, 78vw);
+  aspect-ratio: 5 / 6;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border: 1px solid var(--color-border);
+  touch-action: none;
+}
+
+/* ---- Secret canvas (bottom layer, drawn by JS) ---- */
+.scratch__secret {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Cover canvas (top layer, scratched away) ---- */
+.scratch__cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  z-index: 1;
+}
+
+.scratch__cover.is-done {
+  pointer-events: none;
+}
+
+/* ---- Hint below card ---- */
+.scratch__hint {
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.scratch__hint[hidden] {
+  display: none;
+}
+
+/* ---- Percentage counter ---- */
+.scratch__percent {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.scratch__percent.is-visible {
+  opacity: 1;
+}
+
+/* ---- Reveal message (appears after threshold) ---- */
+.scratch__reveal {
+  margin-top: var(--space-8);
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+.scratch__reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scratch__reveal-text {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-accent);
+  margin-bottom: var(--space-2);
+}
+
+.scratch__reveal-source {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+}
+
+/* ---- Replay button ---- */
+.scratch__replay {
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-8);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  opacity: 0;
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.scratch__replay.is-visible {
+  opacity: 1;
+}
+
+.scratch__replay:hover {
+  background: var(--color-surface);
+}
+
+.scratch__replay:focus-visible {
+  outline: 2px solid var(--color-accent-glow);
+  outline-offset: 3px;
+}
+
+/* ---- Tap-to-reveal (reduced motion) ----
+   Visibility is driven by the [hidden] attribute alone, set by JS. The
+   button starts hidden in markup and is only unhidden when
+   prefers-reduced-motion is on, so no class-based display rule is needed
+   (one would out-specify [hidden] and re-show the button after use). */
+.scratch__tap-btn {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-10);
+  min-height: var(--tap-min);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+}
+
+.scratch__tap-btn:active {
+  background: var(--color-accent-glow);
+}
+
+.scratch__tap-btn:focus-visible {
+  outline: 2px solid var(--color-accent-glow);
+  outline-offset: 3px;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .scratch__reveal {
+    transition: none;
+    transform: none;
+  }
+
+  .scratch__reveal.is-visible {
+    opacity: 1;
+  }
+
+  .scratch__hint,
+  .scratch__percent,
+  .scratch__replay {
+    transition: none;
+  }
+}

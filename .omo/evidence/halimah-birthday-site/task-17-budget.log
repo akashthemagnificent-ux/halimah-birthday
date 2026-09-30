@@ -1,0 +1,21 @@
+halimah-birthday Performance Budget Report
+Date: 2026-09-29T14:53:31.010Z
+Bloat test: false
+
+--- JS Files ---
+  vendor/confetti.browser.min.js: 10.6 KB raw → 4.3 KB gz
+  vendor/howler.min.js: 35.3 KB raw → 9.6 KB gz
+  js/motion.js: 6.1 KB raw → 2.2 KB gz
+  js/begin.js: 13.6 KB raw → 4.1 KB gz
+  TOTAL JS GZ: 93.0 KB
+
+--- Images ---
+  0 raster image(s), total 0.0 KB
+
+--- Fonts ---
+  2 families: family=Fraunces, Space Grotesk
+
+--- Cold-cache estimate ---
+  1.3s at simulated mid-tier (1.5 Mbps)
+
+RESULT: PASS ✅

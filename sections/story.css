@@ -1,0 +1,254 @@
+/* ============================================================
+   story — cinematic spine: 14 pinned chapters (todo 7)
+   GSAP ScrollTrigger scrubs; prefers-reduced-motion → plain stack.
+   ============================================================ */
+
+.section--story {
+  background: var(--color-cine-bg);
+  overflow: hidden;
+}
+
+.story__content {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--section-padding) var(--gutter);
+}
+
+.story__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-cine-text-muted);
+  text-align: center;
+}
+
+.story__headline {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-12);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-cine-text);
+  text-align: center;
+}
+
+.story__kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-cine-accent);
+  margin-bottom: var(--space-2);
+}
+
+.story__of { color: var(--color-cine-text-muted); }
+
+.story__title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-cine-text);
+  margin-bottom: var(--space-3);
+}
+
+.story__source {
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-cine-text-muted);
+  opacity: 0.75;
+}
+
+/* ---- Chapter track ---- */
+.story__track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  padding-right: var(--space-12);
+  /* each chapter gets its own ScrollTrigger pin span; the track
+     height is the sum of chapter heights + gaps, which ScrollTrigger
+     will use as the scroll distance. */
+}
+
+/* ---- Chapter card ---- */
+html.js-story .story__chapter {
+  min-height: 130dvh;
+  display: flex;
+  /* height varies by content; ScrollTrigger pins each card in turn */
+}
+
+.story__chapter-inner {
+  position: sticky;
+  top: calc(var(--section-padding) + var(--safe-top));
+  align-self: flex-start;
+  width: 100%;
+  /* sticky position + GSAP pin = scrub effect when JS runs;
+     without JS it's just a normal stacked chapter. */
+}
+
+/* Date stamp — top of card */
+.story__date {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-cine-text-muted);
+  opacity: 0.8;
+  margin-bottom: var(--space-3);
+  white-space: nowrap;
+}
+
+/* Quote block — the verbatim line(s) */
+.story__quote {
+  position: relative;
+  margin: 0 0 var(--space-6);
+  padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8);
+  border-left: 3px solid var(--color-cine-accent);
+  background: linear-gradient(
+    90deg,
+    var(--color-cine-accent-soft) 0%,
+    transparent 40%
+  );
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.story__quote::before {
+  content: '\201C';
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-3);
+  font-family: var(--font-display);
+  font-size: calc(var(--text-2xl) * 1.8);
+  line-height: 1;
+  color: var(--color-cine-accent);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.story__quote p {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--color-cine-text);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Voiceover — one line from the narrator */
+.story__voiceover {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-cine-text-muted);
+  opacity: 0.9;
+  margin: 0;
+  padding-left: var(--space-2);
+  border-left: 2px solid transparent;
+  transition: border-color var(--duration-normal) var(--ease-out);
+}
+
+.story__chapter:hover .story__voiceover {
+  border-left-color: var(--color-cine-accent);
+}
+
+/* ---- Chapter number / progress indicator ---- */
+.story__progress {
+  position: fixed;
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-normal) var(--ease-out),
+              visibility 0s var(--duration-normal);
+}
+
+/* Only show progress when the story section is in view.
+   story.js toggles .is-in-story on <body> via ScrollTrigger. */
+body.is-in-story .story__progress.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--duration-normal) var(--ease-out),
+              visibility 0s 0s;
+}
+
+.story__progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-cine-surface);
+  border: 1px solid var(--color-cine-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.story__progress-item {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-cine-border);
+  transition: background var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out);
+}
+
+.story__progress-item.is-active {
+  background: var(--color-cine-accent);
+  transform: scale(1.4);
+  box-shadow: 0 0 12px var(--color-cine-accent-glow);
+}
+
+.story__progress-item::after {
+  content: attr(data-num);
+  position: absolute;
+  right: calc(100% + var(--space-3));
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-cine-text-muted);
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.story__progress-item.is-active::after { opacity: 1; }
+
+/* ---- Reduced motion: plain stacked chapters, no pin, no progress ---- */
+@media (prefers-reduced-motion: reduce) {
+  html.js-story .story__chapter { min-height: 0; display: block; }
+  .story__chapter-inner {
+    position: static;
+    top: auto;
+  }
+  .story__progress { display: none; }
+  .story__track { gap: var(--space-16); }
+  .story__quote::before { opacity: 0.25; }
+}
+
+/* ---- Small screens ---- */
+@media (max-width: 480px) {
+  .story__quote {
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6);
+  }
+  .story__quote::before { font-size: calc(var(--text-xl) * 1.5); }
+  .story__quote p { font-size: var(--text-md); }
+  .story__voiceover { font-size: var(--text-xs); }
+  .story__progress-list { gap: var(--space-2); padding: var(--space-3); }
+  .story__progress-item { width: 8px; height: 8px; }
+  .story__progress-item.is-active { transform: scale(1.3); }
+  .story__progress-item::after { display: none; }
+}
+
+/* ---- Focus visible for keyboard nav ---- */
+.story__chapter:focus-within .story__voiceover {
+  border-left-color: var(--color-cine-accent-glow);
+}

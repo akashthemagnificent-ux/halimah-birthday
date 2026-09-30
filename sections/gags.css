@@ -1,0 +1,225 @@
+/* ============================================================
+   gags — gag locker room (todo 9)
+   Four exhibits, each ending in an affection closer (IS-5).
+   Spiders are cute/stylized inline SVG only — never photoreal.
+   ============================================================ */
+
+.section--gags {
+  background:
+    radial-gradient(90% 50% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
+  overflow: hidden;
+}
+
+.gags__content {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--section-padding) var(--gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  text-align: center;
+}
+
+.gags__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.gags__headline {
+  margin-top: calc(-1 * var(--space-4));
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.gags__lede {
+  max-width: 34rem;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-accent-glow);
+}
+
+/* ---- Card grid: one column on phones, two up on wide ---- */
+.gags__grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+  text-align: left;
+}
+
+@media (min-width: 48rem) {
+  .gags__grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+/* ---- Exhibit card ---- */
+.gags__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  opacity: 1;
+}
+
+.gags__card-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.gags__card-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+
+.gags__card-setup {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.gags__gag {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-surface-alt);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.gags__gag p {
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+.gags__gag cite {
+  font-size: var(--text-xs);
+  font-style: normal;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+/* ---- Affection closer: the IS-5 payoff, always present ---- */
+.gags__closer {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-accent-soft);
+  border: 1px dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.gags__closer-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent-glow);
+}
+
+/* ---- Cute spider (stylized inline SVG, never photoreal) ---- */
+.gags__spider {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) 0;
+}
+
+.gags__spider svg {
+  width: 96px;
+  height: 96px;
+}
+
+.gags__spider-btn {
+  align-self: center;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: var(--space-3) var(--space-8);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.gags__spider-btn:active {
+  background: var(--color-accent-glow);
+}
+
+.gags__spider-btn:focus-visible {
+  outline: 2px solid var(--color-accent-glow);
+  outline-offset: 3px;
+}
+
+/* ---- Scroll reveal (JS adds .is-visible; content readable without it) ---- */
+html.js-gags .gags__card {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+html.js-gags .gags__card.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.gags__spider svg.is-wiggling {
+  animation: spider-wiggle 600ms var(--ease-in-out);
+  transform-origin: 50% 30%;
+}
+
+@keyframes spider-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  50% { transform: rotate(6deg); }
+  75% { transform: rotate(-4deg); }
+}
+
+/* ---- Reduced motion: static, fully readable, no animation ---- */
+@media (prefers-reduced-motion: reduce) {
+  html.js-gags .gags__card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .gags__spider svg.is-wiggling {
+    animation: none;
+  }
+}

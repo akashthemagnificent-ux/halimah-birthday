@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<meta property="og:title" content="a surprise, open 19 Oct" />
+<meta property="og:description" content="tap to begin" />
+<meta name="theme-color" content="#1a1410" />
+<title>a surprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="sections/starmap.css" />
+<link rel="stylesheet" href="sections/story.css" />
+<link rel="stylesheet" href="sections/album.css" />
+<link rel="stylesheet" href="sections/quotes.css" />
+<link rel="stylesheet" href="sections/gags.css" />
+<link rel="stylesheet" href="sections/physics.css" />
+<link rel="stylesheet" href="sections/scratch.css" />
+<link rel="stylesheet" href="sections/world.css" />
+<link rel="stylesheet" href="sections/finale.css" />
+</head>
+<body>
+<!-- Opening overlay (todo 2)
+     One-tap gate. js/begin.js starts Howler audio and fires the confetti
+     burst inside this button's click handler, never before. The overlay
+     copy names nothing: no dates, no names, no story. -->
+<div id="begin-overlay" class="begin-overlay" data-testid="begin-overlay">
+  <div class="begin__sky" aria-hidden="true">
+    <canvas id="ember-canvas" class="begin__embers"></canvas>
+    <div class="begin__aurora begin__aurora--a"></div>
+    <div class="begin__aurora begin__aurora--b"></div>
+    <div class="begin__grain"></div>
+    <div class="begin__vignette"></div>
+  </div>
+  <section id="begin" class="section section--begin" aria-label="Opening">
+    <div class="begin__content">
+      <p class="begin__kicker"><span class="begin__kicker-dot" aria-hidden="true"></span>a surprise is waiting</p>
+      <p class="begin__prompt">one tap and it starts</p>
+      <button id="begin-button" class="begin__button" type="button" data-testid="begin-button">
+        <span class="begin__button-glow" aria-hidden="true"></span>
+        <span class="begin__button-label">begin</span>
+      </button>
+      <p class="begin__whisper">sound on &middot; headphones in &middot; one tap</p>
+      <div id="play-fallback" class="begin__fallback" hidden>
+        <p id="play-fallback-reason" class="begin__fallback-reason">music needs one more tap</p>
+        <button id="play-fallback-button" class="begin__fallback-button" type="button">
+          play
+        </button>
+      </div>
+    </div>
+    <p class="begin__foot" aria-hidden="true">tap begin &mdash; everything after is for you</p>
+  </section>
+</div>
+
+<!-- Audio — muted by default, plays only on user gesture -->
+<audio id="bgm" src="assets/music/song.mp3" loop preload="none"></audio>
+
+<!-- Music pause/resume control — visible after first tap -->
+<button id="music-control" class="music-control" type="button" aria-label="Pause music" hidden>
+  <svg class="music-control__icon music-control__icon--pause" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+  <svg class="music-control__icon music-control__icon--play" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+</button>
+
+<!-- 2. countdown — Countdown gate (todo 2)
+     Target is 2026-10-19T00:00 Europe/London, resolved at runtime so the
+     BST/GMT boundary is handled. Stays hidden until Begin is tapped. -->
+<section id="countdown" class="section section--countdown" aria-label="Countdown">
+  <div class="countdown__sky" aria-hidden="true">
+    <div class="countdown__aurora countdown__aurora--a"></div>
+    <div class="countdown__aurora countdown__aurora--b"></div>
+    <div class="countdown__grain"></div>
+    <div class="countdown__vignette"></div>
+  </div>
+  <div id="countdown-panel" class="countdown__panel" hidden>
+    <p class="countdown__eyebrow"><span class="countdown__eyebrow-dot" aria-hidden="true"></span>the waiting room</p>
+    <p id="countdown-label" class="countdown__label">not yet — come back on 19 October</p>
+    <p id="countdown-value" class="countdown__value" aria-live="off">—</p>
+    <div class="countdown__hairline" aria-hidden="true"><span id="countdown-bar"></span></div>
+    <ul class="countdown__teasers" aria-label="Sealed until the day">
+      <li class="countdown__teaser"><span class="countdown__teaser-key">words</span><span class="countdown__teaser-state">sealed</span></li>
+      <li class="countdown__teaser"><span class="countdown__teaser-key">pictures</span><span class="countdown__teaser-state">sealed</span></li>
+      <li class="countdown__teaser"><span class="countdown__teaser-key">the sky</span><span class="countdown__teaser-state">sealed</span></li>
+    </ul>
+    <p class="countdown__music-hint">music is playing &middot; stay a while</p>
+  </div>
+</section>
+
+<!-- Content region — the countdown gate's target (todo 2).
+     Every story section lives inside. While locked, js/begin.js detaches
+     these nodes into a DocumentFragment, so no story text exists in the
+     DOM or in view-source. At the target they are restored in place. -->
+<div id="content-region">
+
+<!-- 3. story — Story chapters / cinematic spine (todo 7) -->
+<section id="story" class="section section--story" aria-label="Our story" data-theme="cinematic">
+<div class="arrival-cue" hidden>
+  <span class="arrival-cue__thread" aria-hidden="true"></span>
+  <span>it&rsquo;s open &mdash; come down</span>
+</div>
+<div class="story__content">
+  <p class="story__eyebrow">our story &#183; fourteen chapters</p>
+  <h2 class="story__headline">how we got here</h2>
+  <div class="story__track" data-story-track>
+<article class="story__chapter" data-chapter="1" id="chapter-1" tabindex="0" aria-label="Chapter 01: The Kakegurui Meme, How We First Met">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">01</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">The Kakegurui Meme, How We First Met</h3>
+    <time class="story__date" datetime="2026-07-09">09 Jul 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-07-09T01:43:27.627000+00:00] me: I remember the first time we talked in a server some months ago Your pfp was that kakegurui meme 😭😭 I WAS FUCKING LAUGHING SO MUCH WHEN I SAW IT THAT MADE MY DAY LOL</p>
+    </blockquote>
+    <p class="story__voiceover">Your laugh was the first gift you gave me, and I still hear it.</p>
+    <p class="story__source">from our chats &#183; halimah dms-1.txt:1056</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="2" id="chapter-2" tabindex="0" aria-label="Chapter 02: A Dare That Meant Everything">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">02</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">A Dare That Meant Everything</h3>
+    <time class="story__date" datetime="2026-07-04">04 Jul 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-07-04T21:06:00.496000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: I love you</p>
+      <p>[2026-07-04T21:28:42.387000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I love you&quot;) THAT WAS A DARE BTW (edited)</p>
+    </blockquote>
+    <p class="story__voiceover">You tried to play it cool, but my heart already knew.</p>
+    <p class="story__source">from our chats &#183; halimah dms-1.txt:470-471</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="3" id="chapter-3" tabindex="0" aria-label="Chapter 03: We Said It Back, For Real">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">03</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">We Said It Back, For Real</h3>
+    <time class="story__date" datetime="2026-07-07">07 Jul 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-07-07T17:13:25.625000+00:00] me: I LOVE YOU</p>
+      <p>[2026-07-07T17:14:13.977000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I LOVE YOU&quot;) I LOVE YOU TOO</p>
+      <p>[2026-07-07T17:15:04.276000+00:00] me: (replying to &quot;I LOVE YOU TOO&quot;) I LOVE YOU SO MUCH MORE</p>
+      <p>[2026-07-07T17:16:10.111000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: NUH UH I LOVE YOU MORE</p>
+    </blockquote>
+    <p class="story__voiceover">That little war of who loves who more still makes me smile.</p>
+    <p class="story__source">from our chats &#183; halimah dms-1.txt:932-935</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="4" id="chapter-4" tabindex="0" aria-label="Chapter 04: I Laid My Heart Down">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">04</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">I Laid My Heart Down</h3>
+    <time class="story__date" datetime="2026-07-11">11 Jul 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-07-11T14:37:41.460000+00:00] me: TAKE YOUR TIME I&#x27;M OKAY WITH THAT    AND YES I THINK SO TOO A LOT OF PEOPLE WILL HATE OR STOP TALKING WITH YOU MAYBE BLOSSOM TOO, IF WE PUT MY PERSONAL EMOTIONS ON THE SIDE I DON&#x27;T WANT YOU TO GO THROUGH THAT EITHER BUT I PUT MY PERSONAL FEELINGS TOO, I LIKE YOU A LOT AND I REALLY WANT TO BE WITH YOU, BUT STILL I WANT YOU TO CHOOSE WHATEVER WILL BE THE BEST FOR YOU. I AM OKAY WITH THAT, IF YOU SAY NO IT&#x27;S OKAY, I WILL TRY TO NOT HAVE FEELINGS FOR YOU BUT HOPEFULLY WE CAN MAKE IT WORK SOMEHOW I KNOW WE CAN</p>
+      <p>ABOUT JESS, YES IT&#x27;S COMPLEX FOR ME TOO, I DON&#x27;T WANT TO SOUND SELFISH BUT I THINK I AM GOING THROUGH A VERY CRTICAL PHASE IN MY LIFE AND I NEED SOMEBODY TO SPEND SOME TIME OR TALK WITH ME, SHE HAVEN&#x27;T BEEN ONLINE IN LIKE A MONTH AND I THINK I&#x27;M LOSING FEELINGS I DON&#x27;T WANT TO LIE TO HER OR MYSELF SO I AM GONNA BREAK UP WITH HER, ABOUT WHEN SHE COMES BACK. I AM PRETTY SURE SHE&#x27;LL UNDERSTAND CUZ SHE HAS WENT THROUGH THE SAME SITUATION AS WELL</p>
+      <p>[2026-07-11T14:48:27.357000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;TAKE YOUR TIME I&#x27;M OKAY WITH THAT    AND YES I THINK SO TOO &quot;) I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE DONT END UP DATING I HOPE WE WILL BE CLOSE. I REALLY ENJOY TALKING YOU. OMG IM ACTUALLY SHAKING SO BAD</p>
+      <p>[2026-07-11T14:50:19.307000+00:00] me: (replying to &quot;I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE &quot;) I REALLY LOVE YOU TOO AND MORE I&#x27;M SORRY FOR PUTTING YOU IN SO MUCH PRESSURE I DON&#x27;T WANT TO LOSE YOU BUT YES I HOPE WE CAN ATLEAST BE CLOSE EVEN IF WE DON&#x27;T END UP DATING BUT I REALLY WANT TO CALL YOU MINE, I REALLY ENJOY EVERY MOMENT I SPEND WITH YOU AS WELL I WAIT FOR YOUR TEXTS OMG AND NOO CALM DOWN IT&#x27;S OKAYYY GET UP AND  DRINK WATER AND TAKE SOME DEEP BREATHS</p>
+    </blockquote>
+    <p class="story__voiceover">I was nervous to ask, and you were brave enough to answer honestly.</p>
+    <p class="story__source">from our chats &#183; halimah dms-1.txt:1211-1214</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="5" id="chapter-5" tabindex="0" aria-label="Chapter 05: A Late Night Love Letter">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">05</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">A Late Night Love Letter</h3>
+    <time class="story__date" datetime="2026-07-31">31 Jul 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-07-31T17:58:12.700000+00:00] me: I don&#x27;t know if this will help you zai, But I think i genuinely admire you and I genuinely love you. You&#x27;re so funny, kind, sweet, cute and beautiful both by your soul and your appearance. It&#x27;s such a blessing for me to get to know you by being so close to you and it&#x27;s genuinely so beautiful. With each passing day i am falling more for you. I&#x27;m trying to control myself not to fall for you but it&#x27;s just too hard i don&#x27;t know why, I miss you at random times and actually so much to the point i keep thinking about it sighh i have become so needy for you. I enjoy every moment I spend with you like every single second, it&#x27;s the best part of the day, i genuinely don&#x27;t want to lose you, Genuinely. I hate it when you sleep late or don&#x27;t eat your meals and don&#x27;t take care of yourself just cuz of some random bunch of idiots who think perfection of the body is everything, it&#x27;s not. Trust me you&#x27;re amazing as you are right now and capable of so much. [reactions: 💗×1]</p>
+    </blockquote>
+    <p class="story__voiceover">Every word there was true then, and truer now.</p>
+    <p class="story__source">from our chats &#183; halimah dms-3.txt:515</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="6" id="chapter-6" tabindex="0" aria-label="Chapter 06: Girlfriend Day Eve">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">06</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">Girlfriend Day Eve</h3>
+    <time class="story__date" datetime="2026-08-01">01 Aug 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-07-31T02:48:11.191000+00:00] me: Yo Tommorow is girlfriend day</p>
+      <p>[2026-07-31T02:48:16.636000+00:00] me: (replying to &quot;OKAYY WELL I HAVE THE SS&quot;) SHUSH NO U DON&#x27;T</p>
+      <p>[2026-07-31T02:48:22.664000+00:00] me: I&#x27;LL HACK INTO UR PHONE AND DLT IT</p>
+      <p>[2026-07-31T02:48:35.477000+00:00] me: (replying to &quot;media&quot;) .</p>
+      <p>[2026-07-31T02:48:37.251000+00:00] me: NOT THIS</p>
+      <p>[2026-07-31T02:48:51.145000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;Yo Tommorow is girlfriend day&quot;) IS IT ACTUALLY</p>
+      <p>[2026-07-31T02:49:06.474000+00:00] me: (replying to &quot;IS IT ACTUALLY&quot;) YES</p>
+      <p>[2026-07-31T02:49:08.882000+00:00] me: AUGUST 1</p>
+    </blockquote>
+    <p class="story__voiceover">You keep me honest, even when I try to steal your screenshots.</p>
+    <p class="story__source">from our chats &#183; halimah dms-2.txt:3009-3016</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="7" id="chapter-7" tabindex="0" aria-label="Chapter 07: The Lullaby You Slept Through">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">07</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">The Lullaby You Slept Through</h3>
+    <time class="story__date" datetime="2026-08-18">18 Aug 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-08-18T14:15:54.451000+00:00] me: I sang you a lullaby tho</p>
+      <p>[2026-08-18T14:16:01.884000+00:00] me: When u were knocked out</p>
+      <p>[2026-08-18T14:16:07.409000+00:00] me: And then I sang you two songs</p>
+    </blockquote>
+    <p class="story__voiceover">Singing to you while you were knocked out felt like a secret just for us.</p>
+    <p class="story__source">from our chats &#183; halimah dms-7.txt:594-596</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="8" id="chapter-8" tabindex="0" aria-label="Chapter 08: All Your Fav Songs, In One Video">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">08</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">All Your Fav Songs, In One Video</h3>
+    <time class="story__date" datetime="2026-08-22">22 Aug 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-08-22T07:55:22.495000+00:00] me:  [attachment: screen-20260822-132435.mp4]</p>
+      <p>[2026-08-22T07:55:30.087000+00:00] me: ALL YOUR FAV SONGS IN ONE VIDEO</p>
+    </blockquote>
+    <p class="story__voiceover">I wanted your ears to have something to hold when I could not be there.</p>
+    <p class="story__source">from our chats &#183; halimah dms-8.txt:152-153</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="9" id="chapter-9" tabindex="0" aria-label="Chapter 09: The Card I Could Not Send">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">09</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">The Card I Could Not Send</h3>
+    <time class="story__date" datetime="2026-08-24">24 Aug 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-08-24T15:48:22.351000+00:00] me: it was such a good card</p>
+      <p>[2026-08-24T15:48:24.380000+00:00] me: i wanted to gift u</p>
+    </blockquote>
+    <p class="story__voiceover">It was a small card, but the wish behind it was huge.</p>
+    <p class="story__source">from our chats &#183; halimah dms-8.txt:1487-1488</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="10" id="chapter-10" tabindex="0" aria-label="Chapter 10: The Fake Birthday We Laughed Through">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">10</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">The Fake Birthday We Laughed Through</h3>
+    <time class="story__date" datetime="2026-08-25">25 Aug 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-08-25T05:34:09.788000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: TODAY IS MY DAY (edited)</p>
+      <p>[2026-08-25T05:34:18.137000+00:00] me: (replying to &quot;TODAY IS MY DAY&quot;) WHAT</p>
+      <p>[2026-08-25T05:34:23.593000+00:00] me: HAPPY BIRTHDAY 😭</p>
+      <p>[2026-08-25T05:34:34.289000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: IT ISNT SOFP</p>
+      <p>[2026-08-25T05:34:35.755000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: STOP</p>
+      <p>[2026-08-25T05:34:39.636000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: THAT WAS AUTO</p>
+      <p>[2026-08-25T05:34:41.909000+00:00] me: YOU SAID IT IS 💀</p>
+      <p>[2026-08-25T05:34:43.941000+00:00] me: LMFAOO</p>
+      <p>[2026-08-25T05:34:46.139000+00:00] me: I AM DEADDD</p>
+      <p>[2026-08-25T05:35:07.865000+00:00] me: I MEAN 19 OCTOBER IS STILL 2 MONTHS</p>
+      <p>[2026-08-25T05:35:13.745000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: WHAT THE SHTI</p>
+      <p>[2026-08-25T05:35:18.672000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: YOU REMEMBERED</p>
+      <p>[2026-08-25T05:35:26.155000+00:00] me: WHY DO YOU THINK I WON&#x27;T</p>
+      <p>[2026-08-25T05:35:30.662000+00:00] me: U REMEMBER MINE AS WELL</p>
+      <p>[2026-08-25T05:35:48.893000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;U REMEMBER MINE AS WELL&quot;) OO YEAH TRUE DECEMBER 29</p>
+      <p>[2026-08-25T05:36:11.165000+00:00] me: (replying to &quot;OO YEAH TRUE DECEMBER 29&quot;) 😭😭😭</p>
+      <p>[2026-08-25T05:36:15.198000+00:00] me: THAT&#x27;S MY BIRTHDAY?</p>
+      <p>[2026-08-25T05:36:24.851000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;THAT&#x27;S MY BIRTHDAY?&quot;) BOI</p>
+    </blockquote>
+    <p class="story__voiceover">You tried to prank me and we both ended up laughing till our sides hurt.</p>
+    <p class="story__source">from our chats &#183; halimah dms-8.txt:1839-1856</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="11" id="chapter-11" tabindex="0" aria-label="Chapter 11: The Night We Said Yes">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">11</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">The Night We Said Yes</h3>
+    <time class="story__date" datetime="2026-08-26">26 Aug 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-08-26T11:33:55.172000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: I know this may be out of the blue and I was planning on telling you my feelings once me and Ciel where like officially broken up. Nonetheless I hope after reading the chats between me and Ciel you can tell that I love you. More than a friend. I know I have said that I don’t but I was in a state of mind when I gen did not know how I felt. I don’t get this spark with ciel any more. I look forward to your texts. I love when u tell me Gm and and Gn. I love whenever you say I miss you and ily. When I say it back i genuinely mean it. I love talking to you every day and I love our calls. and I get jealous of little shit even we aren’t dating. I love every text that I get by you. I sometimes feel so damn needy. And I’m so obsessed with you. There’s always a flutter in my chest whenever you use pet names and call my by my name. Every time I see a ship duo I think of us. Ur are so dear to me and I want to be ur girlfriend. I’m sorry this is so sudden but I want to able to call you mine. I want to be urs. But ofc if u don’t want to that it purely ur choice. but if you do accept then can we like wait a few days before like announcing it. Cause I want the like whole situation to kinda calm down a bit.</p>
+      <p>[2026-08-26T11:41:07.920000+00:00] me: (replying to &quot;media&quot;) About things between you and blossom, I don&#x27;t know what to say but she actually is very sincere towards YOU at least, She loves you and so do you, idk what led things to go that far about losing interest and yeah</p>
+      <p></p>
+      <p>About everything you said about yourself i don&#x27;t mind any of that. Hypersexual? I am too? I can&#x27;t control my sexual urges and thoughts too it&#x27;s like I am just sex deprived? Idk and I get you and I am no better than you. </p>
+      <p>Even i, Myself don&#x27;t care if I am talking dirty to any age group as long as they are okay with it like inside myself i just know i don&#x27;t give a fuck about that, I just try to avoid cuz to fit the society and genuinely if I am interested in someone like take an example of yourself, I won&#x27;t hold back </p>
+      <p>Racist? I grew up in a country where calling people black or making fun of it was a really common thing, so it&#x27;s not in my genes to be cautious about it, Even if society shapes me to be respectful to them, I am, as a person they are the same as me IDGAF about colour but it&#x27;s just really normal for us to make a comment about someone&#x27;s skin colour and i can&#x27;t eliminate that from myself cuz that&#x27;s how I have been raised up, But to fit in the society i don&#x27;t use racial slurs but that doesn&#x27;t change the fact that i am still a racist alongside everyone in my surrounding, so even in this i am not better than you, I am the same as you and I don&#x27;t mind you saying racist slurs often cuz I know you won&#x27;t do it on purpose to disrespect someone&#x27;s race, I know you. You&#x27;re kind and you won&#x27;t to people who are genuinely nice towards you. </p>
+      <p>Reading things that are fucked up? Okay i watch gore, i watch weird stuffs they just intrest me about human emotions and how people react at certain times, I&#x27;ve watched gore, crimes etc etc what not? Im the same here too, same as you. My expressions doesn&#x27;t change. Even tho I may fake making a disgusting face or saying &quot;eww&quot; but inside me I don&#x27;t feel anything. I don&#x27;t wanna kill someone just cuz I watch gore.</p>
+      <p>[2026-08-26T11:41:09.775000+00:00] me: And i realise that you&#x27;re the same, I am really sure even if you read all that you doesn&#x27;t have any fetish to have that to yourself or do that to someone. </p>
+      <p>Feeling good when someone gets hurt? Okay this is not a movie or an anime where you&#x27;re the kind MC thinking good and want to save everyone. I understand this very well. You can&#x27;t stay kind of everyone or everything. It&#x27;s good to give all the care/love to a selected few people in a life who deserves it, you&#x27;re a human and not a monk, even i myself want everyone else who hurted me to fucking die even tho I don&#x27;t show it at all that doesn&#x27;t mean I don&#x27;t want them to, It&#x27;s a lot worse than just hoping someone and getting happy when something bad happens to someone. You see? I am the same. Even worse </p>
+      <p></p>
+      <p>Now what is the purpose of me telling you all this? You&#x27;re not a &quot;Horrible person&quot; for all of that, if you are so am I? And if I am the same or worse then I am in no position to judge you. I am okay with all of that LITERALLY ALL OF THAT, idrc if you&#x27;re using racial slurs or reading weird fanfics, I do the same genuinely in my own way. You&#x27;re not horrible to me. I just want you to just take care of yourself. I WILL MIND WHEN YOU DO SOMETHING THAT CAN POTENTIALLY HURT YOU OR IS HURTING YOU, it includes some decisions you take that can be bad in the future, not taking care for your health, not having enough sleep/food etc. Basically anything that will affect you badly, other than that I don&#x27;t give a fuck about anything else i would still love you the same</p>
+      <p>[2026-08-26T12:00:53.862000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;And i realise that you&#x27;re the same, I am really sure even if&quot;) Yeah I can tell she loves me and cares for me deeply which was the main reason I was hesitant to tell her how I really feel. And I don’t really know what led to me loosing feelings. But sometimes it really pisses me off because half the convos is about you. It’s seems like she does not trust me at all. You are the only person who actually relates to me and actually understands me this much. I don’t even know what to say omg. I love you so fucking much. Word cannot even describe how much I am grateful to have you in my life. And same goes for you. I hate it when you slapped urself that one time. I don’t want you hurting yourself. And the fact you mentioned you have dark circles just proves you don’t sleep as much as you should. I’ve been calculating the time when u go sleep and wake up. Like the most u get is 7/6 hours or so. You should atleast be getting 9 hours of rest. And you have lots of test and I know your always stressed about them. I wish I can just remove that stress from you. I love you so much</p>
+      <p>[2026-08-26T12:07:14.284000+00:00] me: (replying to &quot;I know this may be out of the blue and I was planning on tel&quot;) I love you too, more than a friend. I&#x27;ve did for a while, from when we started talking and i didn&#x27;t lose feelings at any point from that, I still love you very much more than anything or anyone. </p>
+      <p>The feelings are mutual, I love your texts I love when you text me, call me, get jealous for me, and I look forward to your texts, Your good mornings, your good nights, Your everything, anything related to you. I get jealous when you talk about anyone else like literally anyone, I am obsessed as well, i Genuinely am. I am so needy for you, your texts, your voice, your everything. You&#x27;re very dear to me too genuinely. Yes I want to be called urs and want to call you mine and only mine as well, i want to claim you like a prize yes, I love you very much and yes i understand we can take as long as you want, before officially announcing it. I genuinely feel like you should know things about me which you don&#x27;t know about till now, You&#x27;ve seen some of my good qualities and you deserve to know my flaws as well before continuing because if we are doing this i really want this to work and not to break up in a few days or months, cuz I have had 2 exes and they didn&#x27;t work out obviously and that hurted me very much and it took me a very long time to recover from both of them so I don&#x27;t want this to fail or lose you, so before starting I shall let you know my flaws. </p>
+      <p>I am very obsessive idk like a lot i can&#x27;t even hear a damn word or thought about my someone I love with anyone else or even if jokes like that, it really unlocks my anxiousness that i am gonna lose or get replaced, cuz I have always been replaced with better. I get jealous and i instantly go sad cuz millions of possibilities run down my head and it just scares me very very fucking much to the point i start getting insecure of pretty much every fucking thing.</p>
+      <p>[2026-08-26T12:07:15.601000+00:00] me: When i am obsessed or in love, I notice every shift in energy, your talking style etc. and just get insecure or anxious cuz my brain keeps telling me that they&#x27;re losing interest even when it might be something entirely different like you being tired or anything else, I start analysing every second and it&#x27;s scary for most people cuz I start acting like a psychopath, I am actively working to fix my dependent anxious side, But I&#x27;ve been failing. </p>
+      <p>I don&#x27;t stay dependent on anyone not even my parents cuz they never fucking cared about my emotional health so i just shut myself and then when i feel like i am being loved or heard it all comes back down to the same person, that means I expect my partner to be there for me to assure me everytime I feel like that, cuz I can&#x27;t stop that chain of thoughts myself, and It&#x27;s really exhausting for most of the people i know, i want you to know this since you deserve to know before continuing </p>
+      <p>I am very very very anxious when i am in love, I am just a mess when I am in love, I get so obsessed that I might wanna spend every second of the day with you because i would feel comfortable with you and around you, any changes in your emotions/behaviour can trigger my anxiousness and it&#x27;s really really exhausting for someone to constantly assure someone, so I just want you to know that I am actually a mess. I don&#x27;t feel like this to everyone, but I&#x27;ve felt that way for my first ex and then you, and the reason we broke up was me being anxious and she was shutting herself down instead of talking to me about it, and it turned into arguments, frequent arguments and she just dumped me TWO FUCKING TIMES and yeah I was really devasted and I just don&#x27;t want that with you because i really love you</p>
+      <p>[2026-08-26T12:07:39.062000+00:00] me: There are so many other things which are flawed in me</p>
+      <p>[2026-08-26T12:09:26.771000+00:00] me: Also my parents are really strict so sometimes they might ground me for some days but i will try my best to get access to any device to talk to you i promise you, but please stay prepared for me to occasionally go offline for a day or something cuz that&#x27;s really not in my hands, my parents are really strict about me and my devices as you can tell since I don&#x27;t talk on calls when they&#x27;re home</p>
+      <p>[2026-08-26T12:10:36.489000+00:00] me: Other than that I am not even good looking, I used to look good (decent i would say) but due to studies and staying in home I stopped taking care of myself or my health so i look ridiculously bad and I am not kidding about this, i genuinely don&#x27;t have looks to give I just have love or genuine care for you</p>
+      <p>[2026-08-26T12:11:03.967000+00:00] me: I don&#x27;t want you to lose feelings for me for any of that but that doesn&#x27;t change the fact that i have those flaws</p>
+      <p>[2026-08-26T12:12:02.907000+00:00] me: I don&#x27;t want to see you with someone else or even getting along with some other people who isn&#x27;t me, But at the same time you deserve better, but at the same time I just want you to be mine and I want to be yours</p>
+      <p>[2026-08-26T12:12:57.480000+00:00] me: I genuinely love you so much, please don&#x27;t rush this. Take some time to think about it all cuz I really don&#x27;t want this to fail if we continue</p>
+      <p>[2026-08-26T12:14:08.877000+00:00] me: So i want you to stay prepared and About me? I am prepared for you. I love your flaws equally as much as I love your good points, Just not when you talk sweet to someone else cuz that makes me jealous but you&#x27;ve been in a really few peoples who could make me jealous so that&#x27;s an experience in it&#x27;s own</p>
+      <p>[2026-08-26T12:14:26.366000+00:00] me: Im so sorry this is so fucking long it&#x27;s like I am writing a novel about you and myself 😭</p>
+      <p>[2026-08-26T12:21:06.899000+00:00] me: (replying to &quot;Yeah I can tell she loves me and cares for me deeply which w&quot;) I love you so fucking much more and even if i type a million of words for you it still won&#x27;t be able to comprehend about how much i love you and care about you or how much i want to spend my life with you, in your arms. </p>
+      <p>STOOOP I WAS JUST TRYING TO SLAP ME LIKE SOFTLY BUT MY HANDS JUST IDK WORKED ON THEIR OWN 😭😭😭 DON&#x27;T REMIND ME I LOOKED SO STUPID OMMLLLL.</p>
+      <p>You slapped yourself too once and i FEEEL exactly the same as you do and DON&#x27;T YOU DARE DO IT AGAIN </p>
+      <p>I don&#x27;t want you hurting yourself too, In any way, neither mentally nor physically. </p>
+      <p>I DO SLEEP ENOUGH I SWEAR I DO SLEEP IT&#x27;S JUST NOT POSSIBLE FOR ME TO SLEEP MORE THAN THAT CUZ OF I HAVE TO BALANCE MY ACADEMICS, HOBBIES, PASSION, YOU (YOU&#x27;RE THE TOP PRIORITY) ALL AT THE SAME TIME AND I AM ACTUALLY CAPABLE OF DOING THAT TRUST ME I AM A STRONG MAN MUAHAHAHAHAHAHAHAHA</p>
+      <p>[2026-08-26T12:21:57.137000+00:00] me: I LOVE YOU SO MUCH MORE</p>
+      <p>[2026-08-26T12:22:12.574000+00:00] me: AND YOU TOO YOU DON&#x27;T SLEEP ALL NIGHT GRRRRRR</p>
+      <p>[2026-08-26T12:22:17.753000+00:00] me: THAT MAKES ME SADDDDD</p>
+      <p>[2026-08-26T12:22:20.543000+00:00] me: HDKSJDEKWNEEEKOSS</p>
+      <p>[2026-08-26T12:22:29.356000+00:00] me: I LOVE YOU SO MUCH TAKE CARE OF YOURSELF MOREEEE</p>
+      <p>[2026-08-26T12:37:24.357000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: Every time you do feel anxious or insecure tell me. I will assure you every time that I love you. Only you. And I would not mind if you want to spend every second with me. I would LOVE that. I don’t want to loose you either. Even if ur parents don’t care about ur emotional and mental health I fucking would. And please do not shut yourself talk to me. I’m not the best at comforting but I will try for you. Fuck ur exes they don’t deserve you. And I love ur flaws just as much as I love you. It’s okay if you go offline for a day. I understand I’m just glad I get to talk to you even if it’s not everyday and every second. And I really do not gaf if ur good looking or not. Looks don’t matter. And in my eyes you will always be handsome to me. You cannot change that. I love your voice ur personality. All of you. Don’t worry about me getting along with people are not. Just know ur the only want I love and want. My heart belongs to you. And I find it rather cute when u get jealous just not when u get upset sighhhh that makes me sad [reactions: 💖×1]</p>
+      <p>[2026-08-26T12:37:38.118000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: I’m such a slow typer holy fuck [reactions: 😭×1]</p>
+      <p>[2026-08-26T12:39:18.934000+00:00] me: [kind: pin]</p>
+      <p>[2026-08-26T12:39:24.979000+00:00] me: Shit i can&#x27;t stop reading that</p>
+      <p>[2026-08-26T12:40:29.849000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I love you so fucking much more and even if i type a million&quot;) Nuh I love you so much more. I want to hold you so bad gahhh AND BOI YOU SHOULD HAVE NOT EVEN TRIED TO SLAP URSELF IN THE FIRST DAMN PLACE. UHUH U BETTER BE SLEEPING ENOUGH. AND YES MY VERY STRONG HANDSOME MAN WHO IS AFRAID OF SPIDERS 🥹🫶 [reactions: 😭×1, 💗×1, 💖×1]</p>
+      <p>[2026-08-26T12:41:08.457000+00:00] me: (replying to &quot;Every time you do feel anxious or insecure tell me. I will a&quot;) I LOVE YOU SO FUCKING MUCH AND GENUINELY YES THE SAME WITH ME, YOU DON&#x27;T HAVE TO HIDE ANYTHING FROM ME, I WOULD MAKE SURE THAT I MAKE YOU FEEL LOVED. I GENUINELY CARE ABOUT YOU SO MUCH YOU&#x27;RE MY EVRYTHING I WANT YOU PLEASE BE WITH ME, BE MY GIRLFRIEND AND MY WIFE</p>
+      <p>[2026-08-26T12:41:24.943000+00:00] me: I MYSELF BELONG TO YOU, EVERYTHING WHICH IS MINE IS YOURS AS WELL</p>
+      <p>[2026-08-26T12:41:30.267000+00:00] me: EVERYTHING</p>
+      <p>[2026-08-26T12:41:45.319000+00:00] me: MY LOVE, MY HEART, MY BODY, MY EVERY DROP OF BLOOD</p>
+      <p>[2026-08-26T12:41:50.539000+00:00] me: EVERYTHING</p>
+      <p>[2026-08-26T12:42:10.855000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I MYSELF BELONG TO YOU, EVERYTHING WHICH IS MINE IS YOURS AS&quot;) Oh my fucking god that’s so hot holy shit</p>
+      <p>[2026-08-26T12:42:11.520000+00:00] me: (replying to &quot;Nuh I love you so much more. I want to hold you so bad gahhh&quot;) DO NOTTTTT ADD SPIDERSSSSS</p>
+      <p>[2026-08-26T12:42:14.502000+00:00] me: HROEJDJDKSKSKSKSJFNDJDJDJD</p>
+      <p>[2026-08-26T12:42:17.052000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: [kind: pin]</p>
+      <p>[2026-08-26T12:42:23.239000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;DO NOTTTTT ADD SPIDERSSSSS&quot;) HEHEHEHEH</p>
+      <p>[2026-08-26T12:42:47.383000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I LOVE YOU SO FUCKING MUCH AND GENUINELY YES THE SAME WITH M&quot;) YES A MILLION TIMES YES I WANT TO BE UR GIRLFRIEND</p>
+    </blockquote>
+    <p class="story__voiceover">That night turned us from hoping into belonging.</p>
+    <p class="story__source">from our chats &#183; halimah dms-8.txt:2750-2801</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="12" id="chapter-12" tabindex="0" aria-label="Chapter 12: The Maid Outfit Bet">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">12</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">The Maid Outfit Bet</h3>
+    <time class="story__date" datetime="2026-09-05">05 Sep 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-09-05T08:15:34.687000+00:00] me: IF YOU SCORE MORE THAN 40 MARKS IN BIO, PHY, CHEM AND MATHS BY THE END OF SEMESTER, I&#x27;LL DO A COSPLAY FOR U IN MAID OUTFIT</p>
+    </blockquote>
+    <p class="story__voiceover">You motivate me in the most chaotic, cute way possible.</p>
+    <p class="story__source">from our chats &#183; halimah dms-11.txt:32</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="13" id="chapter-13" tabindex="0" aria-label="Chapter 13: Your Love Paragraph Back to Me">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">13</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">Your Love Paragraph Back to Me</h3>
+    <time class="story__date" datetime="2026-09-08">08 Sep 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-09-08T21:39:41.034000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: MYY AKASH I LOVE YOU SOOOSOSOSOSOSOSO MUCHH, YOUR THE REASON I WAKE UP WITH A SMILE ON MY FACE. I LOOK FORWARD TO UR TEXTS AND I HAVE THE BIGGEST GRIN ON MY FACE WHEN U MESSAGE ME. I THINK ABOUT YOU AT RANDOM POINT OF THE DAY, EVEN DURING SCHOOL. I RANDOMLY ZONE OUT AND THINK ABOUT YOU AND YOUR VOICE. THE BEST PART OF SCHOOL IS THE MOMENT I LEAVE AND GET TO TEXT YOU ONCE I ARRIVE HOME. I LOVE OUR CALLSS SMM AND MISS HOW WE CANT CALL AS OFTEN BUT EVEN ONE DAYY MAKES ME SO HAPPY. I MISS YOU SOO MUCHH EVEN IF ITS ONLY</p>
+    </blockquote>
+    <p class="story__voiceover">Reading this still makes my whole day feel soft.</p>
+    <p class="story__source">from our chats &#183; halimah dms-11.txt:2281</p>
+  </div>
+</article>
+<article class="story__chapter" data-chapter="14" id="chapter-14" tabindex="0" aria-label="Chapter 14: My Vow to You">
+  <div class="story__chapter-inner">
+    <p class="story__kicker"><span class="story__num">14</span><span class="story__of" aria-hidden="true"> / 14</span></p>
+    <h3 class="story__title">My Vow to You</h3>
+    <time class="story__date" datetime="2026-09-13">13 Sep 2026</time>
+    <blockquote class="story__quote">
+      <p>[2026-09-13T18:15:25.388000+00:00] me: IN THE END YOU&#x27;RE MY HALIMAH AND I AM YOUR AKASH. I WILL ALWAYS LOVE YOU SO MUCH AND I WILL ALWAYS BE HERE FOR YOU [reactions: 💗×1]</p>
+    </blockquote>
+    <p class="story__voiceover">And I will keep that promise for as long as you will let me.</p>
+    <p class="story__source">from our chats &#183; halimah dms-12.txt:2639</p>
+  </div>
+</article>
+  </div>
+  <nav class="story__progress" data-story-progress aria-hidden="true" aria-label="Story progress">
+    <div class="story__progress-list">
+    <span class="story__progress-item" data-num="01" data-target="chapter-1" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="02" data-target="chapter-2" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="03" data-target="chapter-3" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="04" data-target="chapter-4" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="05" data-target="chapter-5" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="06" data-target="chapter-6" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="07" data-target="chapter-7" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="08" data-target="chapter-8" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="09" data-target="chapter-9" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="10" data-target="chapter-10" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="11" data-target="chapter-11" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="12" data-target="chapter-12" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="13" data-target="chapter-13" aria-hidden="true"></span>
+    <span class="story__progress-item" data-num="14" data-target="chapter-14" aria-hidden="true"></span>
+    </div>
+  </nav>
+</div>
+</section>
+
+<!-- 4. quotes — Quote wall (todo 8) -->
+<section id="quotes" class="section section--quotes" aria-label="Quote wall">
+<div class="quotes__content">
+  <p class="quotes__eyebrow">the quote wall &#183; the threat, fulfilled</p>
+  <h2 class="quotes__headline" data-threat="halimah dms-2.txt:1037">“<span class="quotes__headline-mark">IF YOU STAY UP ANYMORE I&#x27;LL MAKE A FRICKING WEBSITE WITH ALL YOUR QUOTES</span>”</h2>
+  <p class="quotes__lede">he kept the screenshots, and then he kept his word. her words deserved a whole website.</p>
+  <p class="quotes__count">34 certified zainab quotes</p>
+  <div class="quotes__wall" data-quotes-wall>
+<article class="quote-card" data-quote="1" data-source="halimah dms-1.txt:11" style="--d:1" tabindex="0" aria-label="Quote 1: It means slag 😭😭">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-06-28">28 Jun 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>It means slag 😭😭</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:11</p>
+</article>
+<article class="quote-card" data-quote="2" data-source="halimah dms-1.txt:34" style="--d:2" tabindex="0" aria-label="Quote 2: NEVERRR">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-01">01 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>NEVERRR</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:34</p>
+</article>
+<article class="quote-card" data-quote="3" data-source="halimah dms-1.txt:45" style="--d:3" tabindex="0" aria-label="Quote 3: MAGIC 😁">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-01">01 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>MAGIC 😁</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:45</p>
+</article>
+<article class="quote-card" data-quote="4" data-source="halimah dms-1.txt:50" style="--d:4" tabindex="0" aria-label="Quote 4: Hope u like hash browns 🥹🥹">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-01">01 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Hope u like hash browns 🥹🥹</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:50</p>
+</article>
+<article class="quote-card" data-quote="5" data-source="halimah dms-1.txt:52" style="--d:5" tabindex="0" aria-label="Quote 5: IDK IT JUST CAME INTO MY MIND">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-02">02 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>IDK IT JUST CAME INTO MY MIND</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:52</p>
+</article>
+<article class="quote-card" data-quote="6" data-source="halimah dms-1.txt:933" style="--d:6" tabindex="0" aria-label="Quote 6: I LOVE YOU TOO">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-07">07 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I LOVE YOU TOO</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:933</p>
+</article>
+<article class="quote-card" data-quote="7" data-source="halimah dms-1.txt:935" style="--d:7" tabindex="0" aria-label="Quote 7: NUH UH I LOVE YOU MORE">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-07">07 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>NUH UH I LOVE YOU MORE</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:935</p>
+</article>
+<article class="quote-card" data-quote="8" data-source="halimah dms-1.txt:937" style="--d:0" tabindex="0" aria-label="Quote 8: I LOVE YOU SOOOO MUCH MOREE">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-07">07 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I LOVE YOU SOOOO MUCH MOREE</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:937</p>
+</article>
+<article class="quote-card" data-quote="9" data-source="halimah dms-1.txt:1423" style="--d:1" tabindex="0" aria-label="Quote 9: IM GONNA MAKE U PLAY DTI WITH ME 🥰🥰">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-12">12 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>IM GONNA MAKE U PLAY DTI WITH ME 🥰🥰</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-1.txt:1423</p>
+</article>
+<article class="quote-card" data-quote="10" data-source="halimah dms-2.txt:1038" style="--d:2" tabindex="0" aria-label="Quote 10: I was playing mm2 🥹🥹">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-27">27 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I was playing mm2 🥹🥹</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-2.txt:1038</p>
+</article>
+<article class="quote-card" data-quote="11" data-source="halimah dms-2.txt:1608" style="--d:3" tabindex="0" aria-label="Quote 11: Okay bet">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-28">28 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Okay bet</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-2.txt:1608</p>
+</article>
+<article class="quote-card" data-quote="12" data-source="halimah dms-2.txt:2362" style="--d:4" tabindex="0" aria-label="Quote 12: I LIKE RE REQUIEM AND VILLAGE">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-07-30">30 Jul 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I LIKE RE REQUIEM AND VILLAGE</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-2.txt:2362</p>
+</article>
+<article class="quote-card" data-quote="13" data-source="halimah dms-3.txt:850" style="--d:5" tabindex="0" aria-label="Quote 13: My top 3 are the shining, the exorcist and conjuring">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-01">01 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>My top 3 are the shining, the exorcist and conjuring</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-3.txt:850</p>
+</article>
+<article class="quote-card" data-quote="14" data-source="halimah dms-3.txt:957" style="--d:6" tabindex="0" aria-label="Quote 14: Goodboy">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-01">01 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Goodboy</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-3.txt:957</p>
+</article>
+<article class="quote-card" data-quote="15" data-source="halimah dms-3.txt:1090" style="--d:7" tabindex="0" aria-label="Quote 15: IM JIKING">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-01">01 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>IM JIKING</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-3.txt:1090</p>
+</article>
+<article class="quote-card" data-quote="16" data-source="halimah dms-3.txt:1098" style="--d:0" tabindex="0" aria-label="Quote 16: ZOMBIE AGE">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-01">01 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>ZOMBIE AGE</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-3.txt:1098</p>
+</article>
+<article class="quote-card" data-quote="17" data-source="halimah dms-3.txt:2443" style="--d:1" tabindex="0" aria-label="Quote 17: I LIKE AUTUMN">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-02">02 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I LIKE AUTUMN</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-3.txt:2443</p>
+</article>
+<article class="quote-card" data-quote="18" data-source="halimah dms-5.txt:1031" style="--d:2" tabindex="0" aria-label="Quote 18: Is this drawing good">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-08">08 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Is this drawing good</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-5.txt:1031</p>
+</article>
+<article class="quote-card" data-quote="19" data-source="halimah dms-5.txt:2330" style="--d:3" tabindex="0" aria-label="Quote 19: Ima still call u it">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-10">10 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Ima still call u it</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-5.txt:2330</p>
+</article>
+<article class="quote-card" data-quote="20" data-source="halimah dms-5.txt:2336" style="--d:4" tabindex="0" aria-label="Quote 20: Ik u won’t">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-10">10 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Ik u won’t</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-5.txt:2336</p>
+</article>
+<article class="quote-card" data-quote="21" data-source="halimah dms-5.txt:2338" style="--d:5" tabindex="0" aria-label="Quote 21: Okay buddy">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-10">10 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Okay buddy</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-5.txt:2338</p>
+</article>
+<article class="quote-card" data-quote="22" data-source="halimah dms-7.txt:860" style="--d:6" tabindex="0" aria-label="Quote 22: Oh my goshh Chase Atlantic">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-20">20 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Oh my goshh Chase Atlantic</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-7.txt:860</p>
+</article>
+<article class="quote-card" data-quote="23" data-source="halimah dms-8.txt:1020" style="--d:7" tabindex="0" aria-label="Quote 23: Would u love me if I was a spider 🥺🥺">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-24">24 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Would u love me if I was a spider 🥺🥺</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-8.txt:1020</p>
+</article>
+<article class="quote-card" data-quote="24" data-source="halimah dms-8.txt:1839" style="--d:0" tabindex="0" aria-label="Quote 24: TODAY IS MY DAY (edited)">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-25">25 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>TODAY IS MY DAY (edited)</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-8.txt:1839</p>
+</article>
+<article class="quote-card" data-quote="25" data-source="halimah dms-9.txt:435" style="--d:1" tabindex="0" aria-label="Quote 25: Because i love you">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-27">27 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>Because i love you</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-9.txt:435</p>
+</article>
+<article class="quote-card" data-quote="26" data-source="halimah dms-9.txt:436" style="--d:2" tabindex="0" aria-label="Quote 26: And I love sending u spider pics">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-27">27 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>And I love sending u spider pics</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-9.txt:436</p>
+</article>
+<article class="quote-card" data-quote="27" data-source="halimah dms-10.txt:211" style="--d:3" tabindex="0" aria-label="Quote 27: hey hey it’s okay ur here now">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-08-30">30 Aug 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>hey hey it’s okay ur here now</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-10.txt:211</p>
+</article>
+<article class="quote-card" data-quote="28" data-source="halimah dms-11.txt:704" style="--d:4" tabindex="0" aria-label="Quote 28: DAMN IT">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-05">05 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>DAMN IT</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-11.txt:704</p>
+</article>
+<article class="quote-card" data-quote="29" data-source="halimah dms-11.txt:980" style="--d:5" tabindex="0" aria-label="Quote 29: WHAT THE HELLY 😭😭">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-06">06 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>WHAT THE HELLY 😭😭</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-11.txt:980</p>
+</article>
+<article class="quote-card" data-quote="30" data-source="halimah dms-11.txt:982" style="--d:6" tabindex="0" aria-label="Quote 30: I WILL I WILL">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-06">06 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I WILL I WILL</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-11.txt:982</p>
+</article>
+<article class="quote-card" data-quote="31" data-source="halimah dms-11.txt:2830" style="--d:7" tabindex="0" aria-label="Quote 31: ILL CONTINUE WATCHING TOKYO GHOUL">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-09">09 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>ILL CONTINUE WATCHING TOKYO GHOUL</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-11.txt:2830</p>
+</article>
+<article class="quote-card" data-quote="32" data-source="halimah dms-13.txt:1142" style="--d:0" tabindex="0" aria-label="Quote 32: GOODNIGHT MY AKASH">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-15">15 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>GOODNIGHT MY AKASH</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-13.txt:1142</p>
+</article>
+<article class="quote-card" data-quote="33" data-source="halimah dms-13.txt:1145" style="--d:1" tabindex="0" aria-label="Quote 33: I LOVE YOU SO MUCHHH">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-15">15 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>I LOVE YOU SO MUCHHH</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-13.txt:1145</p>
+</article>
+<article class="quote-card quote-card--long" data-quote="34" data-source="halimah dms-14.txt:923" style="--d:2" tabindex="0" aria-label="Quote 34: PE IS SO WEIRD MAN WHY THEY PLAYING BOLLY WOOD SONGS AND ITS">
+  <div class="quote-card__head">
+    <span class="quote-card__avatar" aria-hidden="true">Z</span>
+    <span class="quote-card__who">
+      <span class="quote-card__name">zainab</span>
+      <time class="quote-card__date" datetime="2026-09-22">22 Sep 2026</time>
+    </span>
+  </div>
+  <blockquote class="quote-card__quote">
+    <p>PE IS SO WEIRD MAN WHY THEY PLAYING BOLLY WOOD SONGS AND ITS SO DAMN LOUD LIKE NO I DONT WANT TO HEAR CHAMMAK CHALLO WHILE IM PLAYING BADMINTON</p>
+  </blockquote>
+  <p class="quote-card__source">from our chats &#183; halimah dms-14.txt:923</p>
+</article>
+  </div>
+</div>
+</section>
+
+<!-- 5. gags — Gag locker (todo 9)
+     Four exhibits, each ending in an affection closer (IS-5).
+     Spider is a cute inline SVG, never a photo. -->
+<section id="gags" class="section section--gags" aria-label="Gag locker">
+<div class="gags__content">
+  <p class="gags__eyebrow">the gag locker &#183; four exhibits</p>
+  <h2 class="gags__headline">certified lore</h2>
+  <p class="gags__lede">every joke in here ends the same way &mdash; with you being loved</p>
+  <div class="gags__grid">
+    <article class="gags__card" data-gags-card="buddy" data-testid="gag-card-buddy">
+      <p class="gags__card-num">exhibit 01</p>
+      <h3 class="gags__card-title">the buddy war</h3>
+      <p class="gags__card-setup">She knows I cannot stand being called buddy. Saying it anyway became her favourite sport.</p>
+      <blockquote class="gags__gag" data-testid="gag-lines-buddy">
+        <p>DO NOT CALL ME THAT AGAIN</p>
+        <p>Ima still call u it</p>
+        <p>I don&#x27;t like it, I am more than just a &quot;buddy&quot; and I want to hear that from you</p>
+        <cite>from our chats &#183; halimah dms-5.txt:2323,2330 &#183; dms-11.txt:705</cite>
+      </blockquote>
+      <p class="gags__closer" data-testid="gag-closer-buddy"><span class="gags__closer-label">affection closer</span>I am not her buddy, I am her person, and her teasing only works because we both know it.</p>
+    </article>
+    <article class="gags__card" data-gags-card="goodboy" data-testid="gag-card-goodboy">
+      <p class="gags__card-num">exhibit 02</p>
+      <h3 class="gags__card-title">good-boy bargain</h3>
+      <p class="gags__card-setup">He asked. She rationed. Every single goodboy had to be earned, and the negotiation is on record.</p>
+      <blockquote class="gags__gag" data-testid="gag-lines-goodboy">
+        <p>You can call me your Goodboy anytime</p>
+        <p>call me a goodboy and I won&#x27;t send it &mdash; Goodboy</p>
+        <p>GOTTA USE CHATGPT TO CALL ME GOODBOY NOW</p>
+        <cite>from our chats &#183; halimah dms-2.txt:1604 &#183; dms-3.txt:954,957 &#183; dms-11.txt:979</cite>
+      </blockquote>
+      <p class="gags__closer" data-testid="gag-closer-goodboy"><span class="gags__closer-label">affection closer</span>She says it rarely, which is exactly why each one lands. Her good boy, always.</p>
+    </article>
+    <article class="gags__card" data-gags-card="hashbrown" data-testid="gag-card-hashbrown">
+      <p class="gags__card-num">exhibit 03</p>
+      <h3 class="gags__card-title">hashbrown origin</h3>
+      <p class="gags__card-setup">Out of nowhere, she named me after a fried potato side dish. I questioned it, she had no explanation, and that somehow made it better.</p>
+      <blockquote class="gags__gag" data-testid="gag-lines-hashbrown">
+        <p>Hope u like hash browns &#x1F979;&#x1F979;</p>
+        <p>I AM CRYING &#x1F62D; WHAT MADE YOU NAME ME HASHBROWN</p>
+        <cite>from our chats &#183; halimah dms-1.txt:50-51</cite>
+      </blockquote>
+      <p class="gags__closer" data-testid="gag-closer-hashbrown"><span class="gags__closer-label">affection closer</span>Hashbrown stuck because she picked it. I would rather be her hashbrown than anyone else&#x27;s anything.</p>
+    </article>
+    <article class="gags__card" data-gags-card="spider" data-testid="gag-card-spider">
+      <p class="gags__card-num">exhibit 04</p>
+      <h3 class="gags__card-title">spider-pic amnesty</h3>
+      <p class="gags__card-setup">He has arachnophobia. She sends spider pics as a love language. The system clearly works.</p>
+      <div class="gags__spider" aria-hidden="true">
+        <svg viewBox="0 0 96 96" role="img" aria-label="A cute smiling cartoon spider" data-testid="gag-spider-svg">
+          <g stroke="#c9956b" stroke-width="4" stroke-linecap="round" fill="none">
+            <path d="M28 52 L12 44 M28 60 L12 60 M28 68 L14 78 M68 52 L84 44 M68 60 L84 60 M68 68 L82 78" />
+            <path d="M34 40 L26 26 M62 40 L70 26" />
+          </g>
+          <circle cx="26" cy="24" r="4" fill="#c9956b" />
+          <circle cx="70" cy="24" r="4" fill="#c9956b" />
+          <ellipse cx="48" cy="58" rx="22" ry="24" fill="#2a2118" stroke="#e07c3e" stroke-width="3" />
+          <circle cx="40" cy="52" r="7" fill="#f5ebe0" />
+          <circle cx="56" cy="52" r="7" fill="#f5ebe0" />
+          <circle cx="41" cy="53" r="3" fill="#1a1410" />
+          <circle cx="55" cy="53" r="3" fill="#1a1410" />
+          <circle cx="42" cy="52" r="1" fill="#f5ebe0" />
+          <circle cx="56" cy="52" r="1" fill="#f5ebe0" />
+          <path d="M40 66 Q48 72 56 66" stroke="#f0984a" stroke-width="3" stroke-linecap="round" fill="none" />
+          <circle cx="33" cy="61" r="3" fill="#e07c3e" opacity="0.6" />
+          <circle cx="63" cy="61" r="3" fill="#e07c3e" opacity="0.6" />
+        </svg>
+      </div>
+      <blockquote class="gags__gag" data-testid="gag-lines-spider">
+        <p>I HAVE ARACHNOPHOBIA</p>
+        <p>And I love sending u spider pics</p>
+        <p>Would u love me if I was a spider &#x1F97A;&#x1F97A;</p>
+        <cite>from our chats &#183; halimah dms-3.txt:1608 &#183; dms-9.txt:436 &#183; dms-8.txt:1020</cite>
+      </blockquote>
+      <p class="gags__closer" data-testid="gag-closer-spider"><span class="gags__closer-label">affection closer</span>She could send him anything, even eight-legged nightmares, and he would still open every single one smiling.</p>
+      <button class="gags__spider-btn" type="button" data-gags-boop data-testid="gag-spider-boop">boop the spider</button>
+    </article>
+  </div>
+</div>
+</section>
+
+<!-- 5b. physics — Physics playground (todo 15)
+     Bonus corner inside the gag locker. Shovable floating hearts with
+     their names, lazy-loaded matter-js, static names row whenever motion
+     is reduced / the library is blocked / the weight budget breaks.
+     Names render from content/physics-names.json (single source of truth,
+     fetched by sections/physics.js); no name is hardcoded in this markup. -->
+<section id="physics" class="section section--physics section--gags" aria-label="Physics playground">
+<div class="physics__content">
+  <p class="physics__eyebrow">bonus corner</p>
+  <h2 class="physics__headline">shove a heart</h2>
+  <p class="physics__lede">drag any heart &mdash; they knock into each other, gently</p>
+
+  <div class="physics__stage" data-physics-stage>
+    <div class="physics__static" data-physics-static data-testid="physics-static" hidden>
+      <ul class="physics__chips" data-physics-chips data-testid="physics-chips"></ul>
+      <p class="physics__note" data-physics-note data-testid="physics-note"></p>
+    </div>
+  </div>
+
+  <button class="physics__play" type="button" data-physics-play data-testid="physics-play" hidden>
+    let them float
+  </button>
+  <p class="physics__status" role="status" data-physics-status data-testid="physics-status"></p>
+</div>
+</section>
+
+<!-- 6. scratch — Scratch-off secret (todo 10)
+     The secret is NOT in this markup and NOT in any HTML file. It lives
+     as a JS string in sections/scratch.js and is painted to a canvas, so
+     it is absent from the initial DOM and from view-source. It only
+     reaches readable text after the panel unlocks, written in by JS. -->
+<section id="scratch" class="section section--scratch" aria-label="Secret">
+  <div class="scratch__content">
+    <p class="scratch__eyebrow">one more thing</p>
+    <h2 class="scratch__headline">scratch it out, princess</h2>
+    <div class="scratch__card" data-scratch-card>
+      <canvas class="scratch__secret" data-scratch-secret aria-hidden="true" role="presentation"></canvas>
+      <canvas class="scratch__cover" data-scratch-cover aria-hidden="true" role="presentation"></canvas>
+    </div>
+    <p class="scratch__hint" data-scratch-hint>scratch the foil with your thumb</p>
+    <p class="scratch__percent" data-scratch-percent aria-live="off"></p>
+    <div class="scratch__reveal" data-scratch-reveal>
+      <p class="scratch__reveal-text" data-scratch-reveal-text></p>
+      <p class="scratch__reveal-source" data-scratch-reveal-source></p>
+    </div>
+    <button class="scratch__replay" type="button" data-scratch-replay>scratch it again</button>
+    <button class="scratch__tap-btn" type="button" data-scratch-tap hidden>open it</button>
+  </div>
+</section>
+
+<!-- 7. album — Photo album (todo 11)
+     Pages ship as markup placeholders (clearly marked PLACEHOLDER).
+     sections/album.js probes assets/photos/ at runtime and swaps in a
+     real photo only after it loads — a missing file can never show a
+     broken-image icon. No hotlinked photos; no real photo committed. -->
+<section id="album" class="section section--album" aria-label="Photo album">
+  <div class="album__content">
+    <p class="album__eyebrow">our little book</p>
+    <h2 class="album__headline">the us album</h2>
+    <p class="album__lede">flip through slowly, good girl</p>
+    <div class="album__book" data-album-book>
+      <div class="album__book-inner">
+        <div class="album__pages">
+          <div class="album__page album__page--cover" data-density="hard">
+            <div class="album__placeholder">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">the us album — PLACEHOLDER</span>
+              <span class="album__placeholder-note">cover art arrives with the first real photo</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">open it, zai</p>
+              <span class="album__caption-date">est. 26 Aug 2026</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/photos/photo-1.jpg" data-alt="Us at the very beginning">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">us, the beginning — PLACEHOLDER</span>
+              <span class="album__placeholder-note">slot photo-1.jpg</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">where it started — one pfp and i was done for</p>
+              <span class="album__caption-date">kakegurui-pfp era</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/photos/photo-2.jpg" data-alt="The dare that turned real">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">the dare that turned real — PLACEHOLDER</span>
+              <span class="album__placeholder-note">slot photo-2.jpg</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">dare me again, i dare you</p>
+              <span class="album__caption-date">04 Jul</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/photos/photo-3.jpg" data-alt="Lullaby night">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9790;</span>
+              <span class="album__placeholder-label">lullaby night — PLACEHOLDER</span>
+              <span class="album__placeholder-note">slot photo-3.jpg</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">you fell asleep first. i stayed.</p>
+              <span class="album__caption-date">18 Aug</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/photos/photo-4.jpg" data-alt="The night we said yes">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">yes, a million times — PLACEHOLDER</span>
+              <span class="album__placeholder-note">slot photo-4.jpg</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">YES A MILLION TIMES YES</p>
+              <span class="album__caption-date">26 Aug 2026</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/photos/photo-5.jpg" data-alt="Hashbrown chaos and buddy wars">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9734;</span>
+              <span class="album__placeholder-label">hashbrown chaos + buddy wars — PLACEHOLDER</span>
+              <span class="album__placeholder-note">slot photo-5.jpg</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">certified buddy. good boy (terms apply).</p>
+              <span class="album__caption-date">ongoing lore</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/photos/photo-6.jpg" data-alt="Spider-pic amnesty">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10047;</span>
+              <span class="album__placeholder-label">spider-pic amnesty — PLACEHOLDER</span>
+              <span class="album__placeholder-note">slot photo-6.jpg</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">i survived the spider pics. for you. barely.</p>
+              <span class="album__caption-date">amnesty granted</span>
+            </div>
+          </div>
+          <div class="album__page album__page--cover" data-density="hard">
+            <div class="album__placeholder">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">to be continued — PLACEHOLDER</span>
+              <span class="album__placeholder-note">more pages when the photos land</span>
+            </div>
+            <div class="album__caption">
+              <p class="album__caption-text">every page after this one is ours to fill</p>
+              <span class="album__caption-date">always</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="album__swipe-hint" aria-hidden="true">swipe to flip &#8596;</p>
+    <div class="album__controls">
+      <button class="album__btn" type="button" data-album-prev aria-label="Previous page">&larr; back</button>
+      <button class="album__btn" type="button" data-album-next aria-label="Next page">next &rarr;</button>
+    </div>
+    <p class="album__notice" data-album-notice hidden></p>
+  </div>
+</section>
+
+<!-- 8. starmap — Star map (todo 3) -->
+<section id="starmap" class="section section--starmap" aria-label="Star map">
+  <div class="starmap__content">
+    <div class="starmap__frame">
+      <canvas class="starmap__canvas" data-starmap-canvas aria-hidden="true" role="presentation"></canvas>
+      <p class="starmap__fallback" data-starmap-fallback>
+        <span class="starmap__fallback-glyph" aria-hidden="true">&#10022;</span>
+        the sky is out there tonight, even when the canvas cannot draw
+      </p>
+    </div>
+    <div class="starmap__caption">
+      <p class="starmap__eyebrow">26 Aug 2026 &#183; the night we said yes</p>
+      <h2 class="starmap__headline">the sky on 26 Aug 2026</h2>
+      <p class="starmap__verbatim">YES A MILLION TIMES YES</p>
+      <ul class="starmap__times">
+        <li>
+          <span class="starmap__time-value">26/08/2026 06:12PM</span>
+          <span class="starmap__time-label">his</span>
+        </li>
+        <li>
+          <span class="starmap__time-value">26/08/2026 01:42PM</span>
+          <span class="starmap__time-label">hers</span>
+        </li>
+      </ul>
+      <p class="starmap__source">verbatim from our chat, 26 Aug 2026, 12:42:47 GMT</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. world — Her world strip (todo 13)
+     Eight motif cards: music, horror top-3, games, anime, gothic
+     writing, drawing, badminton, autumn. Titles/names only — zero
+     reproduced lyrics or artwork. Reveal is enhancement
+     (html.js-world, sections/world.js) only. -->
+<section id="world" class="section section--world" aria-label="Her world">
+<div class="world__content">
+  <p class="world__eyebrow">her world &#183; a field guide</p>
+  <h2 class="world__headline">know these, know her</h2>
+  <p class="world__lede">eight little shelves of everything she loves, zai &mdash; titles only, the rest lives in her head</p>
+  <span class="world__leaf world__leaf--a" aria-hidden="true">&#10087;</span>
+  <span class="world__leaf world__leaf--b" aria-hidden="true">&#10087;</span>
+  <div class="world__shelf">
+    <article class="world__card" data-motif="music" data-reveal>
+      <p class="world__kicker"><span class="world__num">01</span><span class="world__of" aria-hidden="true"> / 08 &#183; needle-drop</span></p>
+      <h3 class="world__title">Chase Atlantic</h3>
+      <div class="world__art world__art--vinyl" aria-hidden="true"><span class="world__vinyl"></span></div>
+      <p class="world__note">her current obsession. no skips, no notes &mdash; if she replays it, we replay it.</p>
+      <blockquote class="world__dm" data-source="dm"><p>Oh my goshh Chase Atlantic</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-7.txt:860</p>
+    </article>
+    <article class="world__card" data-motif="horror" data-reveal>
+      <p class="world__kicker"><span class="world__num">02</span><span class="world__of" aria-hidden="true"> / 08 &#183; triple feature</span></p>
+      <h3 class="world__title">her horror top three</h3>
+      <div class="world__stubs" aria-label="Top three horror films">
+        <div class="world__stub"><span class="world__rank">no. 1</span><span class="world__stub-title">The Shining</span><span class="world__admit">admit one scared boyfriend</span></div>
+        <div class="world__stub"><span class="world__rank">no. 2</span><span class="world__stub-title">The Exorcist</span><span class="world__admit">admit one scared boyfriend</span></div>
+        <div class="world__stub"><span class="world__rank">no. 3</span><span class="world__stub-title">The Conjuring</span><span class="world__admit">admit one scared boyfriend</span></div>
+      </div>
+      <p class="world__note">ranked and filed. i watch through my fingers, she laughs at me.</p>
+      <blockquote class="world__dm" data-source="dm"><p>My top 3 are the shining, the exorcist and conjuring</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-3.txt:850</p>
+    </article>
+    <article class="world__card" data-motif="games" data-reveal>
+      <p class="world__kicker"><span class="world__num">03</span><span class="world__of" aria-hidden="true"> / 08 &#183; controller club</span></p>
+      <h3 class="world__title">lobby regular</h3>
+      <div class="world__badges" aria-label="Games she plays">
+        <span class="world__badge">resident evil<span class="world__badge-sub">requiem &#183; village</span></span>
+        <span class="world__badge">roblox<span class="world__badge-sub">her lobby</span></span>
+        <span class="world__badge">dti<span class="world__badge-sub">runway ready</span></span>
+      </div>
+      <p class="world__note">she carries, i respawn. dress-to-impress debut pending.</p>
+      <blockquote class="world__dm" data-source="dm"><p>I LIKE RE REQUIEM AND VILLAGE</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-2.txt:2354, dms-2.txt:2362, dms-1.txt:1423</p>
+    </article>
+    <article class="world__card" data-motif="anime" data-reveal>
+      <p class="world__kicker"><span class="world__num">04</span><span class="world__of" aria-hidden="true"> / 08 &#183; anime corner</span></p>
+      <h3 class="world__title">Tokyo Ghoul</h3>
+      <p class="world__note">on the watchlist &mdash; and the denji edit she posted lives here too, framed in my head.</p>
+      <blockquote class="world__dm" data-source="dm"><p>ILL CONTINUE WATCHING TOKYO GHOUL</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-11.txt:2830, dms-7.txt:634</p>
+    </article>
+    <article class="world__card" data-motif="writing" data-reveal>
+      <p class="world__kicker"><span class="world__num">05</span><span class="world__of" aria-hidden="true"> / 08 &#183; her ink</span></p>
+      <h3 class="world__title">gothic writing</h3>
+      <p class="world__note">her pen goes full gothic. i read every word twice.</p>
+      <blockquote class="world__dm world__dm--manuscript" data-source="dm"><p>It was the most dreariest night of October to which the wind howled with such despair and horror it was as if the souls of the dead has risen within it</p></blockquote>
+      <p class="world__source">her words, verbatim &#183; dms-12.txt:800</p>
+    </article>
+    <article class="world__card" data-motif="drawing" data-reveal>
+      <p class="world__kicker"><span class="world__num">06</span><span class="world__of" aria-hidden="true"> / 08 &#183; sketchbook</span></p>
+      <h3 class="world__title">drawing era</h3>
+      <svg class="world__doodle" viewBox="0 0 120 60" aria-hidden="true" focusable="false"><path d="M8 44 C 24 8, 40 8, 48 30 S 66 54, 78 26 S 100 12, 112 34" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M60 10 l2.2 4.6 4.6 2.2 -4.6 2.2 -2.2 4.6 -2.2 -4.6 -4.6 -2.2 4.6 -2.2 Z" fill="currentColor"/></svg>
+      <p class="world__note">verdict: yes. it is always yes.</p>
+      <blockquote class="world__dm" data-source="dm"><p>Is this drawing good</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-5.txt:1031</p>
+    </article>
+    <article class="world__card" data-motif="badminton" data-reveal>
+      <p class="world__kicker"><span class="world__num">07</span><span class="world__of" aria-hidden="true"> / 08 &#183; court era</span></p>
+      <h3 class="world__title">badminton</h3>
+      <svg class="world__doodle" viewBox="0 0 60 80" aria-hidden="true" focusable="false"><path d="M30 78 L30 40 M30 40 L14 12 M30 40 L24 10 M30 40 L36 10 M30 40 L46 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M14 12 L46 12 L38 40 L22 40 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="30" cy="70" r="7" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+      <p class="world__note">her court era. house rule: no chammak challo on the court.</p>
+      <blockquote class="world__dm" data-source="dm"><p>I DONT WANT TO HEAR CHAMMAK CHALLO WHILE IM PLAYING BADMINTON</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-14.txt:923</p>
+    </article>
+    <article class="world__card" data-motif="autumn" data-reveal>
+      <p class="world__kicker"><span class="world__num">08</span><span class="world__of" aria-hidden="true"> / 08 &#183; amber season</span></p>
+      <h3 class="world__title">autumn</h3>
+      <svg class="world__doodle" viewBox="0 0 60 80" aria-hidden="true" focusable="false"><path d="M30 8 C 48 22, 48 48, 30 62 C 12 48, 12 22, 30 8 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 14 L30 56 M30 26 L40 32 M30 26 L20 32 M30 40 L39 46 M30 40 L21 46" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M30 62 L30 74" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <p class="world__note">crunchy leaves, grey skies, her season. obviously.</p>
+      <blockquote class="world__dm" data-source="dm"><p>I LIKE AUTUMN</p></blockquote>
+      <p class="world__source">from our chats &#183; dms-3.txt:2443</p>
+    </article>
+  </div>
+  <p class="world__closer">loving her means loving her whole world &mdash; this shelf is the map</p>
+</div>
+</section>
+
+<!-- 10. finale — Love letter + keepsakes (todo 12)
+     The letter is plain HTML: readable with JS disabled, printable
+     via finale.css @media print. Envelope/unseal is enhancement
+     (html.js-finale, sections/finale.js) only. -->
+<section id="finale" class="section section--finale" aria-label="For you">
+  <div class="finale__content">
+    <p class="finale__eyebrow">finale &#183; for you</p>
+    <h2 class="finale__headline">one last thing, zai</h2>
+    <p class="finale__lede">unseal it slowly</p>
+    <div class="finale__stage" data-finale-stage>
+      <div class="finale__envelope" aria-hidden="true">
+        <div class="finale__envelope-flap"></div>
+        <div class="finale__seal">H</div>
+      </div>
+      <button class="finale__open" type="button" data-finale-open>open the letter</button>
+      <article class="finale__letter" data-finale-letter aria-label="A love letter for Halimah">
+        <p class="finale__dateline">19 October 2026 &#183; for halimah</p>
+        <p class="finale__para">My Halimah,</p>
+        <p class="finale__para">Happy birthday, good girl. Before anything else, hear this the way I have always meant it: <q>Throughout your journey, I&#x27;ll be with you. I am always here for you.</q> That was never a line for one bad night. It is the whole shape of us.</p>
+        <p class="finale__para">You are not a burden, not on the heavy days, not ever. <q>It gets better, a lot better trust me</q> — and I will sit beside you until it does, for as many nights as it takes. You can tell me everything, even the tired 2am things, and I will still be here in the morning, waiting for your text when you wake up.</p>
+        <p class="finale__para">I think about that August night a lot. You could not sleep, you told me you were passing out from exhaustion, and all I wanted was to be soft with you and take care of you. So here it is again, plain: <q>Yes I am here for you now and I love you so much more than words can ever describe.</q> <q>If everyone leaves, I am here for you and I will always be here for you.</q> Everybody else can go. I stay.</p>
+        <p class="finale__para">And I am so proud of you. <q>I love you so much and I am proud of you</q> — of how you keep going through school and everything else at the same time, of your gothic stories and your drawings, of every random zone-out thought you send my way. Loving you means loving your whole world, and I do: all of it, happily.</p>
+        <p class="finale__para">You once told me I make spiders beautiful for you. <span class="finale__fill">You make everything beautiful for me — even eight-legged nightmares, even Mondays.</span><span class="finale__slot" data-owner-slot="spider-line">[OWNER: rewrite this line in your own words]</span> Keep spamming me with them. I will open every single one smiling.</p>
+        <p class="finale__para">So here is my vow, the same one from September, kept and re-kept: <q>IN THE END YOU&#x27;RE MY HALIMAH AND I AM YOUR AKASH. I WILL ALWAYS LOVE YOU SO MUCH AND I WILL ALWAYS BE HERE FOR YOU.</q> As long as you want me to be.</p>
+        <p class="finale__para">One more year of you — your laugh, your teasing, your 4-hours-of-sleep stubbornness, your goodnight paragraphs. Take care of yourself for me: sleep early, eat your meals, drink your water. Not because I said so, but because you are my priority. Nothing else.</p>
+        <p class="finale__signoff">Yours, always,<br /><span class="finale__fill">your Akash, your hashbrown, your good boy</span><span class="finale__slot" data-owner-slot="signature">[OWNER: sign it your way — edit the name line above]</span></p>
+        <p class="finale__slot" data-owner-slot="ps">[OWNER: optional P.S. — add one private line here before you send her the link]</p>
+        <div class="finale__sources">
+          <p>woven from our chats: halimah dms-6.txt:951-953 &#183; dms-10.txt:213,218,221 &#183; dms-12.txt:2639-2640</p>
+        </div>
+      </article>
+    </div>
+    <div class="finale__keepsakes" aria-label="Keepsakes">
+      <h3 class="finale__keepsakes-title">keepsakes</h3>
+      <p class="finale__keepsakes-note">take a piece of tonight with you</p>
+      <ul class="finale__keepsakes-list">
+        <li><button class="finale__keepsake-link finale__keepsake-link--primary" type="button" data-finale-print>print the letter &#183; save as PDF</button></li>
+        <li><button class="finale__keepsake-link" type="button" data-motion-replay hidden>replay the confetti</button></li>
+        <li><a class="finale__keepsake-link" href="assets/keepsakes/star-map-card.svg" download="star-map-26-aug-2026.svg">download the star-map card</a></li>
+        <li><a class="finale__keepsake-link" href="#album">open the us album</a></li>
+        <li><a class="finale__keepsake-link" href="#story">re-read our story</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div><!-- /#content-region -->
+
+<!-- Base styles (minimal — most styles live in per-section CSS) -->
+<style>
+/* ---- Reset & base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-top: var(--safe-top);
+  padding-right: var(--safe-right);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: var(--color-accent); }
+button, a, input, select, textarea {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+}
+
+/* ---- Section layout ---- */
+.section {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-padding) var(--gutter);
+  position: relative;
+}
+
+.section__placeholder {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---- Begin overlay: the night before ----
+   One authored moment: a dark room, a single horizon-glow, embers rising.
+   The entrance is a single lantern-lighting (lantern-in); restraint elsewhere. */
+.section--begin {
+  background: #14100c;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.begin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #14100c;
+  overflow: hidden;
+}
+
+.begin-overlay[hidden] { display: none; }
+
+.begin__sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.begin__embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* One static horizon-glow, low and off-centre — the only light in the room.
+   Painted, not animated: it is the destination the embers rise toward. */
+.begin__aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+
+.begin__aurora--a {
+  width: min(120vw, 900px);
+  height: min(60vh, 420px);
+  left: 50%;
+  bottom: -34%;
+  transform: translateX(-38%);
+  background: radial-gradient(ellipse at center, rgba(224,124,62,.22), transparent 68%);
+}
+
+.begin__aurora--b {
+  width: min(70vw, 480px);
+  height: min(70vw, 480px);
+  top: -30%;
+  right: -20%;
+  background: radial-gradient(circle, rgba(70,60,90,.10), transparent 65%);
+  opacity: .8;
+}
+
+.begin__grain {
+  position: absolute;
+  inset: 0;
+  opacity: .06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* Room-shadow: darkness settles from the top, the warmth lives at the floor. */
+.begin__vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.5), transparent 30%);
+}
+
+.begin__content {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  padding-inline: var(--gutter);
+  animation: lantern-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The single orchestrated entrance: the room's lamp warming up. */
+@keyframes lantern-in {
+  from { opacity: 0; transform: translateY(14px); filter: brightness(.4); }
+  to   { opacity: 1; transform: translateY(0); filter: brightness(1); }
+}
+
+.begin__kicker {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-6);
+}
+
+.begin__kicker-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  margin-right: .8em;
+  vertical-align: .35em;
+  animation: ember-breathe 3.2s ease-in-out infinite;
+}
+
+/* One living ember beside the kicker — the only infinite motion on the gate. */
+@keyframes ember-breathe {
+  0%, 100% { opacity: .45; box-shadow: 0 0 0 0 rgba(224,124,62,0); }
+  50%      { opacity: 1; box-shadow: 0 0 14px 2px rgba(224,124,62,.55); }
+}
+
+.begin__prompt {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(2.75rem, 9vw, 6rem);
+  line-height: 1.18;
+  letter-spacing: -.02em;
+  color: var(--color-text);
+  text-wrap: balance;
+  text-shadow: 0 0 60px rgba(224,124,62,.25), 0 2px 30px rgba(0,0,0,.6);
+}
+
+/* The match-strike: a hairline ring holding one word. Hover warms it,
+   press strikes it — the glow is earned, not ambient. */
+.begin__button {
+  position: relative;
+  margin-top: var(--space-10);
+  min-height: 88px;
+  min-width: 88px;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid rgba(224,124,62,.45);
+  cursor: pointer;
+  box-shadow: inset 0 0 24px rgba(224,124,62,.08);
+  transition: box-shadow 200ms ease, border-color 200ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms ease;
+}
+
+.begin__button-label { position: relative; z-index: 1; }
+
+.begin__button-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224,124,62,.35), transparent 70%);
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .begin__button:hover {
+    border-color: rgba(240,152,74,.9);
+    box-shadow: inset 0 0 30px rgba(224,124,62,.18), 0 0 36px rgba(224,124,62,.28);
+  }
+  .begin__button:hover .begin__button-glow { opacity: 1; }
+}
+
+.begin__button:active {
+  background-color: rgba(224,124,62,.22);
+  border-color: var(--color-accent-glow);
+  transform: scale(.94);
+  box-shadow: inset 0 0 34px rgba(224,124,62,.3), 0 0 44px rgba(224,124,62,.4);
+}
+
+.begin__button:focus-visible {
+  outline: 2px solid var(--color-accent-glow);
+  outline-offset: 6px;
+}
+
+.begin__whisper {
+  margin-top: var(--space-8);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  opacity: .85;
+}
+
+.begin__foot {
+  position: absolute;
+  bottom: calc(var(--gutter) + var(--safe-bottom));
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  opacity: .55;
+  z-index: 1;
+}
+
+/* ---- Countdown: the waiting room ----
+   An instrument, not a card: open panel, hairline rules, a single readout.
+   Same night as the gate, one breath dimmer — this is the wait, not the arrival. */
+.section--countdown {
+  background: #14100c;
+  overflow: hidden;
+}
+
+.section--countdown[hidden] { display: none; }
+
+.countdown__sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.countdown__aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+
+.countdown__aurora--a {
+  width: min(110vw, 820px);
+  height: min(50vh, 360px);
+  left: 50%;
+  bottom: -36%;
+  transform: translateX(-38%);
+  background: radial-gradient(ellipse at center, rgba(224,124,62,.13), transparent 68%);
+}
+
+.countdown__aurora--b {
+  width: min(60vw, 420px);
+  height: min(60vw, 420px);
+  top: -28%;
+  left: -18%;
+  background: radial-gradient(circle, rgba(70,60,90,.08), transparent 65%);
+  opacity: .7;
+}
+
+.countdown__grain {
+  position: absolute;
+  inset: 0;
+  opacity: .06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+.countdown__vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.5), transparent 30%);
+}
+
+/* ---- Countdown instrument (open panel) ---- */
+.countdown__panel {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  padding: var(--space-10) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  animation: lantern-in .9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.countdown__panel[hidden] { display: none; }
+
+.countdown__eyebrow {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--color-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.countdown__eyebrow-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  margin-right: .8em;
+  vertical-align: .35em;
+  animation: ember-breathe 3.2s ease-in-out infinite;
+}
+
+.countdown__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+  line-height: 1.15;
+  color: var(--color-text);
+  text-wrap: balance;
+  margin-bottom: var(--space-6);
+}
+
+.countdown__value {
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  text-shadow: 0 0 24px var(--color-accent-soft);
+}
+
+.countdown__hairline {
+  margin: var(--space-8) auto 0;
+  width: min(100%, 22rem);
+  height: 1px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.countdown__hairline span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent);
+  transition: width 1s linear;
+}
+
+.countdown__teasers {
+  list-style: none;
+  margin: var(--space-8) auto 0;
+  padding: 0;
+  max-width: 24rem;
+}
+
+.countdown__teaser {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  font-size: var(--text-sm);
+}
+
+.countdown__teaser + .countdown__teaser {
+  border-top: 1px solid var(--color-border);
+}
+
+.countdown__teaser-key {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-text);
+}
+
+.countdown__teaser-state {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  opacity: .75;
+}
+
+.countdown__music-hint {
+  margin-top: var(--space-8);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  opacity: .8;
+}
+
+.begin__fallback {
+  margin-top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.begin__fallback[hidden] { display: none; }
+
+.begin__fallback-reason {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.begin__fallback-button {
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-8);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+/* ---- Arrival cue: the thread at the top of the story ----
+   Rendered only after unlock (begin.js unhides it with the content).
+   One vertical thread, one slow ember-drop. */
+.arrival-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-12);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--color-cine-text-muted, var(--color-text-muted));
+}
+
+.arrival-cue[hidden] { display: none; }
+
+.arrival-cue__thread {
+  display: block;
+  width: 1px;
+  height: 56px;
+  background: linear-gradient(180deg, transparent, var(--color-cine-accent, var(--color-accent)));
+  overflow: hidden;
+  position: relative;
+}
+
+.arrival-cue__thread::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 100%;
+  height: 40%;
+  background: var(--color-cine-accent-glow, var(--color-accent-glow));
+  animation: ember-drop 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes ember-drop {
+  from { top: -40%; }
+  to   { top: 110%; }
+}
+
+/* ---- Reduced motion gate ---- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .begin__content,
+  .countdown__panel { animation: none; }
+  .begin__kicker-dot,
+  .countdown__eyebrow-dot { animation: none; opacity: 1; box-shadow: none; }
+  .arrival-cue__thread::after { animation: none; }
+  .begin__embers { display: none; }
+}
+
+/* ---- Music control ---- */
+.music-control {
+  position: fixed;
+  bottom: var(--gutter);
+  right: var(--gutter);
+  z-index: 100;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-accent);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.music-control[hidden] {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+
+.music-control:hover {
+  background: var(--color-surface-alt);
+}
+
+.music-control__icon--pause,
+.music-control__icon--play {
+  flex-shrink: 0;
+}
+</style>
+<!-- Critical: motion kill-switch + confetti, then the begin gate (tap-to-begin interaction) -->
+<script src="vendor/confetti.browser.min.js" defer></script>
+<script src="vendor/howler.min.js" defer></script>
+<script src="js/motion.js" defer></script>
+<script src="js/begin.js" defer></script>
+
+<!-- Ambient: ember canvas (gate) + countdown progress hairline. Vanilla only:
+     never touches window.confetti / Howl / gsap; idle until painted. -->
+<script>
+(() => {
+  'use strict';
+
+  var reduceMotion = false;
+  try {
+    reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch (err) { reduceMotion = false; }
+
+  /* ---- Ember drift on the gate ----
+     Two families: warm embers rising toward the horizon-glow, and a few
+     slow cool motes sinking — depth needs disagreement. Each ember keeps
+     its own twinkle phase. */
+  function embers() {
+    if (reduceMotion) return;
+    var canvas = document.getElementById('ember-canvas');
+    var overlay = document.getElementById('begin-overlay');
+    if (!canvas || !overlay || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    var parts = [];
+    var raf = 0;
+    var COUNT = 80;
+
+    function size() {
+      var r = overlay.getBoundingClientRect();
+      var dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.max(1, Math.floor(r.width * dpr));
+      canvas.height = Math.max(1, Math.floor(r.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      overlayW = r.width;
+      overlayH = r.height;
+    }
+    var overlayW = 0;
+    var overlayH = 0;
+
+    function spawn(seed) {
+      var cool = Math.random() < 0.16;
+      return {
+        x: Math.random() * overlayW,
+        y: seed ? Math.random() * overlayH : (cool ? -8 : overlayH + 8),
+        r: cool ? 0.5 + Math.random() * 0.9 : 0.6 + Math.random() * 1.8,
+        vy: cool ? -(0.05 + Math.random() * 0.12) : 0.15 + Math.random() * 0.45,
+        sway: Math.random() * 1.2,
+        phase: Math.random() * Math.PI * 2,
+        twinkle: 0.5 + Math.random() * 1.5,
+        alpha: 0.25 + Math.random() * 0.55,
+        warm: cool ? -1 : Math.random()
+      };
+    }
+
+    function frame(t) {
+      if (overlay.hidden) { raf = 0; return; }
+      ctx.clearRect(0, 0, overlayW, overlayH);
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        p.y -= p.vy;
+        p.phase += 0.008;
+        var x = p.x + Math.sin(p.phase) * 14 * p.sway;
+        var out = p.warm < 0 ? p.y > overlayH + 10 : p.y < -10;
+        if (out) parts[i] = p = spawn(false);
+        var breathe = 0.55 + 0.45 * Math.sin((t || 0) / 1000 * p.twinkle + p.phase);
+        var a = (p.alpha * breathe).toFixed(3);
+        var c = p.warm < 0 ? '150,150,170' : (p.warm > 0.5 ? '224,124,62' : '240,190,140');
+        ctx.beginPath();
+        ctx.arc(x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + c + ',' + a + ')';
+        ctx.fill();
+      }
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    size();
+    for (var i = 0; i < COUNT; i++) parts.push(spawn(true));
+    window.addEventListener('resize', size);
+    new MutationObserver(function () {
+      if (!overlay.hidden && !raf) raf = window.requestAnimationFrame(frame);
+    }).observe(overlay, { attributes: true, attributeFilter: ['hidden'] });
+    raf = window.requestAnimationFrame(frame);
+  }
+
+  /* ---- Countdown progress hairline ----
+     Reads the target begin.js already resolved into
+     <html data-countdown-target="..."> — no duplicated timezone math.
+     Anchors "the beginning" at 26 Aug 2026 (the night it became real). */
+  function hairline() {
+    var bar = document.getElementById('countdown-bar');
+    if (!bar) return;
+    var iso = document.documentElement.getAttribute('data-countdown-target');
+    var target = iso ? new Date(iso).getTime() : NaN;
+    if (isNaN(target)) return;
+    var start = Date.UTC(2026, 7, 26, 12, 0, 0);
+    function paint() {
+      var now = Date.now();
+      var pct = ((now - start) / (target - start)) * 100;
+      pct = Math.min(100, Math.max(0, pct));
+      bar.style.width = pct.toFixed(2) + '%';
+    }
+    paint();
+    window.setInterval(paint, 1000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { embers(); hairline(); });
+  } else {
+    embers(); hairline();
+  }
+})();
+</script>
+<!-- Lazy-loaded: section JS + heavy vendor libs (GSAP, ScrollTrigger, page-flip)
+     Loaded via IntersectionObserver when their section first scrolls into view.
+     Confetti is needed by finale.js but is already loaded above. -->
+<script>
+(() => {
+  'use strict';
+
+  /* Map: section element id → array of script URLs to load when it first enters view */
+  var LAZY_SECTIONS = {
+    'story':    ['vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js', 'sections/story.js'],
+    'album':    ['vendor/page-flip.browser.min.js', 'sections/album.js'],
+    'quotes':   ['sections/quotes.js'],
+    'gags':     ['sections/gags.js'],
+    'physics':  ['sections/physics.js'],
+    'scratch':  ['sections/scratch.js'],
+    'starmap':  ['sections/starmap.js'],
+    'world':    ['sections/world.js'],
+    'finale':   ['sections/finale.js']
+  };
+
+  // Motion-only vendor libs: skipped entirely when prefers-reduced-motion.
+  var MOTION_ONLY = ['vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js'];
+  var reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function isMotionOnly(url) { return MOTION_ONLY.includes(url) && reduceMotionQuery.matches; }
+
+  var loaded = {};
+
+  function loadScripts(urls) {
+    return Promise.all(urls.map(function (url) {
+      if (isMotionOnly(url)) return Promise.resolve();
+      if (loaded[url]) return Promise.resolve();
+      return new Promise(function (resolve) {
+        var s = document.createElement('script');
+        s.src = url;
+        s.defer = true;
+        s.onload = resolve;
+        s.onerror = resolve; // don't block on failure
+        document.head.appendChild(s);
+        loaded[url] = true;
+      });
+    }));
+  }
+
+  var observed = {};
+  var initScheduled = false;
+
+  function observeSection(id) {
+    if (observed[id]) return;
+    var el = document.getElementById(id);
+    // The gate (begin.js) detaches the content region into a DocumentFragment
+    // while locked, so a gated section is not in the document yet and cannot
+    // be observed. init() is re-run (see below) once the gate restores it.
+    if (!el) return;
+    observed[id] = true;
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          loadScripts(LAZY_SECTIONS[id]);
+          observer.disconnect(); // load once
+        }
+      });
+    }, { rootMargin: '200px' });
+    observer.observe(el);
+  }
+
+  function init() {
+    Object.keys(LAZY_SECTIONS).forEach(observeSection);
+  }
+
+  // Retry init() on the next macrotask. Script order races the gate: on the
+  // post-target load path begin.js restores the content region during the
+  // deferred scripts, and depending on that ordering a section may be missing
+  // on the first pass. observeSection is idempotent, so a retry is safe.
+  function initSoon() {
+    if (initScheduled) return;
+    initScheduled = true;
+    setTimeout(function () { init(); }, 0);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { init(); initSoon(); });
+  } else {
+    init();
+    initSoon();
+  }
+
+  /* While the gate holds the content, every gated section is detached, so the
+     loop above finds nothing and would never observe them again. Re-attach on
+     the gate's own unlock signal: begin.js sets data-unlocked on <html> in
+     the same task that restores the content region. This covers the live
+     unlock, where the attribute flips long after this script has run. */
+  new MutationObserver(function () {
+    if (document.documentElement.getAttribute('data-unlocked') === 'true') init();
+  }).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-unlocked'],
+  });
+})();
+</script>
+</body>
+</html>
