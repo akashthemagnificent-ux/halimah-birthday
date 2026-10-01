@@ -2,6 +2,13 @@
   'use strict';
 
   const SECTION_ID = 'story';
+  // Sibling-vendor race guard (mirrors sections/birthday.js): the birthday
+  // bundle shares these lazy script tags, so story.js may execute before
+  // gsap/ScrollTrigger parse. Retry briefly; a vendors-blocked lane
+  // (kill-switch false) settles read-only immediately, never spins.
+  let bootAttempts = 0;
+  const BOOT_ATTEMPT_MAX = 200;
+  const BOOT_RETRY_MS = 50;
   const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function prefersReducedMotion() {
@@ -223,7 +230,13 @@
     return { start, stop, bootAmbient };
   }
 
+  // Idempotence: the QA harness (and any loader re-init) may execute
+  // this file twice. Without this guard every ScrollTrigger would be
+  // built twice. Mirrors the `booted` flag in sections/birthday.js.
+  let booted = false;
+
   function boot() {
+    if (booted) return;
     const section = document.getElementById(SECTION_ID);
     if (!section) return;
     const chapters = Array.from(section.querySelectorAll('[data-chapter]'));
@@ -235,23 +248,32 @@
       ? Array.from(progress.querySelectorAll('.story__progress-item'))
       : [];
 
-    if (prefersReducedMotion() || !hasGsap()) {
+    if (prefersReducedMotion() || (window.Motion && typeof window.Motion.motionAllowed === 'function' && !window.Motion.motionAllowed())) {
       if (progress) progress.hidden = true;
       return;
     }
+    if (!hasGsap()) {
+      if (bootAttempts < BOOT_ATTEMPT_MAX) {
+        bootAttempts += 1;
+        window.setTimeout(boot, BOOT_RETRY_MS);
+      } else if (progress) {
+        progress.hidden = true;
+      }
+      return;
+    }
 
+    booted = true;
     window.gsap.registerPlugin(window.ScrollTrigger);
 
     const motionState = createMotionState(chapters.length);
 
     chapters.forEach((chapter, index) => {
       // Richer choreography WITHIN the single existing scrub call
-      // site: a timeline that (a) scrubs the chapter card in, (b)
-      // staggers each .story__beat sub-block behind it, and (c) gives
-      // the .story__pull landmark a scale + clip reveal. Still exactly
+      // site: a timeline that (a) scrubs the chapter card in and (b)
+      // staggers each .story__msg bubble / .story__letter card behind
+      // it, so the thread lands one message at a time. Still exactly
       // one ScrollTrigger per chapter.
-      const beats = chapter.querySelectorAll('.story__beat');
-      const pull = chapter.querySelector('.story__pull');
+      const msgs = chapter.querySelectorAll('.story__msg, .story__letter');
 
       const tl = window.gsap.timeline({
         scrollTrigger: {
@@ -271,9 +293,9 @@
         { opacity: 1, y: 0, ease: 'none', duration: 1 }
       );
 
-      if (beats.length > 0) {
+      if (msgs.length > 0) {
         tl.fromTo(
-          beats,
+          msgs,
           { opacity: 0.4, y: 26 },
           {
             opacity: 1,
@@ -283,20 +305,6 @@
             stagger: 0.28
           },
           0
-        );
-      }
-
-      if (pull) {
-        tl.fromTo(
-          pull,
-          { scale: 0.92, clipPath: 'inset(0 0 100% 0)' },
-          {
-            scale: 1,
-            clipPath: 'inset(0 0 0% 0)',
-            ease: 'none',
-            duration: 1
-          },
-          0.15
         );
       }
 

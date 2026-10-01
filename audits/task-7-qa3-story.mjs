@@ -7,9 +7,9 @@
  *                                 zero console+page errors,
  *                                 + FLOOR checks per lane (todo 7, folded in):
  *                                 zero clipping (scrollWidth<=clientWidth+1 on
- *                                 every .story__quote/.story__pull/.story__voiceover),
+ *                                 every .story__msg/.story__letter/.story__voiceover),
  *                                 375px-only nav-rail bbox overlap check,
- *                                 3 scroll depths (ch1 top, ch11 beat3 mid,
+ *                                 3 scroll depths (ch1 top, ch11 quote mid,
  *                                 ch14 bottom) => task-7-floor-*.png (EXACT 9).
  *   static top: scrim/backdrop-filter asserts on sections/story.css.
  *   tail: 320px narrow-viewport boundary probe (logged, NOT fixed).
@@ -35,7 +35,12 @@ const OUT = '/home/vibex/.omo/evidence/halimah-story-rebuild';
 mkdirSync(OUT, { recursive: true });
 
 const URL = 'file:///home/vibex/halimah-birthday/index.html';
-const EXPECTED_TRIGGERS = 29;
+// Story owns 29 triggers; #birthday adds 5 of its own (3 headline-mask
+// reveals top 82%, 1 manifesto scrub top 78%->bottom 45%, 1 pinned bridge
+// top top+=180%). Full-motion lanes therefore expect 34 total.
+const EXPECTED_STORY_TRIGGERS = 29;
+const EXPECTED_BIRTHDAY_TRIGGERS = 5;
+const EXPECTED_TRIGGERS = EXPECTED_STORY_TRIGGERS + EXPECTED_BIRTHDAY_TRIGGERS;
 const READY_TIMEOUT_MS = 15000;
 
 const log = [];
@@ -81,6 +86,10 @@ function fakeDate() {
 
 /** Attach console+pageerror listeners to EVERY page (closes the qa.mjs page4 gap). */
 function watchErrors(page, bucket) {
+  // Excused-noise URLs seen on requestfailed (album probes + physics fetch).
+  // Their matching console "Failed to load resource" messages carry no URL
+  // in m.text(), so correlate by draining one token per generic console error.
+  const excusedNoise = [];
   page.on('pageerror', (e) => bucket.push(`pageerror: ${String(e).slice(0, 300)}`));
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
@@ -89,6 +98,12 @@ function watchErrors(page, bucket) {
     // Aborted vendor routes in the kill-switch lane also surface as console
     // "Failed to load resource" errors — intentional, same as requestfailed.
     if (/Failed to load resource/.test(txt) && /gsap|ScrollTrigger/i.test(loc)) return;
+    // Correlated noise: bare "Failed to load resource" with one excused
+    // requestfailed token outstanding => same known file:// probe, excuse it.
+    if (/Failed to load resource/.test(txt) && !/gsap|ScrollTrigger/i.test(txt) && excusedNoise.length > 0) {
+      excusedNoise.shift();
+      return;
+    }
     // Pre-existing out-of-story noise under file:// (see requestfailed
     // filter above): physics section fetch + missing album placeholder
     // photos fail identically on the pre-rebuild baseline.
@@ -104,8 +119,8 @@ function watchErrors(page, bucket) {
     // placeholder markup are byte-identical to the pre-rebuild baseline and
     // outside the story edit surface): physics-names.json fetch and
     // assets/photos/* placeholder 404s under file:// are not story regressions.
-    if (/content\/physics-names\.json/.test(r.url())) return;
-    if (/assets\/photos\//.test(r.url())) return;
+    if (/content\/physics-names\.json/.test(r.url())) { excusedNoise.push(r.url()); return; }
+    if (/assets\/photos\//.test(r.url())) { excusedNoise.push(r.url()); return; }
     bucket.push(`requestfailed: ${r.url().slice(0, 160)} (${err})`);
   });
 }
@@ -137,7 +152,10 @@ async function waitForMotionReady(page, { label }) {
 
   for (;;) {
     state = await poll();
-    if (state.gsap && state.st && state.hasGsap === true && state.triggers > 0) break;
+    // Full page expected: 29 story + 5 birthday triggers. Break only when
+    // the complete topology is present, so partial loads (birthday-only or
+    // story-only) keep polling instead of asserting against half the page.
+    if (state.gsap && state.st && state.hasGsap === true && state.triggers >= EXPECTED_TRIGGERS) break;
     if (Date.now() - started > READY_TIMEOUT_MS / 2 && !reinjected) {
       reinjected = true;
       note(`  ..ready-poll timeout at ${Math.round((Date.now() - started) / 1000)}s; re-injecting sections/story.js (${label})`);
@@ -252,6 +270,13 @@ try {
     check(`${lane.name} 14 chapter scrub triggers (top 85%->top 35%)`, scrub.length === 14, `got ${scrub.length}`);
     check(`${lane.name} 14 dot toggle triggers (top center->bottom center)`, dot.length === 14, `got ${dot.length}`);
     check(`${lane.name} 1 section toggle trigger (top 60%->bottom 40%)`, sect.length === 1, `got ${sect.length}`);
+    // Birthday extras: 3 headline masks (top 82%), 1 manifesto scrub (top 78%->bottom 45%), 1 pinned bridge (top top->+=180%).
+    const mask = s0.topology.filter((t) => t.includes('|top 82%|'));
+    const mani = s0.topology.filter((t) => t.includes('|top 78%|bottom 45%|'));
+    const bridge = s0.topology.filter((t) => t.includes('|top top|+=180%|'));
+    check(`${lane.name} 3 birthday mask reveals (top 82%)`, mask.length === 3, `got ${mask.length}`);
+    check(`${lane.name} 1 birthday manifesto scrub (top 78%->bottom 45%)`, mani.length === 1, `got ${mani.length}`);
+    check(`${lane.name} 1 birthday pinned bridge (top top->+=180%)`, bridge.length === 1, `got ${bridge.length}`);
 
     // 3) Rail fill progress signal goes live when scrolled into the story.
     const storyTop = await page.evaluate(() => Math.round(document.getElementById('story').getBoundingClientRect().top + window.scrollY));
@@ -296,7 +321,7 @@ try {
     // 7) FLOOR runtime checks (from task-7-floor.mjs): zero clipping on every
     //    quote/pull/voiceover, plus 375px-only nav-rail overlap.
     const clips = await page.evaluate(() => {
-      const els = [...document.querySelectorAll('.story__quote, .story__pull, .story__voiceover')];
+      const els = [...document.querySelectorAll('.story__msg, .story__letter, .story__voiceover')];
       const bad = [];
       els.forEach((el) => {
         if (el.scrollWidth > el.clientWidth + 1) {
@@ -319,7 +344,7 @@ try {
         const rr = rail.getBoundingClientRect();
         const cs = getComputedStyle(rail);
         const vis = rr.width > 0 && rr.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none';
-        const els = [...document.querySelectorAll('.story__quote, .story__pull, .story__voiceover')];
+        const els = [...document.querySelectorAll('.story__msg, .story__letter, .story__voiceover')];
         const overlaps = [];
         els.forEach((el) => {
           const r = el.getBoundingClientRect();
@@ -340,17 +365,16 @@ try {
     await page.screenshot({ path: `${OUT}/task-7-qa3-story-${lane.name}.png` });
     note(`  screenshot: task-7-qa3-story-${lane.name}.png`);
 
-    // 8) FLOOR 3 scroll depths (from task-7-floor.mjs): ch1 top, ch11 beat3
+    // 8) FLOOR 3 scroll depths (from task-7-floor.mjs): ch1 top, ch11 quote
     //    mid, ch14 bottom => task-7-floor-{top,mid,bottom}-{w}x{h}.png (EXACT 9).
     {
       const pos = await page.evaluate(() => {
         const y = (el) => el.getBoundingClientRect().top + window.scrollY;
         const hh = (el) => el.getBoundingClientRect().height;
         const ch1 = document.getElementById('chapter-1');
-        const beats = document.getElementById('chapter-11').querySelectorAll('.story__beat');
-        const beat3 = beats[2];
+        const quote = document.getElementById('chapter-11').querySelector('.story__quote');
         const ch14 = document.getElementById('chapter-14');
-        return { ch1Top: y(ch1), beat3Mid: y(beat3) + hh(beat3) / 2, ch14Bot: y(ch14) + hh(ch14) };
+        return { ch1Top: y(ch1), beat3Mid: y(quote) + hh(quote) / 2, ch14Bot: y(ch14) + hh(ch14) };
       });
       const depths = [
         ['top', Math.max(0, pos.ch1Top - 60)],
@@ -461,7 +485,7 @@ try {
     const ready320 = await waitForMotionReady(np, { label: '320px' });
     floorNote(`  320px ready: unlocked=${ready320.unlocked} chapters=${ready320.chapters} triggers=${ready320.triggers}`);
     const inj = await np.evaluate(() => {
-      const els = [...document.querySelectorAll('.story__quote, .story__pull, .story__voiceover')];
+      const els = [...document.querySelectorAll('.story__msg, .story__letter, .story__voiceover')];
       const bad = [];
       els.forEach((el) => {
         if (el.scrollWidth > el.clientWidth + 1) {

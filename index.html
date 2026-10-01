@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="tokens.css" />
 <link rel="stylesheet" href="sections/starmap.css" />
+<link rel="stylesheet" href="sections/birthday.css" />
 <link rel="stylesheet" href="sections/story.css" />
 <link rel="stylesheet" href="sections/album.css" />
 <link rel="stylesheet" href="sections/quotes.css" />
@@ -94,7 +95,30 @@
      DOM or in view-source. At the target they are restored in place. -->
 <div id="content-region">
 
-<!-- 3. story — Story chapters / cinematic spine (todo 7) -->
+<!-- 3. birthday — The Night of Her Day (ember-night hero) -->
+<section id="birthday" class="section section--birthday" aria-label="Happy birthday" data-theme="ember">
+  <canvas id="bday-globe" class="bday-stage" aria-hidden="true"></canvas>
+  <div class="bday-folds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <canvas id="bday-trail" class="bday-trail" aria-hidden="true"></canvas>
+  <span class="bday-corner" aria-hidden="true"></span>
+  <div class="bday-rails" aria-hidden="true"><span></span><span></span></div>
+  <div class="bday-copy">
+    <p class="bday-eyebrow">a night made for you</p>
+    <h1 class="bday-title">
+      <span class="bday-line"><span class="bday-w"><span class="bday-wi">Halimah,</span></span></span>
+      <span class="bday-line bday-line--italic"><span class="bday-w"><span class="bday-wi">happy</span></span> <span class="bday-w"><span class="bday-wi">birthday</span></span></span>
+    </h1>
+    <p class="bday-sub">Tonight the sky leans a little closer — every light below is lit for you.</p>
+    <blockquote class="bday-wish">
+      <p class="bday-manifesto"><span class="bday-mw">Another</span> <span class="bday-mw">year,</span> <span class="bday-mw">and</span> <span class="bday-mw">still</span> <span class="bday-mw">my</span> <span class="bday-mw">favourite</span> <span class="bday-mw">story</span> <span class="bday-mw">to</span> <span class="bday-mw">tell.</span> <span class="bday-mw">You</span> <span class="bday-mw">turn</span> <span class="bday-mw">ordinary</span> <span class="bday-mw">days</span> <span class="bday-mw">gold</span> <span class="bday-mw">just</span> <span class="bday-mw">by</span> <span class="bday-mw">walking</span> <span class="bday-mw">through</span> <span class="bday-mw">them.</span> <span class="bday-mw">So</span> <span class="bday-mw">tonight</span> <span class="bday-mw">is</span> <span class="bday-mw">yours</span> <span class="bday-mw">—</span> <span class="bday-mw">every</span> <span class="bday-mw">spark,</span> <span class="bday-mw">every</span> <span class="bday-mw">wish,</span> <span class="bday-mw">every</span> <span class="bday-mw">light.</span> <span class="bday-mw">Happy</span> <span class="bday-mw">birthday,</span> <span class="bday-mw">my</span> <span class="bday-mw">love.</span></p>
+    </blockquote>
+    <a class="bday-cta" href="#story">our story ↓</a>
+  </div>
+  <div class="bday-ticker" aria-hidden="true"><p class="bday-ticker__row"><span>happy birthday ✦ halimah ✦ make a wish ✦&nbsp;</span><span>happy birthday ✦ halimah ✦ make a wish ✦&nbsp;</span><span>happy birthday ✦ halimah ✦ make a wish ✦&nbsp;</span><span>happy birthday ✦ halimah ✦ make a wish ✦&nbsp;</span></p></div>
+  <p class="bday-marker" aria-hidden="true">01</p>
+</section>
+
+<!-- 4. story — Story chapters / cinematic spine (todo 7) -->
 <section id="story" class="section section--story" aria-label="Our story" data-theme="cinematic">
 <canvas class="story__ambient" aria-hidden="true"></canvas>
 <div class="story__atmosphere" aria-hidden="true"></div>
@@ -112,7 +136,10 @@
     <h3 class="story__title">The Kakegurui Meme, How We First Met</h3>
     <time class="story__date" datetime="2026-07-09">09 Jul 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-07-09T01:43:27.627000+00:00] me: I remember the first time we talked in a server some months ago Your pfp was that kakegurui meme 😭😭 I WAS FUCKING LAUGHING SO MUCH WHEN I SAW IT THAT MADE MY DAY LOL</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-07-09T01:43:27.627000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> I remember the first time we talked in a server some months ago Your pfp was that kakegurui meme 😭😭 I WAS FUCKING LAUGHING SO MUCH WHEN I SAW IT THAT MADE MY DAY LOL</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">Your laugh was the first gift you gave me, and I still hear it.</p>
     <p class="story__source">from our chats &#183; halimah dms-1.txt:1056</p>
@@ -124,8 +151,14 @@
     <h3 class="story__title">A Dare That Meant Everything</h3>
     <time class="story__date" datetime="2026-07-04">04 Jul 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-07-04T21:06:00.496000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: I love you</p>
-      <p>[2026-07-04T21:28:42.387000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I love you&quot;) THAT WAS A DARE BTW (edited)</p>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-07-04T21:06:00.496000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> I love you</p>
+      </div>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-07-04T21:28:42.387000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> (replying to &quot;I love you&quot;) THAT WAS A DARE BTW (edited)</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">You tried to play it cool, but my heart already knew.</p>
     <p class="story__source">from our chats &#183; halimah dms-1.txt:470-471</p>
@@ -137,13 +170,21 @@
     <h3 class="story__title">We Said It Back, For Real</h3>
     <time class="story__date" datetime="2026-07-07">07 Jul 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-07-07T17:13:25.625000+00:00] me: I LOVE YOU</p>
-      <p>[2026-07-07T17:14:13.977000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I LOVE YOU&quot;) I LOVE YOU TOO</p>
-      <p>[2026-07-07T17:15:04.276000+00:00] me: (replying to &quot;I LOVE YOU TOO&quot;) I LOVE YOU SO MUCH MORE</p>
-      <p>[2026-07-07T17:16:10.111000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: NUH UH I LOVE YOU MORE</p>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-07-07T17:14:13.977000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> (replying to &quot;I LOVE YOU&quot;) I LOVE YOU TOO</p>
+      </div>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-07-07T17:15:04.276000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> (replying to &quot;I LOVE YOU TOO&quot;) I LOVE YOU SO MUCH MORE</p>
+      </div>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-07-07T17:16:10.111000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> NUH UH I LOVE YOU MORE</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">That little war of who loves who more still makes me smile.</p>
-    <p class="story__source">from our chats &#183; halimah dms-1.txt:932-935</p>
+    <p class="story__source">from our chats &#183; halimah dms-1.txt:933-935</p>
   </div>
 </article>
 <article class="story__chapter" data-chapter="4" id="chapter-4" tabindex="0" aria-label="Chapter 04: I Laid My Heart Down">
@@ -152,18 +193,17 @@
     <h3 class="story__title">I Laid My Heart Down</h3>
     <time class="story__date" datetime="2026-07-11">11 Jul 2026</time>
     <blockquote class="story__quote">
-      <div class="story__beat">
-      <p>[2026-07-11T14:37:41.460000+00:00] me: TAKE YOUR TIME I&#x27;M OKAY WITH THAT    AND YES I THINK SO TOO A LOT OF PEOPLE WILL HATE OR STOP TALKING WITH YOU MAYBE BLOSSOM TOO, IF WE PUT MY PERSONAL EMOTIONS ON THE SIDE I DON&#x27;T WANT YOU TO GO THROUGH THAT EITHER BUT I PUT MY PERSONAL FEELINGS TOO, I LIKE YOU A LOT AND I REALLY WANT TO BE WITH YOU, BUT STILL I WANT YOU TO CHOOSE WHATEVER WILL BE THE BEST FOR YOU. I AM OKAY WITH THAT, IF YOU SAY NO IT&#x27;S OKAY, I WILL TRY TO NOT HAVE FEELINGS FOR YOU BUT HOPEFULLY WE CAN MAKE IT WORK SOMEHOW I KNOW WE CAN</p>
-      <p>ABOUT JESS, YES IT&#x27;S COMPLEX FOR ME TOO, I DON&#x27;T WANT TO SOUND SELFISH BUT I THINK I AM GOING THROUGH A VERY CRTICAL PHASE IN MY LIFE AND I NEED SOMEBODY TO SPEND SOME TIME OR TALK WITH ME, SHE HAVEN&#x27;T BEEN ONLINE IN LIKE A MONTH AND I THINK I&#x27;M LOSING FEELINGS I DON&#x27;T WANT TO LIE TO HER OR MYSELF SO I AM GONNA BREAK UP WITH HER, ABOUT WHEN SHE COMES BACK. I AM PRETTY SURE SHE&#x27;LL UNDERSTAND CUZ SHE HAS WENT THROUGH THE SAME SITUATION AS WELL</p>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-07-11T14:48:27.357000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> (replying to &quot;TAKE YOUR TIME I&#x27;M OKAY WITH THAT    AND YES I THINK SO TOO &quot;) I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE DONT END UP DATING I HOPE WE WILL BE CLOSE. I REALLY ENJOY TALKING YOU. OMG IM ACTUALLY SHAKING SO BAD</p>
       </div>
-      <div class="story__beat">
-      <p>[2026-07-11T14:48:27.357000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;TAKE YOUR TIME I&#x27;M OKAY WITH THAT    AND YES I THINK SO TOO &quot;) I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE DONT END UP DATING I HOPE WE WILL BE CLOSE. I REALLY ENJOY TALKING YOU. OMG IM ACTUALLY SHAKING SO BAD</p>
-      <p class="story__pull" aria-hidden="true">[2026-07-11T14:48:27.357000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;TAKE YOUR TIME I&#x27;M OKAY WITH THAT    AND YES I THINK SO TOO &quot;) I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE DONT END UP DATING I HOPE WE WILL BE CLOSE. I REALLY ENJOY TALKING YOU. OMG IM ACTUALLY SHAKING SO BAD</p>
-      <p>[2026-07-11T14:50:19.307000+00:00] me: (replying to &quot;I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE &quot;) I REALLY LOVE YOU TOO AND MORE I&#x27;M SORRY FOR PUTTING YOU IN SO MUCH PRESSURE I DON&#x27;T WANT TO LOSE YOU BUT YES I HOPE WE CAN ATLEAST BE CLOSE EVEN IF WE DON&#x27;T END UP DATING BUT I REALLY WANT TO CALL YOU MINE, I REALLY ENJOY EVERY MOMENT I SPEND WITH YOU AS WELL I WAIT FOR YOUR TEXTS OMG AND NOO CALM DOWN IT&#x27;S OKAYYY GET UP AND  DRINK WATER AND TAKE SOME DEEP BREATHS</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-07-11T14:50:19.307000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> (replying to &quot;I LOVE YOU I REALLY DO. JUST GIVE ME A FEW DAYS. EVEN IF WE &quot;) I REALLY LOVE YOU TOO AND MORE I&#x27;M SORRY FOR PUTTING YOU IN SO MUCH PRESSURE I DON&#x27;T WANT TO LOSE YOU BUT YES I HOPE WE CAN ATLEAST BE CLOSE EVEN IF WE DON&#x27;T END UP DATING BUT I REALLY WANT TO CALL YOU MINE, I REALLY ENJOY EVERY MOMENT I SPEND WITH YOU AS WELL I WAIT FOR YOUR TEXTS OMG AND NOO CALM DOWN IT&#x27;S OKAYYY GET UP AND  DRINK WATER AND TAKE SOME DEEP BREATHS</p>
       </div>
     </blockquote>
     <p class="story__voiceover">I was nervous to ask, and you were brave enough to answer honestly.</p>
-    <p class="story__source">from our chats &#183; halimah dms-1.txt:1211-1214</p>
+    <p class="story__source">from our chats &#183; halimah dms-1.txt:1213-1214</p>
   </div>
 </article>
 <article class="story__chapter" data-chapter="5" id="chapter-5" tabindex="0" aria-label="Chapter 05: A Late Night Love Letter">
@@ -172,7 +212,10 @@
     <h3 class="story__title">A Late Night Love Letter</h3>
     <time class="story__date" datetime="2026-07-31">31 Jul 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-07-31T17:58:12.700000+00:00] me: I don&#x27;t know if this will help you zai, But I think i genuinely admire you and I genuinely love you. You&#x27;re so funny, kind, sweet, cute and beautiful both by your soul and your appearance. It&#x27;s such a blessing for me to get to know you by being so close to you and it&#x27;s genuinely so beautiful. With each passing day i am falling more for you. I&#x27;m trying to control myself not to fall for you but it&#x27;s just too hard i don&#x27;t know why, I miss you at random times and actually so much to the point i keep thinking about it sighh i have become so needy for you. I enjoy every moment I spend with you like every single second, it&#x27;s the best part of the day, i genuinely don&#x27;t want to lose you, Genuinely. I hate it when you sleep late or don&#x27;t eat your meals and don&#x27;t take care of yourself just cuz of some random bunch of idiots who think perfection of the body is everything, it&#x27;s not. Trust me you&#x27;re amazing as you are right now and capable of so much. [reactions: 💗×1]</p>
+      <div class="story__letter" data-speaker="him">
+        <span class="story__ts">[2026-07-31T17:58:12.700000+00:00]</span>
+        <p class="story__letter-text"><span class="story__who">me:</span> I don&#x27;t know if this will help you zai, But I think i genuinely admire you and I genuinely love you. You&#x27;re so funny, kind, sweet, cute and beautiful both by your soul and your appearance. It&#x27;s such a blessing for me to get to know you by being so close to you and it&#x27;s genuinely so beautiful. With each passing day i am falling more for you. I&#x27;m trying to control myself not to fall for you but it&#x27;s just too hard i don&#x27;t know why, I miss you at random times and actually so much to the point i keep thinking about it sighh i have become so needy for you. I enjoy every moment I spend with you like every single second, it&#x27;s the best part of the day, i genuinely don&#x27;t want to lose you, Genuinely. I hate it when you sleep late or don&#x27;t eat your meals and don&#x27;t take care of yourself just cuz of some random bunch of idiots who think perfection of the body is everything, it&#x27;s not. Trust me you&#x27;re amazing as you are right now and capable of so much. [reactions: 💗×1]</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">Every word there was true then, and truer now.</p>
     <p class="story__source">from our chats &#183; halimah dms-3.txt:515</p>
@@ -184,17 +227,21 @@
     <h3 class="story__title">Girlfriend Day Eve</h3>
     <time class="story__date" datetime="2026-08-01">01 Aug 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-07-31T02:48:11.191000+00:00] me: Yo Tommorow is girlfriend day</p>
-      <p>[2026-07-31T02:48:16.636000+00:00] me: (replying to &quot;OKAYY WELL I HAVE THE SS&quot;) SHUSH NO U DON&#x27;T</p>
-      <p>[2026-07-31T02:48:22.664000+00:00] me: I&#x27;LL HACK INTO UR PHONE AND DLT IT</p>
-      <p>[2026-07-31T02:48:35.477000+00:00] me: (replying to &quot;media&quot;) .</p>
-      <p>[2026-07-31T02:48:37.251000+00:00] me: NOT THIS</p>
-      <p>[2026-07-31T02:48:51.145000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;Yo Tommorow is girlfriend day&quot;) IS IT ACTUALLY</p>
-      <p>[2026-07-31T02:49:06.474000+00:00] me: (replying to &quot;IS IT ACTUALLY&quot;) YES</p>
-      <p>[2026-07-31T02:49:08.882000+00:00] me: AUGUST 1</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-07-31T02:48:11.191000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> Yo Tommorow is girlfriend day</p>
+      </div>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-07-31T02:48:51.145000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> (replying to &quot;Yo Tommorow is girlfriend day&quot;) IS IT ACTUALLY</p>
+      </div>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-07-31T02:49:06.474000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> (replying to &quot;IS IT ACTUALLY&quot;) YES</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">You keep me honest, even when I try to steal your screenshots.</p>
-    <p class="story__source">from our chats &#183; halimah dms-2.txt:3009-3016</p>
+    <p class="story__source">from our chats &#183; halimah dms-2.txt:3009, 3014-3015</p>
   </div>
 </article>
 <article class="story__chapter" data-chapter="7" id="chapter-7" tabindex="0" aria-label="Chapter 07: The Lullaby You Slept Through">
@@ -203,9 +250,18 @@
     <h3 class="story__title">The Lullaby You Slept Through</h3>
     <time class="story__date" datetime="2026-08-18">18 Aug 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-08-18T14:15:54.451000+00:00] me: I sang you a lullaby tho</p>
-      <p>[2026-08-18T14:16:01.884000+00:00] me: When u were knocked out</p>
-      <p>[2026-08-18T14:16:07.409000+00:00] me: And then I sang you two songs</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-18T14:15:54.451000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> I sang you a lullaby tho</p>
+      </div>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-18T14:16:01.884000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> When u were knocked out</p>
+      </div>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-18T14:16:07.409000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> And then I sang you two songs</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">Singing to you while you were knocked out felt like a secret just for us.</p>
     <p class="story__source">from our chats &#183; halimah dms-7.txt:594-596</p>
@@ -217,8 +273,14 @@
     <h3 class="story__title">All Your Fav Songs, In One Video</h3>
     <time class="story__date" datetime="2026-08-22">22 Aug 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-08-22T07:55:22.495000+00:00] me:  [attachment: screen-20260822-132435.mp4]</p>
-      <p>[2026-08-22T07:55:30.087000+00:00] me: ALL YOUR FAV SONGS IN ONE VIDEO</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-22T07:55:22.495000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span>  [attachment: screen-20260822-132435.mp4]</p>
+      </div>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-22T07:55:30.087000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> ALL YOUR FAV SONGS IN ONE VIDEO</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">I wanted your ears to have something to hold when I could not be there.</p>
     <p class="story__source">from our chats &#183; halimah dms-8.txt:152-153</p>
@@ -230,8 +292,14 @@
     <h3 class="story__title">The Card I Could Not Send</h3>
     <time class="story__date" datetime="2026-08-24">24 Aug 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-08-24T15:48:22.351000+00:00] me: it was such a good card</p>
-      <p>[2026-08-24T15:48:24.380000+00:00] me: i wanted to gift u</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-24T15:48:22.351000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> it was such a good card</p>
+      </div>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-24T15:48:24.380000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> i wanted to gift u</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">It was a small card, but the wish behind it was huge.</p>
     <p class="story__source">from our chats &#183; halimah dms-8.txt:1487-1488</p>
@@ -242,35 +310,22 @@
     <p class="story__kicker"><span class="story__num">10</span><span class="story__of" aria-hidden="true"> / 14</span></p>
     <h3 class="story__title">The Fake Birthday We Laughed Through</h3>
     <time class="story__date" datetime="2026-08-25">25 Aug 2026</time>
-<blockquote class="story__quote">
-      <div class="story__beat">
-      <p>[2026-08-25T05:34:09.788000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: TODAY IS MY DAY (edited)</p>
-      <p>[2026-08-25T05:34:18.137000+00:00] me: (replying to &quot;TODAY IS MY DAY&quot;) WHAT</p>
-      <p>[2026-08-25T05:34:23.593000+00:00] me: HAPPY BIRTHDAY 😭</p>
-      <p>[2026-08-25T05:34:34.289000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: IT ISNT SOFP</p>
-      <p>[2026-08-25T05:34:35.755000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: STOP</p>
-      <p>[2026-08-25T05:34:39.636000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: THAT WAS AUTO</p>
+    <blockquote class="story__quote">
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-08-25T05:34:09.788000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> TODAY IS MY DAY (edited)</p>
       </div>
-      <div class="story__beat">
-      <p>[2026-08-25T05:34:41.909000+00:00] me: YOU SAID IT IS 💀</p>
-      <p>[2026-08-25T05:34:43.941000+00:00] me: LMFAOO</p>
-      <p>[2026-08-25T05:34:46.139000+00:00] me: I AM DEADDD</p>
-      <p>[2026-08-25T05:35:07.865000+00:00] me: I MEAN 19 OCTOBER IS STILL 2 MONTHS</p>
-      <p class="story__pull" aria-hidden="true">[2026-08-25T05:35:07.865000+00:00] me: I MEAN 19 OCTOBER IS STILL 2 MONTHS</p>
-      <p>[2026-08-25T05:35:13.745000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: WHAT THE SHTI</p>
-      <p>[2026-08-25T05:35:18.672000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: YOU REMEMBERED</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-25T05:34:23.593000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> HAPPY BIRTHDAY 😭</p>
       </div>
-      <div class="story__beat">
-      <p>[2026-08-25T05:35:26.155000+00:00] me: WHY DO YOU THINK I WON&#x27;T</p>
-      <p>[2026-08-25T05:35:30.662000+00:00] me: U REMEMBER MINE AS WELL</p>
-      <p>[2026-08-25T05:35:48.893000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;U REMEMBER MINE AS WELL&quot;) OO YEAH TRUE DECEMBER 29</p>
-      <p>[2026-08-25T05:36:11.165000+00:00] me: (replying to &quot;OO YEAH TRUE DECEMBER 29&quot;) 😭😭😭</p>
-      <p>[2026-08-25T05:36:15.198000+00:00] me: THAT&#x27;S MY BIRTHDAY?</p>
-      <p>[2026-08-25T05:36:24.851000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;THAT&#x27;S MY BIRTHDAY?&quot;) BOI</p>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-08-25T05:34:34.289000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> IT ISNT SOFP</p>
       </div>
     </blockquote>
     <p class="story__voiceover">You tried to prank me and we both ended up laughing till our sides hurt.</p>
-    <p class="story__source">from our chats &#183; halimah dms-8.txt:1839-1856</p>
+    <p class="story__source">from our chats &#183; halimah dms-8.txt:1839, 1841-1842</p>
   </div>
 </article>
 <article class="story__chapter" data-chapter="11" id="chapter-11" tabindex="0" aria-label="Chapter 11: The Night We Said Yes">
@@ -279,70 +334,21 @@
     <h3 class="story__title">The Night We Said Yes</h3>
     <time class="story__date" datetime="2026-08-26">26 Aug 2026</time>
     <blockquote class="story__quote">
-      <div class="story__beat">
-      <p>[2026-08-26T11:33:55.172000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: I know this may be out of the blue and I was planning on telling you my feelings once me and Ciel where like officially broken up. Nonetheless I hope after reading the chats between me and Ciel you can tell that I love you. More than a friend. I know I have said that I don’t but I was in a state of mind when I gen did not know how I felt. I don’t get this spark with ciel any more. I look forward to your texts. I love when u tell me Gm and and Gn. I love whenever you say I miss you and ily. When I say it back i genuinely mean it. I love talking to you every day and I love our calls. and I get jealous of little shit even we aren’t dating. I love every text that I get by you. I sometimes feel so damn needy. And I’m so obsessed with you. There’s always a flutter in my chest whenever you use pet names and call my by my name. Every time I see a ship duo I think of us. Ur are so dear to me and I want to be ur girlfriend. I’m sorry this is so sudden but I want to able to call you mine. I want to be urs. But ofc if u don’t want to that it purely ur choice. but if you do accept then can we like wait a few days before like announcing it. Cause I want the like whole situation to kinda calm down a bit.</p>
+      <div class="story__letter" data-speaker="her">
+        <span class="story__ts">[2026-08-26T11:33:55.172000+00:00]</span>
+        <p class="story__letter-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> I know this may be out of the blue and I was planning on telling you my feelings once me and Ciel where like officially broken up. Nonetheless I hope after reading the chats between me and Ciel you can tell that I love you. More than a friend. I know I have said that I don’t but I was in a state of mind when I gen did not know how I felt. I don’t get this spark with ciel any more. I look forward to your texts. I love when u tell me Gm and and Gn. I love whenever you say I miss you and ily. When I say it back i genuinely mean it. I love talking to you every day and I love our calls. and I get jealous of little shit even we aren’t dating. I love every text that I get by you. I sometimes feel so damn needy. And I’m so obsessed with you. There’s always a flutter in my chest whenever you use pet names and call my by my name. Every time I see a ship duo I think of us. Ur are so dear to me and I want to be ur girlfriend. I’m sorry this is so sudden but I want to able to call you mine. I want to be urs. But ofc if u don’t want to that it purely ur choice. but if you do accept then can we like wait a few days before like announcing it. Cause I want the like whole situation to kinda calm down a bit.</p>
       </div>
-      <div class="story__beat">
-      <p>[2026-08-26T11:41:07.920000+00:00] me: (replying to &quot;media&quot;) About things between you and blossom, I don&#x27;t know what to say but she actually is very sincere towards YOU at least, She loves you and so do you, idk what led things to go that far about losing interest and yeah</p>
-      <p>About everything you said about yourself i don&#x27;t mind any of that. Hypersexual? I am too? I can&#x27;t control my sexual urges and thoughts too it&#x27;s like I am just sex deprived? Idk and I get you and I am no better than you. </p>
-      <p>Even i, Myself don&#x27;t care if I am talking dirty to any age group as long as they are okay with it like inside myself i just know i don&#x27;t give a fuck about that, I just try to avoid cuz to fit the society and genuinely if I am interested in someone like take an example of yourself, I won&#x27;t hold back </p>
-      <p>Racist? I grew up in a country where calling people black or making fun of it was a really common thing, so it&#x27;s not in my genes to be cautious about it, Even if society shapes me to be respectful to them, I am, as a person they are the same as me IDGAF about colour but it&#x27;s just really normal for us to make a comment about someone&#x27;s skin colour and i can&#x27;t eliminate that from myself cuz that&#x27;s how I have been raised up, But to fit in the society i don&#x27;t use racial slurs but that doesn&#x27;t change the fact that i am still a racist alongside everyone in my surrounding, so even in this i am not better than you, I am the same as you and I don&#x27;t mind you saying racist slurs often cuz I know you won&#x27;t do it on purpose to disrespect someone&#x27;s race, I know you. You&#x27;re kind and you won&#x27;t to people who are genuinely nice towards you. </p>
-      <p>Reading things that are fucked up? Okay i watch gore, i watch weird stuffs they just intrest me about human emotions and how people react at certain times, I&#x27;ve watched gore, crimes etc etc what not? Im the same here too, same as you. My expressions doesn&#x27;t change. Even tho I may fake making a disgusting face or saying &quot;eww&quot; but inside me I don&#x27;t feel anything. I don&#x27;t wanna kill someone just cuz I watch gore.</p>
-      <p>[2026-08-26T11:41:09.775000+00:00] me: And i realise that you&#x27;re the same, I am really sure even if you read all that you doesn&#x27;t have any fetish to have that to yourself or do that to someone. </p>
-      <p>Feeling good when someone gets hurt? Okay this is not a movie or an anime where you&#x27;re the kind MC thinking good and want to save everyone. I understand this very well. You can&#x27;t stay kind of everyone or everything. It&#x27;s good to give all the care/love to a selected few people in a life who deserves it, you&#x27;re a human and not a monk, even i myself want everyone else who hurted me to fucking die even tho I don&#x27;t show it at all that doesn&#x27;t mean I don&#x27;t want them to, It&#x27;s a lot worse than just hoping someone and getting happy when something bad happens to someone. You see? I am the same. Even worse </p>
-      <p>Now what is the purpose of me telling you all this? You&#x27;re not a &quot;Horrible person&quot; for all of that, if you are so am I? And if I am the same or worse then I am in no position to judge you. I am okay with all of that LITERALLY ALL OF THAT, idrc if you&#x27;re using racial slurs or reading weird fanfics, I do the same genuinely in my own way. You&#x27;re not horrible to me. I just want you to just take care of yourself. I WILL MIND WHEN YOU DO SOMETHING THAT CAN POTENTIALLY HURT YOU OR IS HURTING YOU, it includes some decisions you take that can be bad in the future, not taking care for your health, not having enough sleep/food etc. Basically anything that will affect you badly, other than that I don&#x27;t give a fuck about anything else i would still love you the same</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-08-26T12:07:14.284000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> (replying to &quot;I know this may be out of the blue and I was planning on tel&quot;) I love you too, more than a friend. I&#x27;ve did for a while, from when we started talking and i didn&#x27;t lose feelings at any point from that, I still love you very much more than anything or anyone. </p>
       </div>
-      <div class="story__beat">
-      <p>[2026-08-26T12:00:53.862000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;And i realise that you&#x27;re the same, I am really sure even if&quot;) Yeah I can tell she loves me and cares for me deeply which was the main reason I was hesitant to tell her how I really feel. And I don’t really know what led to me loosing feelings. But sometimes it really pisses me off because half the convos is about you. It’s seems like she does not trust me at all. You are the only person who actually relates to me and actually understands me this much. I don’t even know what to say omg. I love you so fucking much. Word cannot even describe how much I am grateful to have you in my life. And same goes for you. I hate it when you slapped urself that one time. I don’t want you hurting yourself. And the fact you mentioned you have dark circles just proves you don’t sleep as much as you should. I’ve been calculating the time when u go sleep and wake up. Like the most u get is 7/6 hours or so. You should atleast be getting 9 hours of rest. And you have lots of test and I know your always stressed about them. I wish I can just remove that stress from you. I love you so much</p>
-      <p>[2026-08-26T12:07:14.284000+00:00] me: (replying to &quot;I know this may be out of the blue and I was planning on tel&quot;) I love you too, more than a friend. I&#x27;ve did for a while, from when we started talking and i didn&#x27;t lose feelings at any point from that, I still love you very much more than anything or anyone. </p>
-      <p>The feelings are mutual, I love your texts I love when you text me, call me, get jealous for me, and I look forward to your texts, Your good mornings, your good nights, Your everything, anything related to you. I get jealous when you talk about anyone else like literally anyone, I am obsessed as well, i Genuinely am. I am so needy for you, your texts, your voice, your everything. You&#x27;re very dear to me too genuinely. Yes I want to be called urs and want to call you mine and only mine as well, i want to claim you like a prize yes, I love you very much and yes i understand we can take as long as you want, before officially announcing it. I genuinely feel like you should know things about me which you don&#x27;t know about till now, You&#x27;ve seen some of my good qualities and you deserve to know my flaws as well before continuing because if we are doing this i really want this to work and not to break up in a few days or months, cuz I have had 2 exes and they didn&#x27;t work out obviously and that hurted me very much and it took me a very long time to recover from both of them so I don&#x27;t want this to fail or lose you, so before starting I shall let you know my flaws. </p>
-      <p>I am very obsessive idk like a lot i can&#x27;t even hear a damn word or thought about my someone I love with anyone else or even if jokes like that, it really unlocks my anxiousness that i am gonna lose or get replaced, cuz I have always been replaced with better. I get jealous and i instantly go sad cuz millions of possibilities run down my head and it just scares me very very fucking much to the point i start getting insecure of pretty much every fucking thing.</p>
-      <p>[2026-08-26T12:07:15.601000+00:00] me: When i am obsessed or in love, I notice every shift in energy, your talking style etc. and just get insecure or anxious cuz my brain keeps telling me that they&#x27;re losing interest even when it might be something entirely different like you being tired or anything else, I start analysing every second and it&#x27;s scary for most people cuz I start acting like a psychopath, I am actively working to fix my dependent anxious side, But I&#x27;ve been failing. </p>
-      <p>I don&#x27;t stay dependent on anyone not even my parents cuz they never fucking cared about my emotional health so i just shut myself and then when i feel like i am being loved or heard it all comes back down to the same person, that means I expect my partner to be there for me to assure me everytime I feel like that, cuz I can&#x27;t stop that chain of thoughts myself, and It&#x27;s really exhausting for most of the people i know, i want you to know this since you deserve to know before continuing </p>
-      <p>I am very very very anxious when i am in love, I am just a mess when I am in love, I get so obsessed that I might wanna spend every second of the day with you because i would feel comfortable with you and around you, any changes in your emotions/behaviour can trigger my anxiousness and it&#x27;s really really exhausting for someone to constantly assure someone, so I just want you to know that I am actually a mess. I don&#x27;t feel like this to everyone, but I&#x27;ve felt that way for my first ex and then you, and the reason we broke up was me being anxious and she was shutting herself down instead of talking to me about it, and it turned into arguments, frequent arguments and she just dumped me TWO FUCKING TIMES and yeah I was really devasted and I just don&#x27;t want that with you because i really love you</p>
-      <p>[2026-08-26T12:07:39.062000+00:00] me: There are so many other things which are flawed in me</p>
-      <p>[2026-08-26T12:09:26.771000+00:00] me: Also my parents are really strict so sometimes they might ground me for some days but i will try my best to get access to any device to talk to you i promise you, but please stay prepared for me to occasionally go offline for a day or something cuz that&#x27;s really not in my hands, my parents are really strict about me and my devices as you can tell since I don&#x27;t talk on calls when they&#x27;re home</p>
-      <p>[2026-08-26T12:10:36.489000+00:00] me: Other than that I am not even good looking, I used to look good (decent i would say) but due to studies and staying in home I stopped taking care of myself or my health so i look ridiculously bad and I am not kidding about this, i genuinely don&#x27;t have looks to give I just have love or genuine care for you</p>
-      <p>[2026-08-26T12:11:03.967000+00:00] me: I don&#x27;t want you to lose feelings for me for any of that but that doesn&#x27;t change the fact that i have those flaws</p>
-      <p>[2026-08-26T12:12:02.907000+00:00] me: I don&#x27;t want to see you with someone else or even getting along with some other people who isn&#x27;t me, But at the same time you deserve better, but at the same time I just want you to be mine and I want to be yours</p>
-      <p>[2026-08-26T12:12:57.480000+00:00] me: I genuinely love you so much, please don&#x27;t rush this. Take some time to think about it all cuz I really don&#x27;t want this to fail if we continue</p>
-      <p>[2026-08-26T12:14:08.877000+00:00] me: So i want you to stay prepared and About me? I am prepared for you. I love your flaws equally as much as I love your good points, Just not when you talk sweet to someone else cuz that makes me jealous but you&#x27;ve been in a really few peoples who could make me jealous so that&#x27;s an experience in it&#x27;s own</p>
-      <p>[2026-08-26T12:14:26.366000+00:00] me: Im so sorry this is so fucking long it&#x27;s like I am writing a novel about you and myself 😭</p>
-      </div>
-      <div class="story__beat">
-      <p>[2026-08-26T12:21:06.899000+00:00] me: (replying to &quot;Yeah I can tell she loves me and cares for me deeply which w&quot;) I love you so fucking much more and even if i type a million of words for you it still won&#x27;t be able to comprehend about how much i love you and care about you or how much i want to spend my life with you, in your arms. </p>
-      <p>STOOOP I WAS JUST TRYING TO SLAP ME LIKE SOFTLY BUT MY HANDS JUST IDK WORKED ON THEIR OWN 😭😭😭 DON&#x27;T REMIND ME I LOOKED SO STUPID OMMLLLL.</p>
-      <p>You slapped yourself too once and i FEEEL exactly the same as you do and DON&#x27;T YOU DARE DO IT AGAIN </p>
-      <p>I don&#x27;t want you hurting yourself too, In any way, neither mentally nor physically. </p>
-      <p>I DO SLEEP ENOUGH I SWEAR I DO SLEEP IT&#x27;S JUST NOT POSSIBLE FOR ME TO SLEEP MORE THAN THAT CUZ OF I HAVE TO BALANCE MY ACADEMICS, HOBBIES, PASSION, YOU (YOU&#x27;RE THE TOP PRIORITY) ALL AT THE SAME TIME AND I AM ACTUALLY CAPABLE OF DOING THAT TRUST ME I AM A STRONG MAN MUAHAHAHAHAHAHAHAHA</p>
-      <p>[2026-08-26T12:21:57.137000+00:00] me: I LOVE YOU SO MUCH MORE</p>
-      <p>[2026-08-26T12:22:12.574000+00:00] me: AND YOU TOO YOU DON&#x27;T SLEEP ALL NIGHT GRRRRRR</p>
-      <p>[2026-08-26T12:22:17.753000+00:00] me: THAT MAKES ME SADDDDD</p>
-      <p>[2026-08-26T12:22:20.543000+00:00] me: HDKSJDEKWNEEEKOSS</p>
-      <p>[2026-08-26T12:22:29.356000+00:00] me: I LOVE YOU SO MUCH TAKE CARE OF YOURSELF MOREEEE</p>
-      <p>[2026-08-26T12:37:24.357000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: Every time you do feel anxious or insecure tell me. I will assure you every time that I love you. Only you. And I would not mind if you want to spend every second with me. I would LOVE that. I don’t want to loose you either. Even if ur parents don’t care about ur emotional and mental health I fucking would. And please do not shut yourself talk to me. I’m not the best at comforting but I will try for you. Fuck ur exes they don’t deserve you. And I love ur flaws just as much as I love you. It’s okay if you go offline for a day. I understand I’m just glad I get to talk to you even if it’s not everyday and every second. And I really do not gaf if ur good looking or not. Looks don’t matter. And in my eyes you will always be handsome to me. You cannot change that. I love your voice ur personality. All of you. Don’t worry about me getting along with people are not. Just know ur the only want I love and want. My heart belongs to you. And I find it rather cute when u get jealous just not when u get upset sighhhh that makes me sad [reactions: 💖×1]</p>
-      </div>
-      <div class="story__beat">
-      <p>[2026-08-26T12:37:38.118000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: I’m such a slow typer holy fuck [reactions: 😭×1]</p>
-      <p>[2026-08-26T12:39:18.934000+00:00] me: [kind: pin]</p>
-      <p>[2026-08-26T12:39:24.979000+00:00] me: Shit i can&#x27;t stop reading that</p>
-      <p>[2026-08-26T12:40:29.849000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I love you so fucking much more and even if i type a million&quot;) Nuh I love you so much more. I want to hold you so bad gahhh AND BOI YOU SHOULD HAVE NOT EVEN TRIED TO SLAP URSELF IN THE FIRST DAMN PLACE. UHUH U BETTER BE SLEEPING ENOUGH. AND YES MY VERY STRONG HANDSOME MAN WHO IS AFRAID OF SPIDERS 🥹🫶 [reactions: 😭×1, 💗×1, 💖×1]</p>
-      <p>[2026-08-26T12:41:08.457000+00:00] me: (replying to &quot;Every time you do feel anxious or insecure tell me. I will a&quot;) I LOVE YOU SO FUCKING MUCH AND GENUINELY YES THE SAME WITH ME, YOU DON&#x27;T HAVE TO HIDE ANYTHING FROM ME, I WOULD MAKE SURE THAT I MAKE YOU FEEL LOVED. I GENUINELY CARE ABOUT YOU SO MUCH YOU&#x27;RE MY EVRYTHING I WANT YOU PLEASE BE WITH ME, BE MY GIRLFRIEND AND MY WIFE</p>
-      <p>[2026-08-26T12:41:24.943000+00:00] me: I MYSELF BELONG TO YOU, EVERYTHING WHICH IS MINE IS YOURS AS WELL</p>
-      <p>[2026-08-26T12:41:30.267000+00:00] me: EVERYTHING</p>
-      <p>[2026-08-26T12:41:45.319000+00:00] me: MY LOVE, MY HEART, MY BODY, MY EVERY DROP OF BLOOD</p>
-      <p>[2026-08-26T12:41:50.539000+00:00] me: EVERYTHING</p>
-      <p>[2026-08-26T12:42:10.855000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I MYSELF BELONG TO YOU, EVERYTHING WHICH IS MINE IS YOURS AS&quot;) Oh my fucking god that’s so hot holy shit</p>
-      <p>[2026-08-26T12:42:11.520000+00:00] me: (replying to &quot;Nuh I love you so much more. I want to hold you so bad gahhh&quot;) DO NOTTTTT ADD SPIDERSSSSS</p>
-      <p>[2026-08-26T12:42:14.502000+00:00] me: HROEJDJDKSKSKSKSJFNDJDJDJD</p>
-      <p>[2026-08-26T12:42:17.052000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: [kind: pin]</p>
-      <p>[2026-08-26T12:42:23.239000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;DO NOTTTTT ADD SPIDERSSSSS&quot;) HEHEHEHEH</p>
-      <p>[2026-08-26T12:42:47.383000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I LOVE YOU SO FUCKING MUCH AND GENUINELY YES THE SAME WITH M&quot;) YES A MILLION TIMES YES I WANT TO BE UR GIRLFRIEND</p>
-      <p class="story__pull" aria-hidden="true">[2026-08-26T12:42:47.383000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: (replying to &quot;I LOVE YOU SO FUCKING MUCH AND GENUINELY YES THE SAME WITH M&quot;) YES A MILLION TIMES YES I WANT TO BE UR GIRLFRIEND</p>
+      <div class="story__msg" data-speaker="her">
+        <span class="story__ts">[2026-08-26T12:42:47.383000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> (replying to &quot;I LOVE YOU SO FUCKING MUCH AND GENUINELY YES THE SAME WITH M&quot;) YES A MILLION TIMES YES I WANT TO BE UR GIRLFRIEND</p>
       </div>
     </blockquote>
     <p class="story__voiceover">That night turned us from hoping into belonging.</p>
-    <p class="story__source">from our chats &#183; halimah dms-8.txt:2750-2801</p>
+    <p class="story__source">from our chats &#183; halimah dms-8.txt:2750, 2762, 2801</p>
   </div>
 </article>
 <article class="story__chapter" data-chapter="12" id="chapter-12" tabindex="0" aria-label="Chapter 12: The Maid Outfit Bet">
@@ -351,7 +357,10 @@
     <h3 class="story__title">The Maid Outfit Bet</h3>
     <time class="story__date" datetime="2026-09-05">05 Sep 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-09-05T08:15:34.687000+00:00] me: IF YOU SCORE MORE THAN 40 MARKS IN BIO, PHY, CHEM AND MATHS BY THE END OF SEMESTER, I&#x27;LL DO A COSPLAY FOR U IN MAID OUTFIT</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-09-05T08:15:34.687000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> IF YOU SCORE MORE THAN 40 MARKS IN BIO, PHY, CHEM AND MATHS BY THE END OF SEMESTER, I&#x27;LL DO A COSPLAY FOR U IN MAID OUTFIT</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">You motivate me in the most chaotic, cute way possible.</p>
     <p class="story__source">from our chats &#183; halimah dms-11.txt:32</p>
@@ -363,7 +372,10 @@
     <h3 class="story__title">Your Love Paragraph Back to Me</h3>
     <time class="story__date" datetime="2026-09-08">08 Sep 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-09-08T21:39:41.034000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: MYY AKASH I LOVE YOU SOOOSOSOSOSOSOSO MUCHH, YOUR THE REASON I WAKE UP WITH A SMILE ON MY FACE. I LOOK FORWARD TO UR TEXTS AND I HAVE THE BIGGEST GRIN ON MY FACE WHEN U MESSAGE ME. I THINK ABOUT YOU AT RANDOM POINT OF THE DAY, EVEN DURING SCHOOL. I RANDOMLY ZONE OUT AND THINK ABOUT YOU AND YOUR VOICE. THE BEST PART OF SCHOOL IS THE MOMENT I LEAVE AND GET TO TEXT YOU ONCE I ARRIVE HOME. I LOVE OUR CALLSS SMM AND MISS HOW WE CANT CALL AS OFTEN BUT EVEN ONE DAYY MAKES ME SO HAPPY. I MISS YOU SOO MUCHH EVEN IF ITS ONLY</p>
+      <div class="story__letter" data-speaker="her">
+        <span class="story__ts">[2026-09-08T21:39:41.034000+00:00]</span>
+        <p class="story__letter-text"><span class="story__who">𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡:</span> MYY AKASH I LOVE YOU SOOOSOSOSOSOSOSO MUCHH, YOUR THE REASON I WAKE UP WITH A SMILE ON MY FACE. I LOOK FORWARD TO UR TEXTS AND I HAVE THE BIGGEST GRIN ON MY FACE WHEN U MESSAGE ME. I THINK ABOUT YOU AT RANDOM POINT OF THE DAY, EVEN DURING SCHOOL. I RANDOMLY ZONE OUT AND THINK ABOUT YOU AND YOUR VOICE. THE BEST PART OF SCHOOL IS THE MOMENT I LEAVE AND GET TO TEXT YOU ONCE I ARRIVE HOME. I LOVE OUR CALLSS SMM AND MISS HOW WE CANT CALL AS OFTEN BUT EVEN ONE DAYY MAKES ME SO HAPPY. I MISS YOU SOO MUCHH EVEN IF ITS ONLY</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">Reading this still makes my whole day feel soft.</p>
     <p class="story__source">from our chats &#183; halimah dms-11.txt:2281</p>
@@ -375,7 +387,10 @@
     <h3 class="story__title">My Vow to You</h3>
     <time class="story__date" datetime="2026-09-13">13 Sep 2026</time>
     <blockquote class="story__quote">
-      <p>[2026-09-13T18:15:25.388000+00:00] me: IN THE END YOU&#x27;RE MY HALIMAH AND I AM YOUR AKASH. I WILL ALWAYS LOVE YOU SO MUCH AND I WILL ALWAYS BE HERE FOR YOU [reactions: 💗×1]</p>
+      <div class="story__msg" data-speaker="him">
+        <span class="story__ts">[2026-09-13T18:15:25.388000+00:00]</span>
+        <p class="story__msg-text"><span class="story__who">me:</span> IN THE END YOU&#x27;RE MY HALIMAH AND I AM YOUR AKASH. I WILL ALWAYS LOVE YOU SO MUCH AND I WILL ALWAYS BE HERE FOR YOU [reactions: 💗×1]</p>
+      </div>
     </blockquote>
     <p class="story__voiceover">And I will keep that promise for as long as you will let me.</p>
     <p class="story__source">from our chats &#183; halimah dms-12.txt:2639</p>
@@ -403,7 +418,7 @@
 </div>
 </section>
 
-<!-- 4. quotes — Quote wall (todo 8) -->
+<!-- 5. quotes — Quote wall (todo 8) -->
 <section id="quotes" class="section section--quotes" aria-label="Quote wall">
 <div class="quotes__content">
   <p class="quotes__eyebrow">the quote wall &#183; the threat, fulfilled</p>
@@ -857,7 +872,7 @@
 </div>
 </section>
 
-<!-- 5. gags — Gag locker (todo 9)
+<!-- 6. gags — Gag locker (todo 9)
      Four exhibits, each ending in an affection closer (IS-5).
      Spider is a cute inline SVG, never a photo. -->
 <section id="gags" class="section section--gags" aria-label="Gag locker">
@@ -964,7 +979,7 @@
 </div>
 </section>
 
-<!-- 6. scratch — Scratch-off secret (todo 10)
+<!-- 7. scratch — Scratch-off secret (todo 10)
      The secret is NOT in this markup and NOT in any HTML file. It lives
      as a JS string in sections/scratch.js and is painted to a canvas, so
      it is absent from the initial DOM and from view-source. It only
@@ -988,7 +1003,7 @@
   </div>
 </section>
 
-<!-- 7. album — Photo album (todo 11)
+<!-- 8. album — Photo album (todo 11)
      Pages ship as markup placeholders (clearly marked PLACEHOLDER).
      sections/album.js probes assets/photos/ at runtime and swaps in a
      real photo only after it loads — a missing file can never show a
@@ -1101,7 +1116,7 @@
   </div>
 </section>
 
-<!-- 8. starmap — Star map (todo 3) -->
+<!-- 9. starmap — Star map (todo 3) -->
 <section id="starmap" class="section section--starmap" aria-label="Star map">
   <div class="starmap__content">
     <div class="starmap__frame">
@@ -1130,7 +1145,7 @@
   </div>
 </section>
 
-<!-- 9. world — Her world strip (todo 13)
+<!-- 10. world — Her world strip (todo 13)
      Eight motif cards: music, horror top-3, games, anime, gothic
      writing, drawing, badminton, autumn. Titles/names only — zero
      reproduced lyrics or artwork. Reveal is enhancement
@@ -1218,7 +1233,7 @@
 </div>
 </section>
 
-<!-- 10. finale — Love letter + keepsakes (todo 12)
+<!-- 11. finale — Love letter + keepsakes (todo 12)
      The letter is plain HTML: readable with JS disabled, printable
      via finale.css @media print. Envelope/unseal is enhancement
      (html.js-finale, sections/finale.js) only. -->
@@ -1921,6 +1936,7 @@ button, a, input, select, textarea {
 
   /* Map: section element id → array of script URLs to load when it first enters view */
   var LAZY_SECTIONS = {
+    'birthday': ['vendor/three.min.js', 'vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js', 'sections/birthday.js'],
     'story':    ['vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js', 'sections/story.js'],
     'album':    ['vendor/page-flip.browser.min.js', 'sections/album.js'],
     'quotes':   ['sections/quotes.js'],

@@ -1,0 +1,366 @@
+/* ============================================================
+   birthday — The Night of Her Day (Lane C, object-centric)
+   Ember-night hero: 3 layers only —
+     (1) CSS atmosphere folds behind,
+     (2) #bday-globe lantern globe,
+     (3) #bday-trail pointer ember sparks.
+   Beam language survives only as the single corner accent.
+   Copy bottom-left over a full-bleed 3D stage; wish card reads
+   as a dark shell holding a warm letter.
+   ============================================================ */
+
+.section--birthday {
+  --bday-night: var(--color-bg);
+  --bday-ember: var(--color-accent);
+  --bday-ember-glow: var(--color-accent-glow);
+  --bday-letter: var(--color-text);
+  --bday-letter-dim: var(--color-text-muted);
+  --bday-hairline: rgba(224, 124, 62, 0.28);
+  --bday-shell: rgba(20, 15, 10, 0.72);
+  --bday-ease: var(--ease-out);
+
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  min-height: 100svh;
+  display: grid;
+  align-items: end;
+  justify-items: start;
+  padding: var(--section-padding) var(--gutter) calc(var(--section-padding) + var(--space-12));
+  background: var(--bday-night);
+  color: var(--bday-letter);
+}
+
+/* ── Layer 1: atmosphere folds (behind everything) ───────────── */
+.bday-folds {
+  position: absolute;
+  inset: -3%;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+.bday-folds i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(46px);
+  will-change: transform;
+  animation: bday-fold-drift 14s ease-in-out infinite alternate;
+}
+
+.bday-folds i:nth-child(1) {
+  width: 62vmax;
+  height: 42vmax;
+  left: -14vmax;
+  top: -10vmax;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.22), transparent 70%);
+  animation-duration: 16s;
+}
+
+.bday-folds i:nth-child(2) {
+  width: 48vmax;
+  height: 36vmax;
+  right: -12vmax;
+  top: 22%;
+  background: radial-gradient(closest-side, rgba(240, 152, 74, 0.16), transparent 70%);
+  animation-duration: 12s;
+  animation-delay: -4s;
+}
+
+.bday-folds i:nth-child(3) {
+  width: 56vmax;
+  height: 40vmax;
+  left: 8%;
+  bottom: -16vmax;
+  background: radial-gradient(closest-side, rgba(201, 149, 107, 0.14), transparent 70%);
+  animation-duration: 18s;
+  animation-delay: -8s;
+}
+
+.bday-folds i:nth-child(4) {
+  width: 34vmax;
+  height: 26vmax;
+  left: 44%;
+  top: 30%;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.1), transparent 70%);
+  animation-duration: 11s;
+  animation-delay: -2s;
+}
+
+@keyframes bday-fold-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(14px, -18px, 0) scale(1.04); }
+}
+
+/* ── Layers 2+3: full-bleed 3D stage ─────────────────────────── */
+#bday-globe,
+#bday-trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+#bday-globe { z-index: 1; }
+#bday-trail { z-index: 2; }
+
+/* soft night vignette so copy stays legible over sparks */
+.section--birthday::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(26, 20, 16, 0.25) 0%, transparent 30%, transparent 52%, rgba(26, 20, 16, 0.78) 100%),
+    linear-gradient(90deg, rgba(26, 20, 16, 0.55) 0%, transparent 55%);
+}
+
+/* optional dither grain, static — no motion cost */
+.section--birthday::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: radial-gradient(rgba(245, 235, 224, 0.9) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
+}
+
+/* ── Copy: bottom-left over the stage ────────────────────────── */
+.bday-copy {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 34rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.bday-eyebrow {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.14em;
+  color: var(--bday-ember-glow);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bday-eyebrow::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--bday-ember);
+  box-shadow: 0 0 12px var(--bday-ember-glow);
+}
+
+.bday-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 2rem + 5vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.bday-line { display: block; }
+.bday-line--italic {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--bday-letter);
+}
+
+/* masked-reveal: CSS owns the mask + will-change; GSAP owns yPercent */
+.bday-w,
+.bday-wm {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.bday-wi,
+.bday-wm > .bday-w {
+  display: inline-block;
+  will-change: transform;
+}
+
+.bday-sub {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--bday-letter-dim);
+  max-width: 26rem;
+}
+
+/* ── Wish card: dark shell, warm letter ──────────────────────── */
+.bday-wish {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-5) var(--space-5);
+  background: var(--bday-shell);
+  border: 1px solid var(--bday-hairline);
+  border-left: 2px solid var(--bday-ember);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.bday-manifesto {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  line-height: 1.65;
+  color: var(--bday-letter);
+}
+
+/* scrub-reveal: dim base, scroll lights each word */
+.bday-mw { opacity: 0.14; }
+
+/* small captions (JS hands each part --word-index; CSS staggers) */
+.bday-cap [data-bday-caption-part] {
+  opacity: 0;
+  animation: bday-cap-in 0.7s var(--bday-ease) forwards;
+  animation-delay: calc(var(--word-index, 0) * 90ms);
+}
+
+@keyframes bday-cap-in {
+  to { opacity: 1; }
+}
+
+.bday-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--bday-letter);
+  text-decoration: underline;
+  text-decoration-color: var(--bday-ember);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35em;
+  transition: color var(--duration-normal) var(--bday-ease);
+}
+
+.bday-cta:hover,
+.bday-cta:focus-visible {
+  color: var(--bday-ember-glow);
+}
+
+/* ── Container-lines rails ───────────────────────────────────── */
+.bday-rails {
+  position: absolute;
+  inset: 0 var(--gutter);
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  user-select: none;
+}
+
+.bday-rails span {
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--bday-hairline) 20%, var(--bday-hairline) 80%, transparent);
+}
+
+/* ── Chapter marker ──────────────────────────────────────────── */
+.bday-marker {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--section-padding) / 2);
+  right: var(--gutter);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  color: var(--bday-letter-dim);
+}
+
+/* ── One amber corner accent (the beam, quoted) ──────────────── */
+.bday-corner {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--section-padding) / 2);
+  left: var(--gutter);
+  width: 2.5rem;
+  height: 2.5rem;
+  pointer-events: none;
+  border-top: 1px solid var(--bday-ember-glow);
+  border-left: 1px solid var(--bday-ember-glow);
+  box-shadow: -6px -6px 24px -12px var(--bday-ember-glow);
+}
+
+/* ── Ticker marquee (transform only) ─────────────────────────── */
+.bday-ticker {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--bday-hairline);
+  background: rgba(26, 20, 16, 0.6);
+}
+
+.bday-ticker__row {
+  margin: 0;
+  display: flex;
+  width: max-content;
+  padding: var(--space-3) 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  color: var(--bday-letter-dim);
+  animation: bday-ticker 28s linear infinite;
+  will-change: transform;
+}
+
+@keyframes bday-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .section--birthday {
+    padding-bottom: calc(var(--section-padding) + var(--space-16));
+  }
+
+  .bday-copy { max-width: 100%; }
+  .bday-wish { padding: var(--space-4); }
+  .bday-marker { top: var(--space-4); }
+  .bday-corner {
+    width: 1.75rem;
+    height: 1.75rem;
+    top: var(--space-4);
+  }
+}
+
+@media (min-width: 768px) {
+  .bday-copy { max-width: 36rem; }
+  .bday-title { font-size: clamp(3.2rem, 2.4rem + 4.5vw, 5.5rem); }
+}
+
+@media (min-width: 1280px) {
+  .section--birthday { padding-left: clamp(2rem, 6vw, 6rem); }
+  .bday-copy { max-width: 40rem; }
+}
+
+@media (min-width: 1440px) {
+  .section--birthday { padding-left: clamp(3rem, 8vw, 9rem); }
+  .bday-copy { max-width: 44rem; }
+  .bday-title { font-size: 6rem; }
+}
