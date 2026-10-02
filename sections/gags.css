@@ -212,14 +212,4 @@ html.js-gags .gags__card.is-visible {
 }
 
 /* ---- Reduced motion: static, fully readable, no animation ---- */
-@media (prefers-reduced-motion: reduce) {
-  html.js-gags .gags__card {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
 
-  .gags__spider svg.is-wiggling {
-    animation: none;
-  }
-}

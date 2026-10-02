@@ -7,11 +7,11 @@
 
   const SECTION_ID = 'album';
   const SWIPE_DISTANCE = 28;
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* personal site: full motion always */
 
   function prefersReducedMotion() {
-    return reduceMotionQuery.matches;
-  }
+  return false; /* personal site: full motion */
+}
 
   function probePhoto(path) {
     return new Promise((resolve) => {
@@ -154,32 +154,33 @@
     section.dataset.albumSupplied = String(supplied);
 
     showEmptyNotice(notice, total - supplied, total);
-    if (prefersReducedMotion() || !resolvePageFlip()) {
+    if (!resolvePageFlip()) {
       book.dataset.albumMode = 'stacked';
       return;
     }
 
-    const bookFlip = buildPages(book, total, supplied);
+    let bookFlip = null;
+    try {
+      bookFlip = buildPages(book, total, supplied);
+    } catch (err) {
+      if (window.console && console.warn) console.warn('[album] flip failed, stacked:', err);
+      bookFlip = null;
+    }
     book.dataset.albumMode = bookFlip ? 'flip' : 'stacked';
     bindControls(bookFlip);
   }
 
+  var mounted = false;
   function boot() {
-    const section = document.getElementById(SECTION_ID);
-    if (!section) return;
-    if (!('IntersectionObserver' in window)) {
-      mount(section);
+    /* personal site: eager. Sections behind the begin-gate are detached
+       until unlock, so retry until the node is connected, then mount. */
+    var section = document.getElementById(SECTION_ID);
+    if (!section || !section.isConnected || mounted) {
+      window.setTimeout(boot, 150);
       return;
     }
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        observer.disconnect();
-        mount(section);
-        return;
-      }
-    }, { rootMargin: '0px 0px -5% 0px', threshold: 0.01 });
-    observer.observe(section);
+    mounted = true;
+    mount(section);
   }
 
   if (document.readyState === 'loading') {

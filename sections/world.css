@@ -279,19 +279,4 @@ html.js-world .world__card[data-reveal].is-in {
 }
 
 /* ---- Reduced motion: leaves rest, reveal is instant ---- */
-@media (prefers-reduced-motion: reduce) {
-  .world__leaf { animation: none; }
 
-  html.js-world .world__card[data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .world__card,
-  .world__card:hover,
-  .world__card:focus-within {
-    transform: none;
-    transition: none;
-  }
-}

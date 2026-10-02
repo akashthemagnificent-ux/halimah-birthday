@@ -14,11 +14,11 @@
   const NAMES_URL = 'content/physics-names.json';
   const LIB_URL = 'vendor/matter.min.js';
   const BUDGET_BYTES = 150 * 1024;
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* personal site: full motion always */
 
   function prefersReducedMotion() {
-    return reduceMotionQuery.matches;
-  }
+  return false; /* personal site: full motion */
+}
 
   function setStatus(status, msg) {
     if (status) status.textContent = msg || '';
@@ -51,23 +51,12 @@
   }
 
   async function loadMatter() {
-    const res = await fetch(LIB_URL, { cache: 'force-cache' });
-    if (!res.ok) throw new Error('lib http ' + res.status);
-    const buf = await res.arrayBuffer();
-    if (buf.byteLength >= BUDGET_BYTES) {
-      throw new Error('lib over budget: ' + buf.byteLength);
+    /* personal site: matter.js loads eagerly via script tag — no fetch
+       budget, no blob dance. Retry briefly while it parses. */
+    for (let i = 0; i < 100; i += 1) {
+      if (window.Matter) return window.Matter;
+      await new Promise((resolve) => window.setTimeout(resolve, 60));
     }
-    const text = new TextDecoder().decode(buf);
-    const blob = new Blob([text], { type: 'text/javascript' });
-    const url = URL.createObjectURL(blob);
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = url;
-      s.onload = resolve;
-      s.onerror = () => reject(new Error('lib exec failed'));
-      document.head.appendChild(s);
-    });
-    URL.revokeObjectURL(url);
     if (!window.Matter) throw new Error('Matter global missing');
     return window.Matter;
   }
@@ -236,8 +225,12 @@
   }
 
   async function boot() {
+    /* personal site: eager — retry until the gated section is connected. */
     const section = document.getElementById(SECTION_ID);
-    if (!section) return;
+    if (!section || !section.isConnected) {
+      window.setTimeout(boot, 150);
+      return;
+    }
     const stage = section.querySelector('[data-physics-stage]');
     const staticWrap = section.querySelector('[data-physics-static]');
     const chips = section.querySelector('[data-physics-chips]');
@@ -251,11 +244,6 @@
       hearts = await fetchNames();
     } catch (err) {
       setStatus(status, 'names unavailable');
-      return;
-    }
-
-    if (prefersReducedMotion()) {
-      initStatic(hearts, staticWrap, chips, note, status, 'calm mode: hearts resting, still named');
       return;
     }
 

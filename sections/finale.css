@@ -312,22 +312,7 @@ html.js-finale .finale__stage.is-open .finale__letter {
 }
 
 /* ---- Reduced motion: no fold, no flap ---- */
-@media (prefers-reduced-motion: reduce) {
-  html.js-finale .finale__letter {
-    transform: none;
-    opacity: 1;
-    margin-top: var(--space-6);
-    transition: none;
-  }
 
-  html.js-finale .finale__envelope-flap {
-    transition: none;
-  }
-
-  html.js-finale .finale__seal {
-    transition: none;
-  }
-}
 
 /* ---- Print: clean Save-as-PDF keepsake ----
    Only the letter prints: envelope, unseal button, keepsake

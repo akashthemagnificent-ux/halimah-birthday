@@ -9,12 +9,15 @@
   const SECTION_ID = 'quotes';
 
   function motionAllowed() {
-    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return true; /* personal site: always animate */
   }
 
   function boot() {
     const section = document.getElementById(SECTION_ID);
-    if (!section) return;
+    if (!section || !section.isConnected) {
+      window.setTimeout(boot, 150);
+      return;
+    }
     const cards = Array.from(section.querySelectorAll('.quote-card'));
     if (cards.length === 0) return;
     if (!motionAllowed()) return;

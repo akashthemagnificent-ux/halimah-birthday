@@ -9,10 +9,9 @@
   let bootAttempts = 0;
   const BOOT_ATTEMPT_MAX = 200;
   const BOOT_RETRY_MS = 50;
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-
+  /* personal site: full motion always. */
   function prefersReducedMotion() {
-    return reduceMotionQuery.matches;
+    return false;
   }
 
   function hasGsap() {
@@ -237,8 +236,12 @@
 
   function boot() {
     if (booted) return;
+    /* personal site: eager — the begin-gate detaches #story until unlock. */
     const section = document.getElementById(SECTION_ID);
-    if (!section) return;
+    if (!section || !section.isConnected || typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') {
+      window.setTimeout(boot, 150);
+      return;
+    }
     const chapters = Array.from(section.querySelectorAll('[data-chapter]'));
     if (chapters.length === 0) return;
     document.documentElement.classList.add('js-story');
@@ -248,17 +251,10 @@
       ? Array.from(progress.querySelectorAll('.story__progress-item'))
       : [];
 
-    if (prefersReducedMotion() || (window.Motion && typeof window.Motion.motionAllowed === 'function' && !window.Motion.motionAllowed())) {
-      if (progress) progress.hidden = true;
-      return;
-    }
+    /* personal site: full motion always. Retry forever until vendors parse. */
     if (!hasGsap()) {
-      if (bootAttempts < BOOT_ATTEMPT_MAX) {
-        bootAttempts += 1;
-        window.setTimeout(boot, BOOT_RETRY_MS);
-      } else if (progress) {
-        progress.hidden = true;
-      }
+      bootAttempts += 1;
+      window.setTimeout(boot, BOOT_RETRY_MS);
       return;
     }
 

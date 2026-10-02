@@ -181,13 +181,4 @@ html.js-quotes .quote-card.is-visible {
   transition-delay: calc(var(--d, 0) * 40ms);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html.js-quotes .quote-card {
-    opacity: 1;
-    transform: none;
-  }
 
-  html.js-quotes .quote-card.is-visible {
-    transition: none;
-  }
-}

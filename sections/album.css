@@ -268,21 +268,7 @@
 }
 
 /* ---- Reduced motion: disable 3D flip, show stacked ---- */
-@media (prefers-reduced-motion: reduce) {
-  .album__book {
-    perspective: none;
-    max-width: 100%;
-  }
-  .album__page {
-    position: relative !important;
-    transform: none !important;
-    transform-origin: initial !important;
-    margin-bottom: var(--space-4);
-    page-break-inside: avoid;
-  }
-  .album__controls { display: none; }
-  .album__swipe-hint { display: none; }
-}
+
 
 /* ---- Print/export fallback ---- */
 @media print {

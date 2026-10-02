@@ -631,48 +631,4 @@ body.is-in-story .story__progress.is-visible {
    opacity its final keyframe held (0.9) and the chapter stack
    un-sticks: a plain, complete, readable archive.
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  html.js-story .story__chapter {
-    min-height: 0;
-    display: block;
-  }
 
-  .story__chapter-inner {
-    position: static;
-    top: auto;
-  }
-
-  .story__track {
-    gap: var(--space-16);
-  }
-
-  .story__letter::before {
-    opacity: 0.25;
-  }
-
-  /* the frozen plate: the final keyframe, held still */
-  .story__atmosphere {
-    animation: none;
-    opacity: 0.9;
-    transform: none;
-    will-change: auto;
-  }
-
-  /* the particle layer is the only thing we can truly take away */
-  canvas.story__ambient {
-    display: none;
-  }
-
-  /* the rail is pure navigation, so it stays */
-  .story__progress {
-    display: block;
-  }
-
-  .story__chapter,
-  .story__quote,
-  .story__msg,
-  .story__letter,
-  .story__progress-item::before {
-    transition: none;
-  }
-}

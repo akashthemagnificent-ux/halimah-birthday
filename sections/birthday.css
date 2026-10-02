@@ -1,12 +1,9 @@
 /* ============================================================
-   birthday — The Night of Her Day (Lane C, object-centric)
-   Ember-night hero: 3 layers only —
-     (1) CSS atmosphere folds behind,
-     (2) #bday-globe lantern globe,
-     (3) #bday-trail pointer ember sparks.
-   Beam language survives only as the single corner accent.
-   Copy bottom-left over a full-bleed 3D stage; wish card reads
-   as a dark shell holding a warm letter.
+   birthday — THE 3D CELEBRATION (personal site, full motion)
+   Ember-night hero rebuilt as the cinematic opener:
+   (1) CSS atmosphere folds, (2) THREE celebration canvas,
+   (3) distance-emitter pointer trail, (4) glass wish card +
+   keepsake photos + metal CTA, (5) marquee ticker + rails.
    ============================================================ */
 
 .section--birthday {
@@ -15,19 +12,27 @@
   --bday-ember-glow: var(--color-accent-glow);
   --bday-letter: var(--color-text);
   --bday-letter-dim: var(--color-text-muted);
-  --bday-hairline: rgba(224, 124, 62, 0.28);
-  --bday-shell: rgba(20, 15, 10, 0.72);
+  --bday-hairline: rgba(224, 124, 62, 0.34);
+  --bday-shell: rgba(18, 13, 9, 0.66);
   --bday-ease: var(--ease-out);
 
   position: relative;
   isolation: isolate;
   overflow: clip;
   min-height: 100svh;
-  display: grid;
-  align-items: end;
+  display: grid !important;
   justify-items: start;
+  text-align: left;
+  grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  align-items: end;
+  align-content: end;
+  justify-content: start;
+  gap: clamp(1rem, 4vw, 4rem);
   padding: var(--section-padding) var(--gutter) calc(var(--section-padding) + var(--space-12));
-  background: var(--bday-night);
+  background:
+    radial-gradient(120vmax 90vmax at 82% 108%, rgba(224, 124, 62, 0.16), transparent 62%),
+    radial-gradient(90vmax 70vmax at 8% -12%, rgba(201, 149, 107, 0.12), transparent 60%),
+    var(--bday-night);
   color: var(--bday-letter);
 }
 
@@ -47,54 +52,54 @@
   border-radius: 50%;
   filter: blur(46px);
   will-change: transform;
-  animation: bday-fold-drift 14s ease-in-out infinite alternate;
+  animation: bday-fold-drift 9s ease-in-out infinite alternate;
 }
 
 .bday-folds i:nth-child(1) {
-  width: 62vmax;
-  height: 42vmax;
+  width: 66vmax;
+  height: 44vmax;
   left: -14vmax;
   top: -10vmax;
-  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.22), transparent 70%);
-  animation-duration: 16s;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.30), transparent 70%);
+  animation-duration: 11s;
 }
 
 .bday-folds i:nth-child(2) {
-  width: 48vmax;
-  height: 36vmax;
+  width: 52vmax;
+  height: 38vmax;
   right: -12vmax;
   top: 22%;
-  background: radial-gradient(closest-side, rgba(240, 152, 74, 0.16), transparent 70%);
-  animation-duration: 12s;
-  animation-delay: -4s;
+  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.20), transparent 70%);
+  animation-duration: 8s;
+  animation-delay: -3s;
 }
 
 .bday-folds i:nth-child(3) {
-  width: 56vmax;
-  height: 40vmax;
+  width: 58vmax;
+  height: 42vmax;
   left: 8%;
   bottom: -16vmax;
-  background: radial-gradient(closest-side, rgba(201, 149, 107, 0.14), transparent 70%);
-  animation-duration: 18s;
-  animation-delay: -8s;
+  background: radial-gradient(closest-side, rgba(255, 209, 102, 0.16), transparent 70%);
+  animation-duration: 12s;
+  animation-delay: -6s;
 }
 
 .bday-folds i:nth-child(4) {
-  width: 34vmax;
-  height: 26vmax;
+  width: 36vmax;
+  height: 28vmax;
   left: 44%;
-  top: 30%;
-  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.1), transparent 70%);
-  animation-duration: 11s;
+  top: 28%;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.16), transparent 70%);
+  animation-duration: 7s;
   animation-delay: -2s;
 }
 
 @keyframes bday-fold-drift {
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(14px, -18px, 0) scale(1.04); }
+  to { transform: translate3d(22px, -28px, 0) scale(1.07); }
 }
 
-/* ── Layers 2+3: full-bleed 3D stage ─────────────────────────── */
+/* ── Layers 2+3: full-bleed 3D stage + trail ─────────────────── */
 #bday-globe,
 #bday-trail {
   position: absolute;
@@ -108,6 +113,27 @@
 #bday-globe { z-index: 1; }
 #bday-trail { z-index: 2; }
 
+/* ignition flash that fires with the confetti storm */
+.bday-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(60vmax 60vmax at 50% 42%, rgba(255, 209, 102, 0.55), rgba(255, 111, 145, 0.22) 45%, transparent 70%);
+  mix-blend-mode: screen;
+}
+
+.bday-burst.is-lit {
+  animation: bday-burst-flash 1.6s ease-out forwards;
+}
+
+@keyframes bday-burst-flash {
+  0% { opacity: 0; transform: scale(0.86); }
+  12% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+
 /* soft night vignette so copy stays legible over sparks */
 .section--birthday::before {
   content: "";
@@ -116,18 +142,18 @@
   z-index: 2;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(26, 20, 16, 0.25) 0%, transparent 30%, transparent 52%, rgba(26, 20, 16, 0.78) 100%),
-    linear-gradient(90deg, rgba(26, 20, 16, 0.55) 0%, transparent 55%);
+    linear-gradient(180deg, rgba(26, 20, 16, 0.22) 0%, transparent 30%, transparent 50%, rgba(26, 20, 16, 0.82) 100%),
+    linear-gradient(90deg, rgba(26, 20, 16, 0.60) 0%, transparent 58%);
 }
 
-/* optional dither grain, static — no motion cost */
+/* dither grain for cinematic texture */
 .section--birthday::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 4;
   pointer-events: none;
-  opacity: 0.07;
+  opacity: 0.09;
   background-image: radial-gradient(rgba(245, 235, 224, 0.9) 0.5px, transparent 0.6px);
   background-size: 3px 3px;
 }
@@ -137,7 +163,11 @@
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 34rem;
+  max-width: 32rem;
+  justify-self: start;
+  background: linear-gradient(90deg, rgba(14, 10, 7, 0.78), rgba(14, 10, 7, 0.42) 82%, transparent);
+  padding: var(--space-5) var(--space-5) var(--space-5) 0;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -148,30 +178,37 @@
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
   color: var(--bday-ember-glow);
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.bday-eyebrow::before {
-  content: "";
-  width: 0.5rem;
-  height: 0.5rem;
+.bday-glow-dot {
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   background: var(--bday-ember);
-  box-shadow: 0 0 12px var(--bday-ember-glow);
+  box-shadow: 0 0 14px var(--bday-ember-glow), 0 0 34px rgba(224, 124, 62, 0.55);
+  animation: bday-dot-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes bday-dot-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.65; }
 }
 
 .bday-title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(2.6rem, 2rem + 5vw, 5.5rem);
+  font-size: clamp(2.8rem, 2rem + 5.4vw, 5.8rem);
   line-height: 1.02;
   letter-spacing: -0.01em;
   text-wrap: balance;
+  text-shadow: 0 4px 44px rgba(0, 0, 0, 0.55);
 }
 
 .bday-line { display: block; }
@@ -182,8 +219,7 @@
 }
 
 /* masked-reveal: CSS owns the mask + will-change; GSAP owns yPercent */
-.bday-w,
-.bday-wm {
+.bday-w {
   display: inline-block;
   overflow: hidden;
   vertical-align: bottom;
@@ -191,8 +227,7 @@
   margin-bottom: -0.08em;
 }
 
-.bday-wi,
-.bday-wm > .bday-w {
+.bday-wi {
   display: inline-block;
   will-change: transform;
 }
@@ -206,15 +241,28 @@
   max-width: 26rem;
 }
 
-/* ── Wish card: dark shell, warm letter ──────────────────────── */
+/* ── Wish card: frosted glass, gradient border ───────────────── */
 .bday-wish {
+  position: relative;
   margin: var(--space-2) 0 0;
   padding: var(--space-5) var(--space-5);
-  background: var(--bday-shell);
-  border: 1px solid var(--bday-hairline);
-  border-left: 2px solid var(--bday-ember);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
+    var(--bday-shell);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 44px rgba(224, 124, 62, 0.14);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.border-gradient {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--bday-shell), var(--bday-shell)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(224, 124, 62, 0.55) 42%, rgba(255, 111, 145, 0.34) 68%, rgba(255, 255, 255, 0.08)) border-box;
 }
 
 .bday-manifesto {
@@ -228,34 +276,113 @@
 /* scrub-reveal: dim base, scroll lights each word */
 .bday-mw { opacity: 0.14; }
 
-/* small captions (JS hands each part --word-index; CSS staggers) */
-.bday-cap [data-bday-caption-part] {
-  opacity: 0;
-  animation: bday-cap-in 0.7s var(--bday-ease) forwards;
-  animation-delay: calc(var(--word-index, 0) * 90ms);
+/* ── Keepsakes: her baby photos as glass-framed cards ────────── */
+.bday-keepsakes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  width: 100%;
+  margin-top: var(--space-2);
 }
 
-@keyframes bday-cap-in {
-  to { opacity: 1; }
+.bday-keepsake {
+  margin: 0;
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(245, 235, 224, 0.22);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(224, 124, 62, 0.12),
+    0 0 26px rgba(224, 124, 62, 0.16);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.45s var(--bday-ease), box-shadow 0.45s var(--bday-ease);
+  aspect-ratio: 3 / 4;
 }
 
-.bday-cta {
+.bday-keepsake:nth-child(1) { --tilt: -2.4deg; }
+.bday-keepsake:nth-child(2) { --tilt: 1.6deg; }
+.bday-keepsake:nth-child(3) { --tilt: -1.2deg; }
+
+.bday-keepsake:hover,
+.bday-keepsake:focus-within {
+  transform: rotate(0deg) translateY(-6px) scale(1.03);
+  box-shadow:
+    0 20px 44px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(255, 209, 102, 0.28);
+}
+
+.bday-keepsake img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.06) contrast(1.04);
+}
+
+.bday-keepsake figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.4em 0.6em 0.55em;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: #fff8ef;
+  text-align: center;
+  background: linear-gradient(180deg, transparent, rgba(10, 7, 4, 0.82));
+}
+
+/* ── CTA: liquid-metal diagonal-cut button ───────────────────── */
+.bday-cta.metal-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
+  margin-top: var(--space-2);
+  padding: 0.85em 2.1em;
   font-family: var(--font-body);
   font-size: var(--text-base);
-  color: var(--bday-letter);
-  text-decoration: underline;
-  text-decoration-color: var(--bday-ember);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.35em;
-  transition: color var(--duration-normal) var(--bday-ease);
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: #fff6ea;
+  text-decoration: none;
+  background:
+    linear-gradient(160deg, rgba(255, 209, 102, 0.28), rgba(224, 124, 62, 0.20) 40%, rgba(255, 111, 145, 0.22)),
+    rgba(24, 16, 10, 0.85);
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  box-shadow: 0 12px 34px rgba(224, 124, 62, 0.28);
+  transition: transform 0.35s var(--bday-ease), box-shadow 0.35s var(--bday-ease), filter 0.35s var(--bday-ease);
 }
 
-.bday-cta:hover,
-.bday-cta:focus-visible {
-  color: var(--bday-ember-glow);
+.bday-cta.metal-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(255, 209, 102, 0.65) 30%, rgba(224, 124, 62, 0.15) 60%, rgba(255, 255, 255, 0.28));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: bday-metal-sheen 3.4s linear infinite;
+  background-size: 220% 220%;
+}
+
+@keyframes bday-metal-sheen {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 0% 40%; }
+}
+
+.bday-cta.metal-btn:hover,
+.bday-cta.metal-btn:focus-visible {
+  transform: translateY(-3px);
+  filter: brightness(1.12);
+  box-shadow: 0 18px 48px rgba(224, 124, 62, 0.42), 0 0 30px rgba(255, 209, 102, 0.30);
+  outline: none;
 }
 
 /* ── Container-lines rails ───────────────────────────────────── */
@@ -311,7 +438,9 @@
   bottom: 0;
   overflow: hidden;
   border-top: 1px solid var(--bday-hairline);
-  background: rgba(26, 20, 16, 0.6);
+  background: rgba(26, 20, 16, 0.62);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
 .bday-ticker__row {
@@ -324,8 +453,12 @@
   letter-spacing: 0.18em;
   white-space: nowrap;
   color: var(--bday-letter-dim);
-  animation: bday-ticker 28s linear infinite;
+  animation: bday-ticker 22s linear infinite;
   will-change: transform;
+}
+
+.bday-ticker:hover .bday-ticker__row {
+  animation-duration: 44s;
 }
 
 @keyframes bday-ticker {
@@ -341,7 +474,8 @@
 
   .bday-copy { max-width: 100%; }
   .bday-wish { padding: var(--space-4); }
-  .bday-marker { top: var(--space-4); }
+  .bday-keepsakes { gap: var(--space-2); }
+  .bday-marker { top: var(--space-4); font-size: var(--text-xs); }
   .bday-corner {
     width: 1.75rem;
     height: 1.75rem;
@@ -349,9 +483,16 @@
   }
 }
 
+@media (max-width: 900px) {
+  .section--birthday {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bday-copy { max-width: 34rem; }
+}
+
 @media (min-width: 768px) {
-  .bday-copy { max-width: 36rem; }
-  .bday-title { font-size: clamp(3.2rem, 2.4rem + 4.5vw, 5.5rem); }
+  .bday-copy { max-width: 33rem; }
+  .bday-title { font-size: clamp(3.4rem, 2.4rem + 4.5vw, 5.8rem); }
 }
 
 @media (min-width: 1280px) {
@@ -362,5 +503,5 @@
 @media (min-width: 1440px) {
   .section--birthday { padding-left: clamp(3rem, 8vw, 9rem); }
   .bday-copy { max-width: 44rem; }
-  .bday-title { font-size: 6rem; }
+  .bday-title { font-size: 6.2rem; }
 }

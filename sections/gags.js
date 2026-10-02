@@ -5,22 +5,24 @@
   'use strict';
 
   const SECTION_ID = 'gags';
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* personal site: full motion always */
 
   function prefersReducedMotion() {
-    return reduceMotionQuery.matches;
-  }
+  return false; /* personal site: full motion */
+}
 
   function boot() {
     const section = document.getElementById(SECTION_ID);
-    if (!section) return;
+    if (!section || !section.isConnected) {
+      window.setTimeout(boot, 150);
+      return;
+    }
     const cards = Array.from(section.querySelectorAll('[data-gags-card]'));
     if (cards.length === 0) return;
 
     const boop = section.querySelector('[data-gags-boop]');
     if (boop) {
       boop.addEventListener('click', () => {
-        if (prefersReducedMotion()) return;
         const svg = section.querySelector('[data-testid="gag-spider-svg"]');
         if (!svg) return;
         svg.classList.remove('is-wiggling');
@@ -30,7 +32,7 @@
       });
     }
 
-    if (prefersReducedMotion() || !('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) return;
     document.documentElement.classList.add('js-gags');
 
     const observer = new IntersectionObserver(

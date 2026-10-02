@@ -19,7 +19,7 @@
   const SECTION_ID = 'scratch';
   const CLEAR_THRESHOLD = 55; // % of cover pixels erased before unlock
   const SAMPLE_STEP = 4; // sample every Nth pixel (keeps phones smooth)
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* personal site: full motion always */
 
   const SECRET_TEXT =
     'For me it is worth living cuz seeing a new day means I will be able ' +
@@ -28,7 +28,7 @@
     'could ask for.';
   const SECRET_SOURCE = 'halimah dms-6.txt:952';
 
-  const prefersReducedMotion = () => reduceMotionQuery.matches;
+  const prefersReducedMotion = () => false; /* personal site: full motion */
 
   function token(name, fallback) {
     const v = getComputedStyle(document.documentElement)
@@ -252,14 +252,13 @@
     }
 
     function applyMotionMode() {
-      state.mode = prefersReducedMotion() ? 'tap' : 'scratch';
+      state.mode = 'scratch'; /* personal site: full motion */
       section.dataset.scratchMode = state.mode;
       if (card) card.hidden = state.mode === 'tap';
       if (nodes.tap) nodes.tap.hidden = state.mode !== 'tap' || state.unlocked;
       if (nodes.hint) nodes.hint.hidden = state.mode === 'tap';
     }
     applyMotionMode();
-    reduceMotionQuery.addEventListener?.('change', applyMotionMode);
 
     if (nodes.tap) {
       nodes.tap.addEventListener('click', () => {

@@ -7,11 +7,11 @@
 
   const SECTION_ID = 'world';
   const STAGGER_MS = 90;
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* personal site: full motion always */
 
   function prefersReducedMotion() {
-    return reduceMotionQuery.matches;
-  }
+  return false; /* personal site: full motion */
+}
 
   function reveal(card, index) {
     window.setTimeout(() => {
@@ -42,10 +42,12 @@
 
   function boot() {
     const section = document.getElementById(SECTION_ID);
-    if (!section) return;
+    if (!section || !section.isConnected) {
+      window.setTimeout(boot, 150);
+      return;
+    }
     const cards = Array.from(section.querySelectorAll('[data-reveal]'));
     if (cards.length === 0) return;
-    if (prefersReducedMotion()) return;
     document.documentElement.classList.add('js-world');
     observe(cards);
   }

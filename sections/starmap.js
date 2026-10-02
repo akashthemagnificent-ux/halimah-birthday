@@ -7,14 +7,14 @@
   const SECTION_ID = 'starmap';
   const STAR_COUNT = 420;
   const TWINKLE_FPS_CAP = 30;
-  const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /* personal site: full motion always */
 
   let frameHandle = null;
   let lastFrameAt = 0;
 
   function prefersReducedMotion() {
-    return reduceMotionQuery.matches;
-  }
+  return false; /* personal site: full motion */
+}
 
   function seededRandom(seed) {
     let s = seed >>> 0;
@@ -176,22 +176,17 @@
     startSky(canvas, context, width, height, stars, rand);
   }
 
+  var mounted = false;
   function boot() {
-    const section = document.getElementById(SECTION_ID);
-    if (!section) return;
-    if (!('IntersectionObserver' in window)) {
-      mount(section);
+    /* personal site: eager. Sections behind the begin-gate are detached
+       until unlock, so retry until the node is connected, then mount. */
+    var section = document.getElementById(SECTION_ID);
+    if (!section || !section.isConnected || mounted) {
+      window.setTimeout(boot, 150);
       return;
     }
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        observer.disconnect();
-        mount(section);
-        return;
-      }
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.01 });
-    observer.observe(section);
+    mounted = true;
+    mount(section);
   }
 
   window.addEventListener('pagehide', () => {

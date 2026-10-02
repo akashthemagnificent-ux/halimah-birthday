@@ -145,10 +145,4 @@
 }
 
 /* ---- Reduced motion: static sky, no twinkle, no fade ---- */
-@media (prefers-reduced-motion: reduce) {
-  .starmap__canvas {
-    opacity: 1;
-    transition: none;
-  }
-  .starmap__verbatim { text-shadow: none; }
-}
+

@@ -91,15 +91,6 @@
   --safe-left:   env(safe-area-inset-left, 0px);
 }
 
-/* ── Reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --duration-fast:   0ms;
-    --duration-normal: 0ms;
-    --duration-slow:   0ms;
-  }
-}
-
 /* ── Dark theme override (cinematic sections) ── */
 [data-theme="cinematic"] {
   --color-bg:           var(--color-cine-bg);

@@ -202,20 +202,3 @@
   outline-offset: 3px;
 }
 
-/* ---- Reduced motion ---- */
-@media (prefers-reduced-motion: reduce) {
-  .scratch__reveal {
-    transition: none;
-    transform: none;
-  }
-
-  .scratch__reveal.is-visible {
-    opacity: 1;
-  }
-
-  .scratch__hint,
-  .scratch__percent,
-  .scratch__replay {
-    transition: none;
-  }
-}

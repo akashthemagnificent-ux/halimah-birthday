@@ -12,9 +12,15 @@
     if (window.Motion) window.Motion.fireworks();
   }
 
+  var wired = false;
   function init() {
+    /* personal site: eager — retry until the gated section is connected. */
     var section = document.getElementById(SECTION_ID);
-    if (!section) return;
+    if (!section || !section.isConnected || wired) {
+      if (!wired) window.setTimeout(init, 150);
+      return;
+    }
+    wired = true;
 
     document.documentElement.classList.add('js-finale');
     if (window.Motion) window.Motion.wireReplay();
