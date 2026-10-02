@@ -634,6 +634,9 @@
 
     var dummy = new THREE.Object3D();
     var progress = 0;
+    /* Camera base position owned ONLY by the scroll flight. The cursor
+       adds a small orbital offset on top every frame — never 누적. */
+    var camBase = { x: 0, y: 0.6, z: 8.2 };
     var pointer = { x: 0, y: 0, seen: false };
     var pointerEase = { x: 0, y: 0 };
 
@@ -653,11 +656,10 @@
       var e = easeInOut(p);
       var angle = e * Math.PI * 0.85;
       var radius = 8.2 - e * 2.3;
-      camera.position.set(
-        Math.sin(angle) * radius * 0.5,
-        0.6 - e * 0.9,
-        Math.cos(angle) * radius
-      );
+      camBase.x = Math.sin(angle) * radius * 0.5;
+      camBase.y = 0.6 - e * 0.9;
+      camBase.z = Math.cos(angle) * radius;
+      camera.position.set(camBase.x, camBase.y, camBase.z);
       camera.lookAt(1.9, -0.3 + e * 0.5, -0.6);
       globe.rotation.y = e * Math.PI * 1.2;
       globe.rotation.x = Math.sin(e * Math.PI) * 0.14;
@@ -735,10 +737,22 @@
       }
       sparks.mesh.instanceMatrix.needsUpdate = true;
 
-      // pointer parallax on the whole camera rig
-      camera.position.x += pointerEase.x * 0.35;
-      camera.position.y += pointerEase.y * 0.22;
-      camera.lookAt(1.9, -0.3 + progress * 0.5, -0.6);
+      /* Cursor orbit: the camera swings around the scene toward the
+         hand (x + y follow the pointer direction) while the gaze
+         counter-shifts, so the whole celebration turns WITH the cursor
+         instead of drifting away. Absolute set every frame: the offset
+         can never accumulate, so nothing shrinks and scroll never snaps. */
+      camera.position.set(
+        camBase.x + pointerEase.x * 0.9,
+        camBase.y + pointerEase.y * 0.5,
+        camBase.z
+      );
+      camera.lookAt(
+        1.9 - pointerEase.x * 0.45,
+        -0.3 + progress * 0.5 - pointerEase.y * 0.25,
+        -0.6
+      );
+      camera.rotateZ(pointerEase.x * 0.03);
 
       renderer.render(scene, camera);
       rafId = window.requestAnimationFrame(frame);
@@ -799,6 +813,21 @@
     section.addEventListener('pointerleave', onPointerLeave, { passive: true });
 
     applyProgress(progress);
+
+    /* QA probe: live camera distance + cake world scale for drift tests. */
+    window.__bdayCam = function () {
+      var d = Math.sqrt(
+        camera.position.x * camera.position.x +
+        camera.position.y * camera.position.y +
+        camera.position.z * camera.position.z
+      );
+      return {
+        dist: Math.round(d * 1000) / 1000,
+        x: Math.round(camera.position.x * 1000) / 1000,
+        y: Math.round(camera.position.y * 1000) / 1000,
+        z: Math.round(camera.position.z * 1000) / 1000
+      };
+    };
 
     return {
       setProgress: function (p) {
