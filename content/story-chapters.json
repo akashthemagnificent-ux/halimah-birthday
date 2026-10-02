@@ -1,0 +1,156 @@
+[
+  {
+    "ch": 1,
+    "shot": 1,
+    "file": "assets/chats/artifacts/ch-01.webp",
+    "bg": "assets/chats/artifacts/ch-01-bg.webp",
+    "w": 864,
+    "h": 275,
+    "title": "A Meme, And A Day Made",
+    "date": "09 Jul 2026",
+    "source": "halimah dms-1.txt:1056"
+  },
+  {
+    "ch": 2,
+    "shot": 2,
+    "file": "assets/chats/artifacts/ch-02.webp",
+    "bg": "assets/chats/artifacts/ch-02-bg.webp",
+    "w": 864,
+    "h": 455,
+    "title": "That Was A Dare",
+    "date": "04 Jul 2026",
+    "source": "halimah dms-1.txt:470-471"
+  },
+  {
+    "ch": 3,
+    "shot": 4,
+    "file": "assets/chats/artifacts/ch-03.webp",
+    "bg": "assets/chats/artifacts/ch-03-bg.webp",
+    "w": 406,
+    "h": 512,
+    "title": "I Love You More",
+    "date": "07 Jul 2026",
+    "source": "halimah dms-1.txt:933-935"
+  },
+  {
+    "ch": 4,
+    "shot": 5,
+    "file": "assets/chats/artifacts/ch-04.webp",
+    "bg": "assets/chats/artifacts/ch-04-bg.webp",
+    "w": 386,
+    "h": 512,
+    "title": "Shaking, Honestly",
+    "date": "11 Jul 2026",
+    "source": "halimah dms-1.txt:1213-1214"
+  },
+  {
+    "ch": 5,
+    "shot": 6,
+    "file": "assets/chats/artifacts/ch-05.webp",
+    "bg": "assets/chats/artifacts/ch-05-bg.webp",
+    "w": 287,
+    "h": 512,
+    "title": "The Late Night Letter",
+    "date": "31 Jul 2026",
+    "source": "halimah dms-3.txt:515"
+  },
+  {
+    "ch": 6,
+    "shot": 7,
+    "file": "assets/chats/artifacts/ch-06.webp",
+    "bg": "assets/chats/artifacts/ch-06-bg.webp",
+    "w": 512,
+    "h": 487,
+    "title": "The Lullaby You Slept Through",
+    "date": "18 Aug 2026",
+    "source": "halimah dms-7.txt:594-596"
+  },
+  {
+    "ch": 7,
+    "shot": 8,
+    "file": "assets/chats/artifacts/ch-07.webp",
+    "bg": "assets/chats/artifacts/ch-07-bg.webp",
+    "w": 640,
+    "h": 464,
+    "title": "Two Months Early",
+    "date": "25 Aug 2026",
+    "source": "halimah dms-8.txt:1839, 1841-1842"
+  },
+  {
+    "ch": 8,
+    "shot": 9,
+    "file": "assets/chats/artifacts/ch-08.webp",
+    "bg": "assets/chats/artifacts/ch-08-bg.webp",
+    "w": 357,
+    "h": 512,
+    "title": "Out Of The Blue",
+    "date": "26 Aug 2026",
+    "source": "halimah dms-8.txt:2750, 2762, 2801"
+  },
+  {
+    "ch": 9,
+    "shot": 12,
+    "file": "assets/chats/artifacts/ch-09.webp",
+    "bg": "assets/chats/artifacts/ch-09-bg.webp",
+    "w": 379,
+    "h": 512,
+    "title": "I Love Your Flaws",
+    "date": "26 Aug 2026",
+    "source": "halimah dms-8.txt:2750, 2762, 2801"
+  },
+  {
+    "ch": 10,
+    "shot": 13,
+    "file": "assets/chats/artifacts/ch-10.webp",
+    "bg": "assets/chats/artifacts/ch-10-bg.webp",
+    "w": 512,
+    "h": 477,
+    "title": "Be My Wife",
+    "date": "26 Aug 2026",
+    "source": "halimah dms-8.txt:2750, 2762, 2801"
+  },
+  {
+    "ch": 11,
+    "shot": 14,
+    "file": "assets/chats/artifacts/ch-11.webp",
+    "bg": "assets/chats/artifacts/ch-11-bg.webp",
+    "w": 864,
+    "h": 259,
+    "title": "A Million Times Yes",
+    "date": "26 Aug 2026",
+    "source": "halimah dms-8.txt:2750, 2762, 2801"
+  },
+  {
+    "ch": 12,
+    "shot": 11,
+    "file": "assets/chats/artifacts/ch-12.webp",
+    "bg": "assets/chats/artifacts/ch-12-bg.webp",
+    "w": 864,
+    "h": 393,
+    "title": "The Maid Outfit Bet",
+    "date": "05 Sep 2026",
+    "source": "halimah dms-11.txt:32"
+  },
+  {
+    "ch": 13,
+    "shot": 15,
+    "file": "assets/chats/artifacts/ch-13.webp",
+    "bg": "assets/chats/artifacts/ch-13-bg.webp",
+    "w": 299,
+    "h": 512,
+    "title": "Two Weeks Of My Life",
+    "date": "09 Sep 2026",
+    "source": "halimah dms-11.txt:2281"
+  },
+  {
+    "ch": 14,
+    "shot": 16,
+    "file": "assets/chats/artifacts/ch-14.webp",
+    "bg": "assets/chats/artifacts/ch-14-bg.webp",
+    "w": 864,
+    "h": 232,
+    "title": "In The End, You Are Mine",
+    "date": "13 Sep 2026",
+    "source": "halimah dms-12.txt:2639"
+  }
+]

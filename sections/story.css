@@ -1,39 +1,28 @@
 /* ============================================================
-   story — the archive of us
-   Ember-night continuity: one living ambient stack behind a
-   fourteen-chapter spine. Chapters read as a curated chat thread:
-   short exchanges are left/right message bubbles with timestamp
-   chips, long letters are full-width letter cards. Generous air
-   between chapters, no walls of text, no repeated landmarks.
-
-   contract notes
-   - the html.js-story gate is preserved exactly: 130dvh + flex
-     only when JS is live, plain block stack otherwise
-   - no rule ever hides a chapter; the no-JS readability floor
-     is the same floor reduced-motion reads
-   - reduced-motion gets the frozen final frame of the gradient
-     (animation: none; opacity: 0.9) and no canvas: zero motion,
-     maximum picture
+   story — THE ARCHIVE OF US (personal site, full motion)
+   Fourteen memory chambers on a nebula flight. Every screenshot is
+   a real chat, matted as a backlit artifact on a blurred plate, so
+   mixed aspect ratios read as exhibits — never stretched, never
+   cropped. Each chamber: giant masked title, tilting artifact with
+   cursor-tracked 3D + glare sweep + tap-to-hold zoom, scrub-lit
+   voiceover with the golden line, mono source stamp. A glowing
+   thread rail fills 01→14; the nebula + ember canvas breathe
+   behind everything. Valuable chambers (04, 08, 09, 10, 11, 13, 14)
+   carry the .is-precious seal glow.
    ============================================================ */
 
-/* ── Section shell + local palette ───────────────────────────────── */
 .section--story {
-  /* ambient + sticky inners need a clipping box, not a containing
-     one: the chapter card is 130dvh but must never paint a hair
-     beyond the section's horizontal edges. */
   position: relative;
   isolation: isolate;
   overflow-x: clip;
   overflow-y: visible;
   background: var(--color-cine-bg);
-
-  /* local layer stack (also the reveal easing for this file) */
   --story-layer-ambient: 0;
   --story-layer-content: 2;
   --story-layer-rail: 50;
   --story-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --story-rail-dot: 8px;
-  --story-column: 38rem;
+  --story-column: 44rem;
   --story-scrim: linear-gradient(
     90deg,
     rgba(10, 10, 15, 0.92) 0%,
@@ -42,17 +31,14 @@
   );
   --story-scrim-flat: rgba(10, 10, 15, 0.9);
   --story-hairline: rgba(212, 168, 106, 0.26);
-  --story-bubble-him: rgba(212, 168, 106, 0.1);
-  --story-bubble-her: rgba(232, 192, 136, 0.14);
+  --story-gold: #eec27f;
+  --story-gold-hot: #ffe3ae;
 }
 
-/* ── Ambient stack: one gradient plate + one particle canvas ────── */
-/* Both are position:absolute inset:0 inside #story, inert to the
-   pointer, and sit BELOW .story__content (z 2). story.js drives the
-   drift and the particles; the gradient also breathes on its own so
-   the plate is never dead even before the engine starts. */
+/* ── Ambient stack: nebula + atmosphere + ember canvas ───────── */
 .story__atmosphere,
-canvas.story__ambient {
+canvas.story__ambient,
+.story__nebula {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -64,34 +50,43 @@ canvas.story__ambient {
 
 .story__atmosphere {
   background:
-    radial-gradient(
-      68% 46% at 50% -4%,
-      rgba(224, 124, 62, 0.2) 0%,
-      rgba(224, 124, 62, 0) 62%
-    ),
-    radial-gradient(
-      48% 36% at 88% 34%,
-      rgba(212, 168, 106, 0.14) 0%,
-      rgba(212, 168, 106, 0) 68%
-    ),
-    radial-gradient(
-      56% 40% at 6% 76%,
-      rgba(124, 88, 190, 0.12) 0%,
-      rgba(124, 88, 190, 0) 70%
-    ),
-    linear-gradient(
-      180deg,
-      #14101c 0%,
-      #0a0a0f 38%,
-      #0a0a0f 68%,
-      #170f0b 100%
-    );
+    radial-gradient(68% 46% at 50% -4%, rgba(224, 124, 62, 0.2) 0%, rgba(224, 124, 62, 0) 62%),
+    radial-gradient(48% 36% at 88% 34%, rgba(212, 168, 106, 0.14) 0%, rgba(212, 168, 106, 0) 68%),
+    radial-gradient(56% 40% at 6% 76%, rgba(124, 88, 190, 0.12) 0%, rgba(124, 88, 190, 0) 70%),
+    linear-gradient(180deg, #14101c 0%, #0a0a0f 38%, #0a0a0f 68%, #170f0b 100%);
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  opacity: 1;
-  /* slow ember breath, transform+opacity only */
   animation: story-atmosphere-drift 46s var(--ease-in-out) infinite;
   will-change: transform, opacity;
+}
+
+.story__nebula i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(60px);
+  will-change: transform;
+  animation: story-nebula-drift 18s ease-in-out infinite alternate;
+}
+
+.story__nebula i:nth-child(1) {
+  width: 60vmax; height: 40vmax; left: -16vmax; top: 6%;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.16), transparent 70%);
+}
+.story__nebula i:nth-child(2) {
+  width: 52vmax; height: 38vmax; right: -14vmax; top: 44%;
+  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.13), transparent 70%);
+  animation-duration: 14s; animation-delay: -5s;
+}
+.story__nebula i:nth-child(3) {
+  width: 56vmax; height: 40vmax; left: 6%; bottom: -12vmax;
+  background: radial-gradient(closest-side, rgba(124, 88, 190, 0.14), transparent 70%);
+  animation-duration: 22s; animation-delay: -9s;
+}
+
+@keyframes story-nebula-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(26px, -34px, 0) scale(1.08); }
 }
 
 canvas.story__ambient {
@@ -101,25 +96,13 @@ canvas.story__ambient {
 }
 
 @keyframes story-atmosphere-drift {
-  0% {
-    transform: scale(1) translate3d(0, 0, 0);
-    opacity: 0.86;
-  }
-  38% {
-    transform: scale(1.07) translate3d(-1.2%, -1.8%, 0);
-    opacity: 0.97;
-  }
-  70% {
-    transform: scale(1.03) translate3d(1.4%, 1.1%, 0);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(1) translate3d(0, 0, 0);
-    opacity: 0.86;
-  }
+  0% { transform: scale(1) translate3d(0, 0, 0); opacity: 0.86; }
+  38% { transform: scale(1.07) translate3d(-1.2%, -1.8%, 0); opacity: 0.97; }
+  70% { transform: scale(1.03) translate3d(1.4%, 1.1%, 0); opacity: 0.9; }
+  100% { transform: scale(1) translate3d(0, 0, 0); opacity: 0.86; }
 }
 
-/* ── Content column ─────────────────────────────────────────────── */
+/* ── Content column ──────────────────────────────────────────── */
 .story__content {
   position: relative;
   z-index: var(--story-layer-content);
@@ -139,15 +122,90 @@ canvas.story__ambient {
 
 .story__headline {
   margin-top: var(--space-3);
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-4);
   font-family: var(--font-display);
-  font-size: var(--text-xl);
+  font-size: clamp(2.6rem, 2rem + 4vw, 4.4rem);
   font-weight: 500;
   font-style: italic;
-  line-height: 1.15;
+  line-height: 1.05;
   letter-spacing: -0.01em;
   color: var(--color-cine-text);
   text-align: center;
+  text-shadow: 0 6px 60px rgba(0, 0, 0, 0.6);
+}
+
+.story__lede {
+  margin: 0 auto var(--space-16);
+  max-width: 30rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  line-height: 1.6;
+  color: var(--color-cine-text-muted);
+}
+
+.story__track {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6rem, 14vh, 10rem);
+  padding-bottom: var(--space-24);
+}
+
+/* ── Chamber ─────────────────────────────────────────────────── */
+.story__chamber {
+  position: relative;
+  min-height: 0;
+  padding: clamp(1.6rem, 4vw, 3rem) clamp(1.2rem, 4vw, 2.6rem);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)),
+    rgba(16, 14, 22, 0.62);
+  border: 1px solid rgba(212, 168, 106, 0.16);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  transform-style: preserve-3d;
+  outline: none;
+}
+
+.story__chamber:focus-visible {
+  border-color: rgba(255, 227, 174, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 227, 174, 0.25), 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.story__chamber-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(80% 46% at 50% 0%, rgba(238, 194, 127, 0.14), transparent 70%);
+  opacity: 0.7;
+}
+
+/* precious seal: the valuable chambers glow warmer */
+.story__chamber.is-precious {
+  border-color: rgba(238, 194, 127, 0.42);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 0 60px rgba(238, 194, 127, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.story__chamber.is-precious::after {
+  content: "kept closest";
+  position: absolute;
+  top: -0.8em;
+  right: 1.4rem;
+  padding: 0.3em 0.9em;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #1a1208;
+  background: linear-gradient(120deg, var(--story-gold-hot), var(--story-gold));
+  border-radius: 999px;
+  box-shadow: 0 6px 24px rgba(238, 194, 127, 0.4);
 }
 
 .story__kicker {
@@ -163,13 +221,205 @@ canvas.story__ambient {
 
 .story__title {
   font-family: var(--font-display);
-  font-size: var(--text-lg);
+  font-size: clamp(1.9rem, 1.4rem + 2.6vw, 3rem);
   font-weight: 500;
-  line-height: 1.25;
+  line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--color-cine-text);
   margin-bottom: var(--space-3);
   text-wrap: balance;
+}
+
+.story__title .word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.09em;
+  margin-bottom: -0.09em;
+}
+
+.story__title .word {
+  display: inline-block;
+  will-change: transform;
+  /* pre-split titles must read until GSAP sets yPercent */
+  transform: translateY(0);
+}
+
+.story__date {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-cine-text-muted);
+  border: 1px solid rgba(212, 168, 106, 0.3);
+  border-radius: 999px;
+  padding: 0.45em 1.1em;
+  margin-bottom: var(--space-6);
+}
+
+/* ── Artifact: the real screenshot, matted + backlit ─────────── */
+.story__artifact {
+  position: relative;
+  margin: 0 0 var(--space-6);
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: zoom-in;
+  border: 1px solid rgba(245, 235, 224, 0.2);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 168, 106, 0.1),
+    0 0 54px rgba(224, 124, 62, 0.14);
+  transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.25s ease-out, box-shadow 0.45s var(--story-ease);
+  will-change: transform;
+  background: #101014;
+  /* uniform stage: every artifact shares one height so mixed
+     screenshots read as exhibits, never stretched */
+  min-height: min(58vh, 460px);
+  max-height: min(72vh, 560px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story__artifact-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.story__artifact-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.12);
+  filter: saturate(1.2) brightness(0.85);
+  opacity: 0.9;
+}
+
+.story__artifact-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  max-height: inherit;
+  object-fit: contain;
+  display: block;
+  filter: saturate(1.04) contrast(1.03);
+}
+
+/* glare sweep follows the cursor */
+.story__artifact-glare {
+  position: absolute;
+  inset: -20%;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--glare-x, 50%) var(--glare-y, 40%),
+    rgba(255, 255, 255, 0.16),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.story__artifact:hover .story__artifact-glare,
+.story__artifact.is-held .story__artifact-glare {
+  opacity: 1;
+}
+
+.story__artifact-cap {
+  position: absolute;
+  z-index: 3;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6em 1.1em 0.8em;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(245, 235, 224, 0.85);
+  background: linear-gradient(180deg, transparent, rgba(8, 6, 4, 0.85));
+}
+
+.story__artifact-cap time {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--story-gold);
+}
+
+/* tap-to-hold: the artifact opens into a lightbox layer */
+.story__artifact.is-held {
+  cursor: zoom-out;
+  transform: perspective(1100px) rotateX(0deg) rotateY(0deg) scale(1.015);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.7),
+    0 0 80px rgba(238, 194, 127, 0.25);
+}
+
+body.has-artifact-open {
+  overflow: hidden;
+}
+
+.story__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(6, 5, 8, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.story__lightbox.is-open { opacity: 1; }
+
+.story__lightbox img {
+  max-width: min(94vw, 900px);
+  max-height: 86vh;
+  object-fit: contain;
+  border-radius: 14px;
+  border: 1px solid rgba(238, 194, 127, 0.4);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 90px rgba(238, 194, 127, 0.2);
+}
+
+.story__lightbox-cap {
+  position: absolute;
+  bottom: clamp(1rem, 4vh, 2.4rem);
+  left: 0; right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: var(--story-gold-hot);
+}
+
+/* ─�� Voiceover: scrub-lit, golden line ───────────────────────── */
+.story__voiceover {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1rem + 1vw, 1.5rem);
+  line-height: 1.65;
+  color: var(--color-cine-text);
+  text-wrap: pretty;
+}
+
+.story__voiceover .vw {
+  display: inline;
+  opacity: 1;
+}
+
+.story__voiceover em {
+  font-style: italic;
+  color: var(--story-gold-hot);
+  text-shadow: 0 0 26px rgba(238, 194, 127, 0.45);
 }
 
 .story__source {
@@ -178,457 +428,111 @@ canvas.story__ambient {
   font-size: var(--text-xs);
   letter-spacing: 0.08em;
   color: var(--color-cine-text-muted);
-  opacity: 0.75;
+  opacity: 0.85;
 }
 
-/* Date stamp — top of card */
-.story__date {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-cine-text-muted);
-  opacity: 0.8;
-  margin-bottom: var(--space-3);
-  white-space: nowrap;
-}
-
-/* ── Chapter track ──────────────────────────────────────────────── */
-.story__track {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-24);
-  /* the rail owns the right edge; the track must not run under it.
-     rail footprint = tap cell + list padding + border:
-     44px + 2*12px + 2px, plus one step breathing room. */
-  padding-right: calc(var(--tap-min) + (2 * var(--space-3)) + 2px + var(--space-2));
-}
-
-/* ── Chapter card ───────────────────────────────────────────────── */
-html.js-story .story__chapter {
-  min-height: 130dvh;
-  display: flex;
-  /* height varies by content; ScrollTrigger pins each card in turn */
-}
-
-.story__chapter-inner {
-  position: sticky;
-  top: calc(var(--section-padding) + var(--safe-top));
-  align-self: flex-start;
-  width: 100%;
-  max-width: 38rem;
-  margin-inline: auto;
-}
-
-/* ── Quote block: the chat thread ────────────────────────────────── */
-/* The quote is the thread itself: an uncluttered vertical stack of
-   message bubbles and letter cards. No wall, no scrim box — the
-   ambient night shows between messages and each bubble carries its
-   own quiet fill so every line stays legible. */
-.story__quote {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin: 0 0 var(--space-6);
-  padding: 0;
-  border: 0;
-  background: none;
-}
-
-/* ── Message bubbles ─────────────────────────────────────────────── */
-/* Him speaks from the left in the accent tint, her from the right in
-   the warm glow tint. The [data-speaker] hook is live on every
-   message: these selectors match real attributes in the markup. */
-.story__msg {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  max-width: 82%;
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-lg);
-  overflow-wrap: anywhere;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
-}
-
-.story__msg[data-speaker="him"] {
-  align-self: flex-start;
-  background: var(--story-bubble-him);
-  border: 1px solid rgba(212, 168, 106, 0.3);
-  border-bottom-left-radius: var(--radius-sm);
-}
-
-.story__msg[data-speaker="her"] {
-  align-self: flex-end;
-  background: var(--story-bubble-her);
-  border: 1px solid rgba(232, 192, 136, 0.38);
-  border-bottom-right-radius: var(--radius-sm);
-  box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.35),
-    0 0 22px rgba(232, 192, 136, 0.12);
-}
-
-/* Timestamp chip: a small pill above the words. Pure presentation —
-   the text inside is byte-identical to the DM timestamp, so the
-   verbatim harness (whitespace-collapsed textContent) stays green. */
-.story__ts {
-  display: inline-block;
-  align-self: flex-start;
-  max-width: 100%;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.04em;
-  line-height: 1.5;
-  color: var(--color-cine-text-muted);
-  background: rgba(10, 10, 15, 0.55);
-  border: 1px solid var(--color-cine-border);
-  border-radius: var(--radius-pill);
-  padding: var(--space-1) var(--space-3);
-  overflow-wrap: anywhere;
-  opacity: 0.9;
-}
-
-.story__msg[data-speaker="her"] .story__ts {
-  align-self: flex-end;
-  border-color: rgba(232, 192, 136, 0.3);
-}
-
-.story__msg-text {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-md);
-  line-height: 1.6;
-  color: var(--color-cine-text);
-  overflow-wrap: anywhere;
-}
-
-/* Sender stamp: a small caps tag naming the voice. */
-.story__who {
-  display: block;
-  margin-bottom: var(--space-1);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-style: normal;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-cine-accent);
-}
-
-.story__msg[data-speaker="her"] .story__who {
-  color: var(--color-cine-accent-glow);
-}
-
-/* ── Letter cards: the long confessions ──────────────────────────── */
-/* Full-width, scrim-backed, serif-italic reading cards for the three
-   long letters (ch5, ch11, ch13). The scrim + backdrop-filter are the
-   legibility floor here, so the ember field never costs contrast. */
-.story__letter {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  position: relative;
-  padding: var(--space-8) var(--space-6);
-  border: 1px solid rgba(212, 168, 106, 0.32);
-  border-radius: var(--radius-lg);
-  background: var(--story-scrim);
-  -webkit-backdrop-filter: blur(7px) saturate(115%);
-  backdrop-filter: blur(7px) saturate(115%);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
-  overflow-wrap: anywhere;
-}
-
-.story__letter::before {
-  content: '\201C';
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-4);
-  font-family: var(--font-display);
-  font-size: calc(var(--text-2xl) * 1.8);
-  line-height: 1;
-  color: var(--color-cine-accent);
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-.story__letter .story__ts {
-  position: relative;
-}
-
-.story__letter-text {
-  position: relative;
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-style: italic;
-  line-height: 1.65;
-  color: var(--color-cine-text);
-  overflow-wrap: anywhere;
-}
-
-.story__letter-text .story__who {
-  font-family: var(--font-mono);
-  font-style: normal;
-}
-
-/* ── Voiceover: one line from the narrator ───────────────────────── */
-.story__voiceover {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  color: var(--color-cine-text-muted);
-  opacity: 0.9;
-  margin: 0;
-  padding-left: var(--space-2);
-  border-left: 2px solid transparent;
-  transition: border-color var(--duration-normal) var(--ease-out);
-}
-
-.story__chapter:hover .story__voiceover {
-  border-left-color: var(--color-cine-accent);
-}
-
-.story__chapter:focus-within .story__voiceover {
-  border-left-color: var(--color-cine-accent-glow);
-}
-
-/* ── Staged reveal: base states the page already reads in ─────────
-   The fromTo in story.js scrubs chapter opacity/y; these are the
-   resting and hover states between scrubs. Nothing here is allowed
-   to be a hidden state: with GSAP blocked the very same cascade is
-   what a visitor sees, and it is the finished page. */
-html.js-story .story__chapter {
-  will-change: opacity, transform;
-}
-
-.story__chapter {
-  transform-origin: center bottom;
-}
-
-.story__quote,
-.story__msg,
-.story__letter,
-.story__voiceover,
-.story__source,
-.story__kicker,
-.story__date,
-.story__title {
-  opacity: 1;
-  transform: none;
-}
-
-.story__progress-item,
-.story__progress-list {
-  opacity: 1;
-  transform: none;
-}
-
-/* ── Nav rail ─────────────────────────────────────────────────────
-   A rail of fourteen links. The container stays inert so it never
-   eats a click meant for the story; every link takes its pointer
-   back and keeps a 44px target. Labels ride data-num and appear on
-   hover/focus, permanently from 901px up.
-
-   The rail is not a staged-reveal surface: it stays hidden until
-   story.js sets body.is-in-story, so its resting state below is
-   deliberately the hidden one. The chapter prose itself is what has
-   to read without JS, and it does. */
+/* ── Thread rail: 01→14 glowing progress ─────────────────────── */
 .story__progress {
-  position: fixed;
-  right: var(--gutter);
-  top: 50%;
-  transform: translateY(-50%);
+  position: sticky;
+  bottom: var(--space-6);
   z-index: var(--story-layer-rail);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity var(--duration-normal) var(--ease-out),
-    visibility 0s var(--duration-normal);
-}
-
-body.is-in-story .story__progress.is-visible {
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity var(--duration-normal) var(--ease-out),
-    visibility 0s 0s;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-12);
 }
 
 .story__progress-list {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: rgba(20, 20, 32, 0.72);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--color-cine-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-radius: 999px;
+  background: rgba(12, 10, 16, 0.72);
+  border: 1px solid rgba(212, 168, 106, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .story__progress-item {
   position: relative;
-  display: block;
-  /* WCAG 2.2: the target is the whole 44px cell, the dot is drawn
-     inside it. Width/height stay at the dot measure so the rail
-     keeps its hairline presence on a phone. */
-  width: var(--tap-min);
-  height: var(--tap-min);
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  pointer-events: auto;
-  border-radius: var(--radius-sm);
-  color: var(--color-cine-text-muted);
-  text-decoration: none;
-  transition: background var(--duration-fast) var(--ease-out);
+  width: var(--story-rail-dot);
+  height: var(--story-rail-dot);
+  min-width: var(--story-rail-dot);
+  min-height: var(--story-rail-dot);
+  border-radius: 50%;
+  background: rgba(212, 168, 106, 0.25);
+  transition: background 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
 }
 
 .story__progress-item::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--story-rail-dot);
-  height: var(--story-rail-dot);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--color-cine-border);
-  transition:
-    background var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out);
-}
-
-/* the data-num label, revealed on hover/focus */
-.story__progress-item::after {
   content: attr(data-num);
   position: absolute;
-  right: calc(100% + var(--space-2));
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  line-height: 1;
+  font-size: 9px;
+  letter-spacing: 0.1em;
   color: var(--color-cine-text-muted);
-  background: rgba(10, 10, 15, 0.9);
-  border: 1px solid var(--color-cine-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-2);
-  white-space: nowrap;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--duration-fast) var(--ease-out);
+  transition: opacity 0.3s ease;
 }
 
-.story__progress-item:hover::after,
-.story__progress-item:focus-visible::after {
-  opacity: 1;
-}
+.story__progress-item:hover::before { opacity: 1; }
 
-.story__progress-item:hover::before {
-  background: var(--color-cine-accent-glow);
-}
-
-.story__progress-item:focus-visible {
-  outline: 2px solid var(--color-cine-accent-glow);
-  outline-offset: 2px;
-}
-
-/* the active chapter burns: glow, grow, and its label stays up */
 .story__progress-item.is-active {
-  background: rgba(212, 168, 106, 0.08);
+  background: var(--story-gold-hot);
+  transform: scale(1.5);
+  box-shadow: 0 0 16px rgba(255, 227, 174, 0.9), 0 0 40px rgba(238, 194, 127, 0.5);
 }
 
-.story__progress-item.is-active::before {
-  background: var(--color-cine-accent);
-  transform: translate(-50%, -50%) scale(1.5);
-  box-shadow: 0 0 14px var(--color-cine-accent-glow);
+.story__progress-item.is-read {
+  background: rgba(238, 194, 127, 0.75);
+  box-shadow: 0 0 8px rgba(238, 194, 127, 0.4);
 }
 
-.story__progress-item.is-active::after {
-  opacity: 1;
-  color: var(--color-cine-accent-glow);
-  border-color: rgba(212, 168, 106, 0.4);
+/* the thread itself: fills gold behind the dots */
+.story__progress-list::before {
+  content: "";
+  position: absolute;
+  left: var(--space-5);
+  right: var(--space-5);
+  top: 50%;
+  height: 1px;
+  background: rgba(212, 168, 106, 0.25);
 }
 
-.story__progress-item[aria-current="true"]::before {
-  background: var(--color-cine-accent);
-  transform: translate(-50%, -50%) scale(1.5);
-  box-shadow: 0 0 14px var(--color-cine-accent-glow);
+.story__progress-list::after {
+  content: "";
+  position: absolute;
+  left: var(--space-5);
+  top: 50%;
+  height: 1px;
+  width: calc(var(--story-rail-progress, 0) * (100% - var(--space-5) * 2));
+  background: linear-gradient(90deg, rgba(224, 124, 62, 0.9), var(--story-gold-hot));
+  box-shadow: 0 0 12px rgba(238, 194, 127, 0.7);
 }
 
-/* ============================================================
-   VIEWPORTS — 375px-first base, then two widening steps
-   ============================================================ */
-
-/* base (≤480px) is already 375px-first: the bubble padding, type
-   scale, voiceover size and rail metrics above ARE the small screen.
-   Bubbles breathe at near-full width so 375px threads never clip. */
-
-/* 481px–900px: a wider page, a fatter dot */
-@media (min-width: 481px) and (max-width: 900px) {
-  .section--story {
-    --story-column: 46rem;
-    --story-rail-dot: 12px;
-    --story-scrim: linear-gradient(
-      90deg,
-      rgba(10, 10, 15, 0.9) 0%,
-      rgba(10, 10, 15, 0.8) 60%,
-      rgba(10, 10, 15, 0.5) 100%
-    );
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .story__chamber {
+    padding: 1.2rem 0.9rem;
+    border-radius: 22px;
   }
 
-  .story__msg {
-    max-width: 78%;
+  .story__artifact {
+    min-height: 300px;
+    max-height: 62vh;
   }
 
-  .story__msg-text {
-    font-size: var(--text-md);
-  }
+  .story__progress-list { gap: var(--space-2); }
 }
 
-/* 901px+: the full stage */
-@media (min-width: 901px) {
-  .section--story {
-    --story-column: 52rem;
-    --story-rail-dot: 12px;
-  }
-
-  .story__track {
-    padding-right: var(--space-16);
-  }
-
-  .story__chapter-inner {
-    max-width: 44rem;
-  }
-
-  .story__msg {
-    max-width: 72%;
-  }
-
-  .story__letter {
-    padding: var(--space-10) var(--space-8);
-  }
-
-  /* the rail reads as a numbered ladder here, always */
-  .story__progress-item::after {
-    opacity: 0.75;
-  }
-
-  .story__progress-item:hover::after,
-  .story__progress-item:focus-visible::after,
-  .story__progress-item.is-active::after,
-  .story__progress-item[aria-current="true"]::after {
-    opacity: 1;
-  }
+@media (min-width: 900px) {
+  .section--story { --story-column: 46rem; }
 }
 
-/* ============================================================
-   REDUCED MOTION — frozen frame, zero movement
-   No animation, no loop, no canvas. The gradient holds the same
-   opacity its final keyframe held (0.9) and the chapter stack
-   un-sticks: a plain, complete, readable archive.
-   ============================================================ */
-
+@media (min-width: 1280px) {
+  .section--story { --story-column: 50rem; }
+}
