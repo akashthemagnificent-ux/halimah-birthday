@@ -50,14 +50,16 @@ canvas.story__ambient,
 
 .story__atmosphere {
   background:
-    radial-gradient(68% 46% at 50% -4%, rgba(224, 124, 62, 0.2) 0%, rgba(224, 124, 62, 0) 62%),
-    radial-gradient(48% 36% at 88% 34%, rgba(212, 168, 106, 0.14) 0%, rgba(212, 168, 106, 0) 68%),
-    radial-gradient(56% 40% at 6% 76%, rgba(124, 88, 190, 0.12) 0%, rgba(124, 88, 190, 0) 70%),
+    radial-gradient(68% 46% at 50% -4%, rgba(224, 124, 62, 0.26) 0%, rgba(224, 124, 62, 0) 62%),
+    radial-gradient(48% 36% at 88% 34%, rgba(212, 168, 106, 0.2) 0%, rgba(212, 168, 106, 0) 68%),
+    radial-gradient(56% 40% at 6% 76%, rgba(124, 88, 190, 0.18) 0%, rgba(124, 88, 190, 0) 70%),
     linear-gradient(180deg, #14101c 0%, #0a0a0f 38%, #0a0a0f 68%, #170f0b 100%);
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  animation: story-atmosphere-drift 46s var(--ease-in-out) infinite;
+  animation: story-atmosphere-drift 26s var(--ease-in-out) infinite;
   will-change: transform, opacity;
+  /* chamber-reactive warmth: JS drives --story-glow 0..1 as she travels */
+  filter: saturate(calc(1 + var(--story-glow, 0) * 0.35)) brightness(calc(1 + var(--story-glow, 0) * 0.12));
 }
 
 .story__nebula i {
@@ -70,29 +72,46 @@ canvas.story__ambient,
 }
 
 .story__nebula i:nth-child(1) {
-  width: 60vmax; height: 40vmax; left: -16vmax; top: 6%;
-  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.16), transparent 70%);
+  width: 72vmax; height: 48vmax; left: -18vmax; top: 2%;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.24), transparent 70%);
 }
 .story__nebula i:nth-child(2) {
-  width: 52vmax; height: 38vmax; right: -14vmax; top: 44%;
-  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.13), transparent 70%);
-  animation-duration: 14s; animation-delay: -5s;
+  width: 62vmax; height: 44vmax; right: -16vmax; top: 42%;
+  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.2), transparent 70%);
+  animation-duration: 11s; animation-delay: -4s;
 }
 .story__nebula i:nth-child(3) {
-  width: 56vmax; height: 40vmax; left: 6%; bottom: -12vmax;
-  background: radial-gradient(closest-side, rgba(124, 88, 190, 0.14), transparent 70%);
-  animation-duration: 22s; animation-delay: -9s;
+  width: 66vmax; height: 46vmax; left: 4%; bottom: -14vmax;
+  background: radial-gradient(closest-side, rgba(124, 88, 190, 0.22), transparent 70%);
+  animation-duration: 15s; animation-delay: -7s;
+}
+.story__nebula i:nth-child(4) {
+  width: 40vmax; height: 30vmax; left: 30%; top: 30%;
+  background: radial-gradient(closest-side, rgba(255, 211, 130, 0.12), transparent 70%);
+  animation-duration: 9s; animation-delay: -2s;
 }
 
 @keyframes story-nebula-drift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(26px, -34px, 0) scale(1.08); }
+  from { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  to { transform: translate3d(44px, -56px, 0) scale(1.14) rotate(4deg); }
 }
 
 canvas.story__ambient {
   display: block;
   opacity: 0.85;
   mix-blend-mode: screen;
+}
+
+canvas.story__threads {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--story-layer-ambient);
+  pointer-events: none;
+  user-select: none;
+  display: block;
+  opacity: 0.9;
 }
 
 @keyframes story-atmosphere-drift {

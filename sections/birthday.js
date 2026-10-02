@@ -674,9 +674,11 @@
       if (!running) return;
       var t = performance.now() * 0.001;
 
-      // eased pointer parallax (camera-space drift, never snapped)
-      pointerEase.x += ((pointer.seen ? pointer.x : 0) - pointerEase.x) * 0.045;
-      pointerEase.y += ((pointer.seen ? pointer.y : 0) - pointerEase.y) * 0.045;
+      /* Cursor compass: fast, decisive follow — the scene swings WITH
+         the hand. pointer is -1..1 across the section; the eased twin
+         converges in a handful of frames so the turn feels alive. */
+      pointerEase.x += ((pointer.seen ? pointer.x : 0) - pointerEase.x) * 0.16;
+      pointerEase.y += ((pointer.seen ? pointer.y : 0) - pointerEase.y) * 0.16;
 
       // globe + cake life
       globeMat.uniforms.u_time.value = t;
@@ -737,22 +739,29 @@
       }
       sparks.mesh.instanceMatrix.needsUpdate = true;
 
-      /* Cursor orbit: the camera swings around the scene toward the
-         hand (x + y follow the pointer direction) while the gaze
-         counter-shifts, so the whole celebration turns WITH the cursor
-         instead of drifting away. Absolute set every frame: the offset
-         can never accumulate, so nothing shrinks and scroll never snaps. */
+      /* 360-degree cursor orbit: the camera rig swings around the
+         celebration toward the hand. Full left cursor = full left swing,
+         full right = full right, top/bottom tilt the rig up and down —
+         the whole scene turns WITH the cursor through the full field.
+         Absolute set every frame from camBase (scroll owns that), so the
+         offset can never accumulate: nothing shrinks, scroll never snaps.
+         Distance from the scene never changes, only the angle. */
+      var swing = pointerEase.x * 1.0;
+      var orbitAngle = swing * 0.85;
+      var orbitR = Math.sqrt(camBase.x * camBase.x + camBase.z * camBase.z);
+      var baseAngle = Math.atan2(camBase.x, camBase.z);
+      var newAngle = baseAngle + orbitAngle;
       camera.position.set(
-        camBase.x + pointerEase.x * 0.9,
-        camBase.y + pointerEase.y * 0.5,
-        camBase.z
+        Math.sin(newAngle) * orbitR,
+        camBase.y + pointerEase.y * 0.9,
+        Math.cos(newAngle) * orbitR
       );
       camera.lookAt(
-        1.9 - pointerEase.x * 0.45,
-        -0.3 + progress * 0.5 - pointerEase.y * 0.25,
+        1.9 - swing * 1.15,
+        -0.3 + progress * 0.5 - pointerEase.y * 0.55,
         -0.6
       );
-      camera.rotateZ(pointerEase.x * 0.03);
+      camera.rotateZ(swing * 0.06);
 
       renderer.render(scene, camera);
       rafId = window.requestAnimationFrame(frame);

@@ -310,6 +310,221 @@
     return { start, stop, state };
   }
 
+  /* ================================================================
+     THREAD CANVAS — the constellation behind the chambers. Golden
+     threads stitch every chamber to the next; each thread brightens
+     as she reaches it, and the precious chambers pulse like
+     heartbeats. Cursor stirs nearby threads. Fully procedural 2D.
+     ================================================================ */
+  function createThreadCanvas(section, chapters) {
+    const canvas = section.querySelector('canvas.story__threads');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    if (!ctx) return { setProgress() {}, nudge() {} };
+
+    let w = 0;
+    let h = 0;
+    let dpr = 1;
+    let rafId = 0;
+    let running = false;
+    let visible = true;
+    let progress = 0;
+    const pointer = { x: 0.5, y: 0.3, active: false };
+    const rand = (() => {
+      let s = 20260826;
+      return () => {
+        s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0;
+        return s / 4294967296;
+      };
+    })();
+
+    // drifting anchor stars seeded once
+    const stars = [];
+    for (let i = 0; i < 90; i += 1) {
+      stars.push({
+        bx: rand(), by: rand(), r: 0.5 + rand() * 1.6,
+        drift: 0.2 + rand() * 0.8, phase: rand() * Math.PI * 2,
+        gold: rand() < 0.55,
+      });
+    }
+
+    function resize() {
+      const rect = section.getBoundingClientRect();
+      w = Math.max(1, Math.floor(rect.width || window.innerWidth || 1));
+      h = Math.max(1, Math.floor(rect.height || window.innerHeight || 1));
+      dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // chamber centres in canvas space (viewport-relative)
+    function centres() {
+      const top = canvas.getBoundingClientRect().top;
+      return chapters.map((ch) => {
+        const r = ch.getBoundingClientRect();
+        return {
+          x: r.left - canvas.getBoundingClientRect().left + r.width / 2,
+          y: r.top - top + r.height / 2,
+          w: r.width,
+          precious: ch.classList.contains('is-precious'),
+        };
+      });
+    }
+
+    function draw(time) {
+      if (!running) { rafId = 0; return; }
+      const t = time * 0.001;
+      ctx.clearRect(0, 0, w, h);
+      const pts = centres();
+      const n = pts.length;
+
+      // anchor stars
+      for (let i = 0; i < stars.length; i += 1) {
+        const s = stars[i];
+        const x = ((s.bx + t * 0.004 * s.drift) % 1) * w;
+        const y = (s.by * h + Math.sin(t * 0.3 + s.phase) * 8 + h) % h;
+        const tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.8 + s.phase));
+        const a = (0.1 + tw * 0.3).toFixed(3);
+        ctx.fillStyle = s.gold ? 'rgba(238,194,127,' + a + ')' : 'rgba(200,170,220,' + a + ')';
+        ctx.beginPath();
+        ctx.arc(x, y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // threads between consecutive chambers. A segment draws only
+      // while at least one of its chambers is near the viewport —
+      // otherwise a single line would span the whole journey.
+      const lit = progress * (n - 1);
+      const MARGIN = 500;
+      for (let i = 0; i < n - 1; i += 1) {
+        const a = pts[i];
+        const b = pts[i + 1];
+        const aNear = a.y > -MARGIN && a.y < h + MARGIN;
+        const bNear = b.y > -MARGIN && b.y < h + MARGIN;
+        if (!aNear && !bNear) continue;
+        const drawA = { x: a.x, y: Math.max(-MARGIN, Math.min(h + MARGIN, a.y)) };
+        const drawB = { x: b.x, y: Math.max(-MARGIN, Math.min(h + MARGIN, b.y)) };
+        const ax = drawA.x;
+        const ay = drawA.y;
+        const bx = drawB.x;
+        const by = drawB.y;
+        const seg = Math.max(0, Math.min(1, lit - i));
+        const segs = 26;
+        ctx.lineWidth = 1.4;
+        for (let sgm = 0; sgm < segs; sgm += 1) {
+          const f0 = sgm / segs;
+          const f1 = (sgm + 1) / segs;
+          const bright = f1 <= seg ? 1 : 0.16;
+          const mx = ax + (bx - ax) * ((f0 + f1) / 2);
+          const sway = Math.sin(t * 0.9 + i * 1.7 + f0 * 5) * 14 * (1 - Math.abs(f0 - 0.5) * 2);
+          // cursor stir: threads lean away near the hand
+          let px = 0;
+          let py = 0;
+          if (pointer.active) {
+            const dx = (pointer.x * w - mx);
+            const dy = (pointer.y * h - (ay + (by - ay) * ((f0 + f1) / 2)));
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 190 && d > 1) {
+              const push = (1 - d / 190) * 26;
+              px = (dx / d) * push;
+              py = (dy / d) * push;
+            }
+          }
+          const x0 = ax + (bx - ax) * f0 + sway * f0 + px * f0;
+          const y0 = ay + (by - ay) * f0 + py * f0;
+          const x1 = ax + (bx - ax) * f1 + sway * f1 + px * f1;
+          const y1 = ay + (by - ay) * f1 + py * f1;
+          const shimmer = (0.42 + 0.22 * Math.sin(t * 2 + i + f0 * 6)).toFixed(3);
+          const glow = bright > 0.5
+            ? 'rgba(255,227,174,' + shimmer + ')'
+            : 'rgba(212,168,106,0.14)';
+          ctx.strokeStyle = glow;
+          ctx.shadowColor = bright > 0.5 ? 'rgba(238,194,127,0.8)' : 'transparent';
+          ctx.shadowBlur = bright > 0.5 ? 8 : 0;
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+
+        // node pulse on each chamber
+        for (let k = 0; k < 2; k += 1) {
+          const p = k === 0 ? a : b;
+          const idx = k === 0 ? i : i + 1;
+          if (p.y < -100 || p.y > h + 100) continue;
+          const on = idx <= lit + 0.001;
+          const pulse = p.precious
+            ? 1 + Math.sin(t * 2.6 + idx) * 0.35
+            : 1 + Math.sin(t * 1.4 + idx) * 0.12;
+          const r = (on ? 5 : 3) * pulse;
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
+          const core = on ? '255,227,174' : '212,168,106';
+          grad.addColorStop(0, 'rgba(' + core + ',' + (on ? 0.95 : 0.4) + ')');
+          grad.addColorStop(1, 'rgba(' + core + ',0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      rafId = window.requestAnimationFrame(draw);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      resize();
+      if (!rafId) rafId = window.requestAnimationFrame(draw);
+    }
+
+    function stop() {
+      running = false;
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+    }
+
+    section.addEventListener('pointermove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      pointer.x = (e.clientX - rect.left) / rect.width;
+      pointer.y = (e.clientY - rect.top) / rect.height;
+      pointer.active = true;
+    }, { passive: true });
+    section.addEventListener('pointerleave', () => { pointer.active = false; }, { passive: true });
+
+    let resizeQueued = false;
+    window.addEventListener('resize', () => {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      window.requestAnimationFrame(() => {
+        resizeQueued = false;
+        if (running) resize();
+      });
+    }, { passive: true });
+
+    if (typeof IntersectionObserver === 'function') {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          visible = entry.isIntersecting;
+          if (visible) start();
+          else stop();
+        });
+      }, { threshold: 0 });
+      observer.observe(section);
+    } else {
+      start();
+    }
+
+    return {
+      setProgress(v) { progress = Math.max(0, Math.min(1, v || 0)); },
+      nudge() { resize(); },
+    };
+  }
+
   function boot() {
     if (booted) return;
     const section = document.getElementById(SECTION_ID);
@@ -338,6 +553,7 @@
     });
 
     const ambient = createAmbientEngine(section);
+    const threads = createThreadCanvas(section, chapters);
     createLightbox(section);
 
     // ── Cursor tilt + glare on every artifact ───────────────────
@@ -467,6 +683,8 @@
         onUpdate: (self) => {
           list.style.setProperty('--story-rail-progress', self.progress.toFixed(4));
           ambient.state.depth = self.progress;
+          threads.setProgress(self.progress);
+          section.style.setProperty('--story-glow', self.progress.toFixed(4));
         },
         onToggle: (self) => {
           ambient.state.active = self.isActive;
