@@ -1,25 +1,28 @@
 /* ============================================================
-   quotes — THE WALL OF ZAINAB (personal site, full motion)
+   quotes — THE WALL OF ZAINAB : the orbital evidence locker
 
-   Orbital evidence locker for 80 quote-bot cards (11 ultra rare).
-   Data-driven: cards render from content/quotes-manifest.json, so new
-   quotes merge in with zero markup edits. Layers:
+   PHASE 1 — pinned orbital hero (260vh of scroll)
+     Eighty textured quote cards hang on two counter-rotating rings
+     around a glowing ember seal, tilted like a galaxy disc. The rig
+     turns with the cursor (fixed radius — distance never changes, so
+     nothing can shrink). Scrolling collapses the orbit: the rings
+     fling outward and down, the seal flares, and the DOM wall rises
+     to take over. Pure function of progress, so it reverses exactly.
 
-   - Three.js orbit void: numbered evidence tags drifting in depth +
-     rising ember sparks, cursor orbit (camBase pattern: distance fixed,
-     angle follows the hand — nothing can shrink).
-   - Threat headline: kinetic word slam-in on entry.
-   - Wall: batch-cascade entrance, EVIDENCE stamp on every card, gold
-     foil on rares, cursor tilt + glare, tap-to-hold lightbox,
-     "shake the wall" FLIP shuffle, live counter.
-   - Full motion always. One renderer, one rAF, pause off-screen.
+   PHASE 2 — the DOM wall
+     Same 80 exhibits as glass cards: EVIDENCE stamp slam, gold foil
+     on the 11 ultra-rares (2-column heroes), cursor tilt + glare,
+     tap-to-hold lightbox, FLIP shuffle, live counter.
+
+   Full motion always. Data-driven from content/quotes-manifest.js
+   (plain script, so file:// previews need no fetch).
    ============================================================ */
 (() => {
   'use strict';
 
   const SECTION_ID = 'quotes';
-  const CANVAS_SELECTOR = '#quotes-orbit';
-  const MANIFEST_URL = 'content/quotes-manifest.json';
+  const MANIFEST_GLOBAL = 'QUOTES_MANIFEST';
+  const HERO_END = '+=260%';
 
   let booted = false;
 
@@ -42,18 +45,37 @@
     };
   }
 
+  function readManifest() {
+    const data = window[MANIFEST_GLOBAL];
+    return Array.isArray(data) && data.length ? data : [];
+  }
+
+  function easeInOut(t) {
+    t = Math.max(0, Math.min(1, t));
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+
+  function easeOutCubic(t) {
+    t = Math.max(0, Math.min(1, t));
+    return 1 - Math.pow(1 - t, 3);
+  }
+
   /* ================================================================
-     Orbit void — evidence tags + embers in depth, cursor orbit.
+     ORBIT STAGE — two counter-rotating rings of textured cards
+     around an ember seal. One renderer, one rAF.
      ================================================================ */
-  function createOrbitVoid(section, canvas, count) {
+  function createOrbitStage(section, canvas, items) {
     const THREE = window.THREE;
     if (!THREE || !canvas) return null;
 
     let renderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        canvas, alpha: true, antialias: true,
-        powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false,
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+        failIfMajorPerformanceCraveat: false,
       });
     } catch (err) {
       return null;
@@ -61,85 +83,201 @@
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(window.devicePixelRatio || 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
 
-    const rand = makeRandom(6660);
+    const rand = makeRandom(90081);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    const camBase = { x: 0, y: 0, z: 9 };
-    camera.position.set(0, 0, 9);
+    scene.fog = new THREE.FogExp2(0x0d0a08, 0.038);
 
-    // evidence tags: small glowing numbered chips as sprites
-    const tagCount = Math.min(count, 40);
-    const tagGroup = new THREE.Group();
-    scene.add(tagGroup);
-    const tags = [];
-    const tagCanvas = document.createElement('canvas');
-    tagCanvas.width = 128;
-    tagCanvas.height = 64;
+    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 120);
+    const camBase = { x: 0, y: 2.15, z: 8.4 };
+    camera.position.set(0, 2.15, 8.4);
 
-    function tagTexture(label, rare) {
-      const ctx = tagCanvas.getContext('2d');
-      ctx.clearRect(0, 0, 128, 64);
-      ctx.fillStyle = rare ? 'rgba(60,38,8,0.92)' : 'rgba(20,14,10,0.92)';
-      ctx.strokeStyle = rare ? '#ffe3ae' : '#c9956b';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.roundRect(4, 8, 120, 48, 10);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = rare ? '#ffe3ae' : '#f5ebe0';
-      ctx.font = 'bold 26px monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, 64, 34);
-      const tex = new THREE.CanvasTexture(tagCanvas);
+    // ── seal: the glowing core the quotes orbit ────────────────
+    function makeGlowTexture(THREE) {
+      const size = 256;
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+      g.addColorStop(0, 'rgba(255,247,232,1)');
+      g.addColorStop(0.14, 'rgba(255,214,150,0.92)');
+      g.addColorStop(0.34, 'rgba(240,152,74,0.44)');
+      g.addColorStop(0.62, 'rgba(224,124,62,0.14)');
+      g.addColorStop(1, 'rgba(224,124,62,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, size, size);
+      const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
       return tex;
     }
+    const glowTex = makeGlowTexture(THREE);
 
-    for (let i = 0; i < tagCount; i += 1) {
-      const rare = i % 7 === 0;
-      const tex = tagTexture(rare ? '★' + String(i + 1).padStart(2, '0') : String(i + 1).padStart(2, '0'), rare);
-      const mat = new THREE.SpriteMaterial({
-        map: tex, transparent: true, depthWrite: false,
-        opacity: rare ? 0.95 : 0.7,
+    const sealGroup = new THREE.Group();
+    scene.add(sealGroup);
+
+    const coreMat = new THREE.MeshBasicMaterial({ color: 0xffd9a0, transparent: true, opacity: 0.95 });
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.52, 3), coreMat);
+    core.material.wireframe = false;
+    sealGroup.add(core);
+
+    const shellMat = new THREE.MeshBasicMaterial({ color: 0xe07c3e, transparent: true, opacity: 0.32, wireframe: true });
+    const shell = new THREE.Mesh(new THREE.IcosahedronGeometry(0.78, 1), shellMat);
+    sealGroup.add(shell);
+
+    const haloMat = new THREE.SpriteMaterial({
+      map: glowTex, color: 0xffb45e, transparent: true,
+      opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending,
+    });
+    const halo = new THREE.Sprite(haloMat);
+    halo.scale.set(7.2, 7.2, 1);
+    sealGroup.add(halo);
+
+    const coreLight = new THREE.PointLight(0xffb45e, 26, 16, 1.7);
+    sealGroup.add(coreLight);
+
+    // ── rings of quote cards ──────────────────────────────────
+    const loader = new THREE.TextureLoader();
+    const cardGeo = new THREE.PlaneGeometry(1.72, 0.9);
+    const edgeGeo = new THREE.PlaneGeometry(1.86, 1.04);
+
+    const ringOuter = new THREE.Group();
+    const ringInner = new THREE.Group();
+    const rig = new THREE.Group();
+    rig.add(ringOuter, ringInner, sealGroup);
+    rig.rotation.x = -0.22;
+    scene.add(rig);
+
+    const cards = [];
+    const disposables = [cardGeo, edgeGeo, coreMat, shellMat, haloMat, glowTex];
+
+    const edgeMat = new THREE.MeshBasicMaterial({
+      color: 0xeec27f, transparent: true, opacity: 0.5,
+      side: THREE.BackSide, depthWrite: false,
+    });
+    disposables.push(edgeMat);
+
+    items.forEach((item, i) => {
+      const isOuter = i % 2 === 0;
+      const ring = isOuter ? ringOuter : ringInner;
+      const ringCount = isOuter
+        ? Math.ceil(items.length / 2)
+        : Math.floor(items.length / 2);
+      const idxInRing = isOuter ? Math.floor(i / 2) : Math.floor(i / 2);
+      const angle = (idxInRing / ringCount) * Math.PI * 2 + (isOuter ? 0 : Math.PI / ringCount);
+      const radius = isOuter ? 4.5 + rand() * 0.35 : 2.85 + rand() * 0.3;
+      const y = isOuter ? (rand() - 0.5) * 0.5 : (rand() - 0.5) * 1.1;
+
+      const holder = new THREE.Group();
+      const face = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial({
+        color: 0xffffff, transparent: true, opacity: 1, side: THREE.DoubleSide,
+      }));
+      face.material.side = THREE.DoubleSide;
+      disposables.push(face.material);
+
+      // gold edge behind each card (reads as a lit exhibit)
+      const edge = new THREE.Mesh(edgeGeo, edgeMat);
+      edge.position.z = -0.012;
+      holder.add(edge);
+      holder.add(face);
+
+      loader.load(
+        item.thumb,
+        (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+          face.material.map = tex;
+          face.material.needsUpdate = true;
+        },
+        undefined,
+        () => {
+          // missing thumbnail: warm gradient plate, never a hole
+          const c = document.createElement('canvas');
+          c.width = 64; c.height = 36;
+          const cx = c.getContext('2d');
+          const g = cx.createLinearGradient(0, 0, 64, 36);
+          g.addColorStop(0, '#e07c3e');
+          g.addColorStop(1, '#7d3b1a');
+          cx.fillStyle = g;
+          cx.fillRect(0, 0, 64, 36);
+          const t = new THREE.CanvasTexture(c);
+          t.colorSpace = THREE.SRGBColorSpace;
+          disposables.push(t);
+          face.material.map = t;
+          face.material.needsUpdate = true;
+        }
+      );
+
+      holder.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+      holder.rotation.y = -angle + Math.PI / 2;
+      holder.rotation.x = (rand() - 0.5) * 0.22;
+      holder.rotation.z = (rand() - 0.5) * 0.12;
+
+      ring.add(holder);
+      cards.push({
+        holder,
+        face,
+        angle,
+        radius,
+        yBase: y,
+        // scattered collapse direction so the fling reads as an explosion
+        flingX: Math.cos(angle) * (1.6 + rand() * 2.2),
+        flingY: -(1.2 + rand() * 3.4),
+        flingZ: Math.sin(angle) * (1.2 + rand() * 2.0) + (rand() - 0.5) * 2,
+        spin: (rand() - 0.5) * 2.2,
+        tiltX: (rand() - 0.5) * 0.22,
+        tiltZ: (rand() - 0.5) * 0.12,
+        isOuter,
+        delay: rand() * 0.22,
+        rare: !!item.rare,
       });
-      const sp = new THREE.Sprite(mat);
-      const s = rare ? 1.15 : 0.7 + rand() * 0.5;
-      sp.scale.set(s * 1.6, s * 0.8, 1);
-      const ang = rand() * Math.PI * 2;
-      const rad = 2.6 + rand() * 3.4;
-      sp.position.set(Math.cos(ang) * rad, (rand() * 2 - 1) * 3.4, -1 - rand() * 4);
-      sp.userData = {
-        ang, rad, yBase: sp.position.y,
-        speed: 0.05 + rand() * 0.1,
-        bobAmp: 0.15 + rand() * 0.25,
-        phase: rand() * Math.PI * 2,
-      };
-      tagGroup.add(sp);
-      tags.push(sp);
-    }
+    });
 
-    // rising embers
-    const emberCount = 130;
-    const epos = new Float32Array(emberCount * 3);
+    // ── embers rising through the vault ────────────────────────
+    const EMBERS = 220;
+    const epos = new Float32Array(EMBERS * 3);
     const eseed = [];
-    for (let i = 0; i < emberCount; i += 1) {
-      epos[i * 3] = (rand() * 2 - 1) * 7;
-      epos[i * 3 + 1] = -4 + rand() * 9;
-      epos[i * 3 + 2] = -2 - rand() * 4;
-      eseed.push({ rise: 0.3 + rand() * 0.6, sway: 0.3 + rand() * 0.8, phase: rand() * Math.PI * 2 });
+    for (let i = 0; i < EMBERS; i += 1) {
+      epos[i * 3] = (rand() * 2 - 1) * 9;
+      epos[i * 3 + 1] = -3 + rand() * 8;
+      epos[i * 3 + 2] = (rand() * 2 - 1) * 5 - 1;
+      eseed.push({ rise: 0.3 + rand() * 0.8, sway: 0.2 + rand() * 0.7, phase: rand() * Math.PI * 2 });
     }
     const egeo = new THREE.BufferGeometry();
-    egeo.setAttribute('position', new THREE.BufferAttribute(epos, 3));
+    const eattr = new THREE.BufferAttribute(epos, 3);
+    eattr.setUsage(THREE.DynamicDrawUsage);
+    egeo.setAttribute('position', eattr);
     const emat = new THREE.PointsMaterial({
-      color: 0xe8a33d, size: 0.05, transparent: true, opacity: 0.8,
+      color: 0xf0984a, size: 0.055, transparent: true, opacity: 0.9,
       depthWrite: false, blending: THREE.AdditiveBlending,
     });
     const embers = new THREE.Points(egeo, emat);
     embers.frustumCulled = false;
     scene.add(embers);
+    disposables.push(egeo, emat);
 
+    // ── dust field for depth ──────────────────────────────────
+    const DUST = 420;
+    const dpos = new Float32Array(DUST * 3);
+    for (let i = 0; i < DUST; i += 1) {
+      dpos[i * 3] = (rand() * 2 - 1) * 16;
+      dpos[i * 3 + 1] = rand() * 12 - 4;
+      dpos[i * 3 + 2] = -10 - rand() * 10;
+    }
+    const dgeo = new THREE.BufferGeometry();
+    dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
+    const dmat = new THREE.PointsMaterial({
+      color: 0xf5ebe0, size: 0.03, transparent: true, opacity: 0.55,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    });
+    const dust = new THREE.Points(dgeo, dmat);
+    dust.frustumCulled = false;
+    scene.add(dust);
+    disposables.push(dgeo, dmat);
+
+    // ── state ─────────────────────────────────────────────────
     const pointer = { x: 0, y: 0, seen: false };
     const ease = { x: 0, y: 0 };
     let progress = 0;
@@ -154,56 +292,132 @@
       camera.updateProjectionMatrix();
     }
 
+    // Pure function of progress: 0 = full orbit, 1 = fully collapsed.
+    function applyProgress(p) {
+      const t = performance.now() * 0.001;
+      const collapse = easeInOut(p);
+      /* Hold the finished orbit for the first fifth of the pin, then blow it
+         out over the remaining travel — so the collapse reads as one long
+         explosion instead of an instant vanish. */
+      const push = easeOutCubic(Math.max(0, Math.min(1, (collapse - 0.22) / 0.78)));
+
+      for (let i = 0; i < cards.length; i += 1) {
+        const c = cards[i];
+        // each card follows its own delayed slice of the collapse
+        const local = Math.max(0, Math.min(1, (push - c.delay) / (1 - c.delay)));
+        const l = easeOutCubic(local);
+        // the ring spins up as it throws
+        const angle = c.angle + collapse * (c.isOuter ? 2.6 : -3.6);
+        // travel grows with the throw but stays on screen: capped radius
+        const r = c.radius + l * 2.2;
+        c.holder.position.set(
+          Math.cos(angle) * r + c.flingX * l * 0.55,
+          c.yBase + c.flingY * l * 0.5 + (1 - l) * Math.sin(t * 0.4 + c.angle * 3) * 0.09,
+          Math.sin(angle) * r + c.flingZ * l * 0.55
+        );
+        c.holder.rotation.y = -angle + Math.PI / 2 + l * c.spin * 1.6;
+        c.holder.rotation.x = c.tiltX * (1 - l) + l * c.spin * 1.1;
+        c.holder.rotation.z = c.tiltZ * (1 - l) + l * c.spin * 2.0;
+        // fade late: the cards stay solid for most of the flight
+        c.face.material.opacity = Math.max(0, 1 - Math.max(0, (l - 0.55) / 0.45));
+        const edge = c.holder.children[0];
+        if (edge && edge.material && edge.material !== edgeMat) edge.material.opacity = 1;
+      }
+
+      // seal: swells then flares out
+      const flare = Math.sin(Math.min(1, collapse) * Math.PI);
+      sealGroup.scale.setScalar(1 + flare * 1.5 + collapse * 0.4);
+      haloMat.opacity = 0.85 + flare * 0.6;
+      coreLight.intensity = 26 + flare * 90;
+      core.rotation.y += 0.01;
+      shell.rotation.y -= 0.014;
+      shell.rotation.x += 0.006;
+
+      // rig tips from galaxy-disc to a downward throw
+      rig.rotation.x = -0.22 + collapse * 0.5;
+      rig.rotation.z = collapse * 0.22;
+
+      // camera: rises and looks down into the vault as it collapses, but
+      // stays close enough that the throwing cards stay in frame
+      camBase.y = 2.15 + collapse * 1.7;
+      camBase.z = 8.4 + collapse * 1.6;
+      camBase.x = collapse * 0.9;
+
+      embers.material.opacity = 0.9 * (1 - collapse * 0.6);
+    }
+
     let running = false;
     let rafId = 0;
+    let lastTime = 0;
 
-    function frame() {
+    /* Frame-rate independent damping. A fixed per-frame factor makes the
+       orbit crawl on a slow machine and snap on a fast one; this converges
+       in the same wall-clock time everywhere. */
+    function damp(current, target, lambda, dt) {
+      return current + (target - current) * (1 - Math.exp(-lambda * dt));
+    }
+
+    function frame(time) {
       if (!running) return;
-      const t = performance.now() * 0.001;
-      ease.x += ((pointer.seen ? pointer.x : 0) - ease.x) * 0.14;
-      ease.y += ((pointer.seen ? pointer.y : 0) - ease.y) * 0.14;
+      const now = (time || performance.now()) * 0.001;
+      const dt = Math.min(0.1, Math.max(0.001, now - lastTime || 0.016));
+      lastTime = now;
+      const t = now;
 
-      for (let i = 0; i < tags.length; i += 1) {
-        const sp = tags[i];
-        const u = sp.userData;
-        const a = u.ang + t * u.speed + progress * 1.2;
-        sp.position.x = Math.cos(a) * u.rad;
-        sp.position.z = -2.4 + Math.sin(a * 0.7) * 1.4;
-        sp.position.y = u.yBase + Math.sin(t * 0.7 + u.phase) * u.bobAmp;
-      }
+      // cursor follow: decisive but eased, so the turn feels alive
+      ease.x = damp(ease.x, pointer.seen ? pointer.x : 0, 6, dt);
+      ease.y = damp(ease.y, pointer.seen ? pointer.y : 0, 6, dt);
 
-      const arr = egeo.attributes.position.array;
-      for (let i = 0; i < emberCount; i += 1) {
+      // rings turn on their own, at different rates and directions
+      ringOuter.rotation.y += 0.0022;
+      ringInner.rotation.y -= 0.0036;
+      // rig leans with the hand (half), camera swings the other half
+      rig.rotation.y = ease.x * 0.30;
+      rig.rotation.z = ease.y * 0.10;
+
+      // embers rise
+      const arr = eattr.array;
+      for (let i = 0; i < EMBERS; i += 1) {
         const s = eseed[i];
-        arr[i * 3 + 1] += s.rise * 0.016;
-        arr[i * 3] += Math.sin(t * s.sway + s.phase) * 0.004;
-        if (arr[i * 3 + 1] > 5) {
-          arr[i * 3 + 1] = -4.5;
-          arr[i * 3] = (Math.random() * 2 - 1) * 7;
+        arr[i * 3 + 1] += s.rise * 0.018;
+        arr[i * 3] += Math.sin(t * s.sway + s.phase) * 0.005;
+        if (arr[i * 3 + 1] > 6) {
+          arr[i * 3 + 1] = -3;
+          arr[i * 3] = (Math.random() * 2 - 1) * 9;
         }
       }
-      egeo.attributes.position.needsUpdate = true;
+      eattr.needsUpdate = true;
+      dust.rotation.y = t * 0.006;
 
-      // cursor orbit: fixed distance, angle follows the hand
-      const orbitR = Math.sqrt(camBase.x * camBase.x + camBase.z * camBase.z);
+      // 360 cursor orbit on a FIXED radius: only the angle changes, so
+      // nothing can ever shrink or grow with the hand.
+      const radius = Math.sqrt(camBase.x * camBase.x + camBase.z * camBase.z);
       const baseAngle = Math.atan2(camBase.x, camBase.z);
-      const newAngle = baseAngle + ease.x * 0.8;
+      // FULL 360: the hand's position across the section maps to the camera's
+      // position on the orbit, so far left = far left, far right = far right.
+      const angle = baseAngle + ease.x * 1.05;
       camera.position.set(
-        Math.sin(newAngle) * orbitR,
-        camBase.y + ease.y * 0.8,
-        Math.cos(newAngle) * orbitR
+        Math.sin(angle) * radius,
+        camBase.y + ease.y * 1.5,
+        Math.cos(angle) * radius
       );
-      camera.lookAt(-ease.x * 1.0, -ease.y * 0.5, -2);
+      camera.lookAt(ease.x * 0.5, -collapseLift() * 1.6 - ease.y * 0.4, 0);
       camera.rotateZ(ease.x * 0.05);
 
       renderer.render(scene, camera);
       rafId = window.requestAnimationFrame(frame);
     }
 
+    function collapseLift() {
+      return easeInOut(progress);
+    }
+
     function start() {
       if (running) return;
       running = true;
       resize();
+      applyProgress(progress);
+      lastTime = 0;
       rafId = window.requestAnimationFrame(frame);
     }
     function stop() {
@@ -212,6 +426,7 @@
         window.cancelAnimationFrame(rafId);
         rafId = 0;
       }
+      lastTime = 0;
     }
 
     section.addEventListener('pointermove', (e) => {
@@ -227,14 +442,37 @@
       pointer.y = 0;
     }, { passive: true });
 
+    let started = false;
+    function ensureRunning() {
+      if (!started) {
+        started = true;
+        start();
+      }
+    }
+
     if (typeof IntersectionObserver === 'function') {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) start();
-          else stop();
+          if (entry.isIntersecting) ensureRunning();
+          else if (started) stop();
         });
       }, { threshold: 0 });
       observer.observe(section);
+      // The gate restores this section after boot(), so the observer may see
+      // it already on screen without firing: prime the loop on the next frames
+      // either way, and pause only when it is genuinely far off screen.
+      let primed = 0;
+      const prime = () => {
+        const rect = section.getBoundingClientRect();
+        const onScreen = rect.bottom > -200 && rect.top < window.innerHeight + 200;
+        if (onScreen) {
+          ensureRunning();
+          return;
+        }
+        primed += 1;
+        if (primed < 60) window.requestAnimationFrame(prime);
+      };
+      window.requestAnimationFrame(prime);
     } else {
       start();
     }
@@ -249,22 +487,48 @@
       });
     }, { passive: true });
 
+    applyProgress(progress);
+    // draw one frame immediately so the orbit is present before first scroll
+    resize();
+    renderer.render(scene, camera);
+
     return {
-      setProgress(p) { progress = Math.max(0, Math.min(1, p || 0)); },
+      setProgress(p) {
+        progress = Math.max(0, Math.min(1, p || 0));
+        applyProgress(progress);
+      },
+      probe() {
+        const d = Math.sqrt(
+          camera.position.x * camera.position.x +
+          camera.position.y * camera.position.y +
+          camera.position.z * camera.position.z
+        );
+        return {
+          calls: renderer.info.render.calls,
+          triangles: renderer.info.render.triangles,
+          textures: renderer.info.memory.textures,
+          geometries: renderer.info.memory.geometries,
+          cards: cards.length,
+          progress: progress,
+          camDist: Math.round(d * 1000) / 1000,
+          camAngle: Math.round(Math.atan2(camera.position.x, camera.position.z) * 1000) / 1000,
+        };
+      },
+      dispose() {
+        stop();
+        disposables.forEach((d) => {
+          try {
+            if (d && typeof d.dispose === 'function') d.dispose();
+          } catch (err) { /* already gone */ }
+        });
+        try { renderer.dispose(); } catch (err) { /* already gone */ }
+      },
     };
   }
 
   /* ================================================================
-     Wall — data-driven cards, stamp, tilt, lightbox, shuffle.
+     DOM WALL
      ================================================================ */
-  async function loadManifest() {
-    const res = await fetch(MANIFEST_URL, { cache: 'force-cache' });
-    if (!res.ok) throw new Error('quotes manifest ' + res.status);
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) throw new Error('quotes empty');
-    return data;
-  }
-
   function buildCard(item, index) {
     const fig = document.createElement('figure');
     fig.className = 'quote-exhibit' + (item.rare ? ' quote-exhibit--rare' : '');
@@ -310,6 +574,16 @@
 
   function armTilt(wall) {
     if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) return;
+    let rafId = 0;
+    let pending = null;
+    const flush = () => {
+      rafId = 0;
+      const el = pending;
+      pending = null;
+      if (!el) return;
+      el.style.setProperty('--ex-tilt-x', el.dataset.tx + 'deg');
+      el.style.setProperty('--ex-tilt-y', el.dataset.ty + 'deg');
+    };
     wall.addEventListener('pointermove', (e) => {
       const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
       if (!card) return;
@@ -319,8 +593,10 @@
       const py = (e.clientY - rect.top) / rect.height;
       card.style.setProperty('--ex-glare-x', (px * 100).toFixed(2) + '%');
       card.style.setProperty('--ex-glare-y', (py * 100).toFixed(2) + '%');
-      card.style.setProperty('--ex-tilt-x', ((0.5 - py) * 10).toFixed(2) + 'deg');
-      card.style.setProperty('--ex-tilt-y', ((px - 0.5) * 14).toFixed(2) + 'deg');
+      card.dataset.tx = ((0.5 - py) * 10).toFixed(2);
+      card.dataset.ty = ((px - 0.5) * 14).toFixed(2);
+      pending = card;
+      if (!rafId) rafId = window.requestAnimationFrame(flush);
     }, { passive: true });
     wall.addEventListener('pointerout', (e) => {
       const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
@@ -382,17 +658,16 @@
 
   function shuffleWall(wall) {
     const cards = Array.from(wall.children);
-    if (cards.length < 2 || !window.gsap) {
-      // no-gsap fallback: plain DOM shuffle
+    if (cards.length < 2) return;
+    if (!window.gsap) {
       for (let i = cards.length - 1; i > 0; i -= 1) {
         const k = Math.floor(Math.random() * (i + 1));
         wall.appendChild(cards[k]);
       }
       return;
     }
-    // FLIP: record, reorder, invert, play
     const first = new Map();
-    cards.forEach((el) => { first.set(el, el.getBoundingClientRect()); });
+    cards.forEach((el) => first.set(el, el.getBoundingClientRect()));
     for (let i = cards.length - 1; i > 0; i -= 1) {
       const k = Math.floor(Math.random() * (i + 1));
       const tmp = cards[i];
@@ -413,53 +688,53 @@
     });
   }
 
-  async function boot() {
+  function boot() {
     if (booted) return;
     const section = document.getElementById(SECTION_ID);
     if (!section || !section.isConnected || !hasVendors()) {
       window.setTimeout(boot, 120);
       return;
     }
-    const wall = section.querySelector('[data-quotes-wall]');
-    const canvas = section.querySelector(CANVAS_SELECTOR);
-    if (!wall || !canvas) return;
-
-    let items;
-    try {
-      items = await loadManifest();
-    } catch (err) {
-      if (window.console && console.warn) console.warn('[quotes] manifest failed:', err);
+    const items = readManifest();
+    if (items.length === 0) {
+      if (window.console && console.warn) console.warn('[quotes] manifest empty');
       return;
     }
 
+    const wall = section.querySelector('[data-quotes-wall]');
+    const hero = section.querySelector('[data-quotes-hero]');
+    const canvas = section.querySelector('#quotes-orbit');
+    const body = section.querySelector('[data-quotes-body]');
+    if (!wall || !hero || !canvas) return;
+
     booted = true;
     document.documentElement.classList.add('js-quotes');
+    window.gsap.registerPlugin(window.ScrollTrigger);
 
-    // render all cards
+    /* ── DOM wall build ─────────────────────────────────────── */
     const frag = document.createDocumentFragment();
     items.forEach((item, i) => frag.appendChild(buildCard(item, i)));
     wall.appendChild(frag);
 
-    const count = section.querySelector('[data-quotes-count]');
-    if (count) count.textContent = String(items.length);
-    const rare = section.querySelector('[data-quotes-rare]');
-    if (rare) rare.textContent = String(items.filter((x) => x.rare).length);
+    const countEl = section.querySelector('[data-quotes-count]');
+    if (countEl) countEl.textContent = String(items.length);
+    const rareEl = section.querySelector('[data-quotes-rare]');
+    if (rareEl) rareEl.textContent = String(items.filter((x) => x.rare).length);
 
     const lb = createLightbox();
     armTilt(wall);
-
     wall.addEventListener('click', (e) => {
       if (lb && e.target.closest && e.target.closest('.quotes__lightbox')) return;
       const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
-      if (!card || !lb) return;
-      lb.open(card);
+      if (card && lb) lb.open(card);
     });
     wall.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
-      if (!card || !lb) return;
-      e.preventDefault();
-      lb.open(card);
+      if (card && lb) {
+        e.preventDefault();
+        lb.open(card);
+      }
     });
 
     const btn = section.querySelector('[data-quotes-shuffle]');
@@ -467,70 +742,117 @@
       btn.addEventListener('click', () => {
         shuffleWall(wall);
         if (window.Motion && typeof window.Motion.burst === 'function') {
-          window.Motion.burst({ particleCount: 60, spread: 70 });
+          window.Motion.burst({ particleCount: 70, spread: 80 });
         }
       });
     }
 
-    // 3D void behind the wall
-    const orbit = createOrbitVoid(section, canvas, items.length);
-    if (orbit && window.ScrollTrigger) {
-      window.gsap.registerPlugin(window.ScrollTrigger);
+    /* ── orbit stage + pinned collapse ──────────────────────── */
+    const stage = createOrbitStage(section, canvas, items);
+    const meter = section.querySelector('[data-quotes-meter]');
+
+    if (stage) {
+      window.__quotesStage = stage;
       window.ScrollTrigger.create({
-        trigger: section,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 0.8,
-        onUpdate: (self) => orbit.setProgress(self.progress),
+        trigger: hero,
+        start: 'top top',
+        end: HERO_END,
+        pin: true,
+        pinSpacing: true,
+        scrub: 0.7,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          stage.setProgress(self.progress);
+          if (meter) meter.style.width = (self.progress * 100).toFixed(2) + '%';
+          if (body) {
+            // the wall rises as the orbit collapses
+            const lift = Math.max(0, Math.min(1, (self.progress - 0.62) / 0.3));
+            body.style.opacity = String(lift);
+            body.style.transform = 'translate3d(0,' + ((1 - lift) * 70).toFixed(1) + 'px,0)';
+            body.style.pointerEvents = lift > 0.6 ? '' : 'none';
+          }
+        },
       });
     } else if (canvas) {
       canvas.style.display = 'none';
+      if (body) body.style.opacity = '1';
     }
 
-    // threat slam-in
+    /* ── threat headline slam ───────────────────────────────── */
     const words = Array.from(section.querySelectorAll('.qthreat-i'));
-    if (words.length && window.gsap) {
-      window.gsap.set(words, { yPercent: 120, rotation: 6 });
+    if (words.length) {
+      window.gsap.set(words, { yPercent: 125, rotation: 7 });
       window.gsap.to(words, {
-        yPercent: 0, rotation: 0, duration: 0.9, ease: 'back.out(1.6)', stagger: 0.045,
-        scrollTrigger: { trigger: section.querySelector('.quotes__headline'), start: 'top 85%', toggleActions: 'play none none reverse' },
+        yPercent: 0, rotation: 0, duration: 0.95, ease: 'back.out(1.7)', stagger: 0.05,
+        scrollTrigger: {
+          trigger: section.querySelector('.quotes__headline'),
+          start: 'top 88%',
+          toggleActions: 'play none none reverse',
+        },
       });
     }
+    window.gsap.from(section.querySelectorAll('.quotes__lede, .quotes-hero__cue'), {
+      autoAlpha: 0, y: 22, duration: 0.9, ease: 'power3.out', stagger: 0.12, delay: 0.5,
+    });
 
-    // batch cascade entrance + stamp snap
+    /* ── wall card entrances ────────────────────────────────── */
     const cards = Array.from(wall.children);
-    if (window.gsap && window.ScrollTrigger && cards.length) {
-      window.gsap.set(cards, { opacity: 0, y: 70, scale: 0.92, rotation: () => (Math.random() - 0.5) * 8 });
-      window.ScrollTrigger.batch(cards, {
-        start: 'top 92%',
-        onEnter: (batch) => {
-          window.gsap.to(batch, {
+    window.gsap.set(cards, {
+      opacity: 0, y: 80, scale: 0.9,
+      rotation: () => (Math.random() - 0.5) * 9,
+    });
+    window.ScrollTrigger.batch(cards, {
+      batchMax: 6,
+      start: 'top 96%',
+      onEnter: (batch) => {
+        window.gsap.to(batch, {
+          opacity: 1, y: 0, scale: 1, rotation: 0,
+          duration: 0.95, ease: 'expo.out', stagger: 0.055, overwrite: true,
+        });
+        batch.forEach((card) => {
+          card.classList.add('is-in');
+          const stamp = card.querySelector('.quote-exhibit__stamp');
+          if (stamp) {
+            window.gsap.fromTo(stamp, { scale: 2.4, opacity: 0, rotation: -20 }, {
+              scale: 1, opacity: 1, rotation: -7, duration: 0.42, ease: 'power4.in', delay: 0.34,
+            });
+          }
+        });
+      },
+      onLeaveBack: (batch) => {
+        window.gsap.to(batch, { opacity: 0, y: 80, scale: 0.9, duration: 0.5, ease: 'power2.in', overwrite: true });
+        batch.forEach((card) => card.classList.remove('is-in'));
+      },
+    });
+
+    /* Fallback: the wall's own container is animated in opacity, so a batch
+       trigger can measure against a hidden ancestor and never fire. Once the
+       wall is genuinely on screen, anything still hidden is revealed. */
+    window.ScrollTrigger.create({
+      trigger: wall,
+      start: 'top 92%',
+      onEnter: () => {
+        cards.forEach((card, i) => {
+          if (card.classList.contains('is-in')) return;
+          window.gsap.to(card, {
             opacity: 1, y: 0, scale: 1, rotation: 0,
-            duration: 0.9, ease: 'expo.out', stagger: 0.06, overwrite: true,
+            duration: 0.8, ease: 'expo.out', delay: Math.min(0.5, i * 0.012), overwrite: true,
           });
-          batch.forEach((card) => {
-            card.classList.add('is-in');
-            const stamp = card.querySelector('.quote-exhibit__stamp');
-            if (stamp) {
-              window.gsap.fromTo(stamp, { scale: 2.2, opacity: 0, rotation: -18 }, {
-                scale: 1, opacity: 1, rotation: -7, duration: 0.4, ease: 'power4.in', delay: 0.35,
-              });
-            }
-          });
-        },
-        onLeaveBack: (batch) => {
-          window.gsap.to(batch, { opacity: 0, y: 70, scale: 0.92, duration: 0.5, ease: 'power2.in', overwrite: true });
-          batch.forEach((card) => card.classList.remove('is-in'));
-        },
-      });
-    } else {
-      cards.forEach((card) => card.classList.add('is-in'));
-    }
+          card.classList.add('is-in');
+          const stamp = card.querySelector('.quote-exhibit__stamp');
+          if (stamp) {
+            window.gsap.fromTo(stamp, { scale: 2.4, opacity: 0, rotation: -20 }, {
+              scale: 1, opacity: 1, rotation: -7, duration: 0.42, ease: 'power4.in', delay: 0.3,
+            });
+          }
+        });
+      },
+    });
 
     if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-      document.fonts.ready.then(() => window.ScrollTrigger && window.ScrollTrigger.refresh()).catch(() => {});
+      document.fonts.ready.then(() => window.ScrollTrigger.refresh()).catch(() => {});
     }
-    window.addEventListener('load', () => window.ScrollTrigger && window.ScrollTrigger.refresh());
+    window.addEventListener('load', () => window.ScrollTrigger.refresh());
   }
 
   if (document.readyState === 'loading') {

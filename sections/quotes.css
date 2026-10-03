@@ -1,19 +1,26 @@
 /* ============================================================
-   quotes — THE WALL OF ZAINAB (personal site, full motion)
-   Orbital evidence locker: 80 quote-bot cards as glass exhibits in
-   a 3D ember-void. Threat headline slams in word by word; cards
-   cascade in batches, tilt toward the cursor with glare sweeps,
-   stamp their EVIDENCE seal on arrival; rare cards get gold foil.
-   Tap any card to hold it closer (lightbox). Shuffle re-deals the
-   wall with a FLIP-animated reorder.
+   quotes — THE WALL OF ZAINAB : orbital evidence locker
+   Phase 1: pinned orbital hero — eighty quote cards hang on two
+   counter-rotating rings around a glowing ember seal; the rig turns
+   with the cursor; scrolling collapses the orbit into the wall.
+   Phase 2: DOM wall of glass exhibits, rares in gold foil.
    ============================================================ */
 
 .section--quotes {
   position: relative;
   isolation: isolate;
   overflow: clip;
-  background:
-    radial-gradient(90% 55% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
+  background: radial-gradient(90% 55% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
+}
+
+/* ── Phase 1: pinned orbital hero ───────────────────────────── */
+.quotes-hero {
+  position: relative;
+  height: 100svh;
+  min-height: 40rem;
+  display: grid;
+  place-items: center;
+  overflow: clip;
 }
 
 #quotes-orbit {
@@ -23,7 +30,7 @@
   height: 100%;
   display: block;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 .quotes-void {
@@ -39,42 +46,43 @@
   position: absolute;
   display: block;
   border-radius: 50%;
-  filter: blur(60px);
+  filter: blur(64px);
   will-change: transform;
-  animation: quotes-void-drift 12s ease-in-out infinite alternate;
+  animation: quotes-void-drift 11s ease-in-out infinite alternate;
 }
 
 .quotes-void i:nth-child(1) {
-  width: 60vmax; height: 40vmax; left: -16vmax; top: -8%;
-  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.22), transparent 70%);
+  width: 62vmax; height: 42vmax; left: -16vmax; top: -10%;
+  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.26), transparent 70%);
 }
 .quotes-void i:nth-child(2) {
-  width: 54vmax; height: 38vmax; right: -14vmax; top: 36%;
-  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.16), transparent 70%);
-  animation-duration: 9s; animation-delay: -3s;
+  width: 56vmax; height: 40vmax; right: -14vmax; top: 34%;
+  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.18), transparent 70%);
+  animation-duration: 8s; animation-delay: -3s;
 }
 .quotes-void i:nth-child(3) {
-  width: 58vmax; height: 42vmax; left: 6%; bottom: -14vmax;
-  background: radial-gradient(closest-side, rgba(124, 88, 190, 0.18), transparent 70%);
-  animation-duration: 15s; animation-delay: -6s;
+  width: 60vmax; height: 44vmax; left: 8%; bottom: -16vmax;
+  background: radial-gradient(closest-side, rgba(124, 88, 190, 0.2), transparent 70%);
+  animation-duration: 14s; animation-delay: -6s;
 }
 
 @keyframes quotes-void-drift {
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(30px, -40px, 0) scale(1.1); }
+  to { transform: translate3d(34px, -44px, 0) scale(1.12); }
 }
 
-.quotes__content {
+.quotes-hero__copy {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+  max-width: 46rem;
   padding: var(--section-padding) var(--gutter);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-5);
+  text-align: center;
+  pointer-events: none;
 }
 
 .quotes__eyebrow {
@@ -82,51 +90,96 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  text-align: center;
 }
 
-/* ── Threat headline: kinetic slam-in ────────────────────────── */
 .quotes__headline {
-  max-width: 46rem;
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.9rem, 1.3rem + 3.4vw, 3.6rem);
-  line-height: 1.18;
+  font-size: clamp(2rem, 1.3rem + 3.6vw, 3.8rem);
+  line-height: 1.16;
   letter-spacing: -0.01em;
   color: var(--color-text);
-  text-align: center;
   text-wrap: balance;
-  text-shadow: 0 6px 60px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 8px 70px rgba(0, 0, 0, 0.7);
 }
 
 .qthreat { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.1em; margin-bottom: -0.1em; }
-.qthreat-i {
-  display: inline-block;
-  will-change: transform;
-  transform: translateY(0) rotate(0deg);
-}
-.qthreat:nth-child(8) .qthreat-i,
-.qthreat:nth-child(12) .qthreat-i,
-.qthreat:nth-child(16) .qthreat-i,
-.qthreat:nth-child(18) .qthreat-i {
+.qthreat-i { display: inline-block; will-change: transform; transform: translateY(0) rotate(0deg); }
+
+.quotes__headline .qthreat:nth-child(8) .qthreat-i,
+.quotes__headline .qthreat:nth-child(12) .qthreat-i,
+.quotes__headline .qthreat:nth-child(16) .qthreat-i,
+.quotes__headline .qthreat:nth-child(18) .qthreat-i {
   color: var(--color-accent-glow);
 }
 
 .quotes__lede {
   margin: 0;
-  max-width: 36rem;
+  max-width: 34rem;
   font-family: var(--font-display);
   font-size: var(--text-base);
   font-style: italic;
   line-height: 1.5;
   color: var(--color-accent-glow);
-  text-align: center;
 }
 
 .quotes__lede em { color: var(--color-text); }
 
-/* ── Controls: counter + shuffle ─────────────────────────────── */
+.quotes-hero__cue {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.quotes-hero__cue-dot {
+  width: 0.5rem; height: 0.5rem; border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 14px var(--color-accent-glow);
+  animation: quotes-cue-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes quotes-cue-pulse {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(7px) scale(0.7); opacity: 0.4; }
+}
+
+.quotes-hero__meter {
+  width: min(100%, 18rem);
+  height: 2px;
+  margin-top: var(--space-3);
+  background: rgba(212, 168, 106, 0.2);
+  overflow: hidden;
+}
+
+.quotes-hero__meter span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-glow));
+  box-shadow: 0 0 12px var(--color-accent-glow);
+}
+
+/* ── Phase 2: the wall ──────────────────────────────────────── */
+.quotes__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: var(--space-16) var(--gutter) var(--section-padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
 .quotes__controls {
   display: flex;
   flex-wrap: wrap;
@@ -155,10 +208,9 @@
   font-family: var(--font-body);
   font-size: var(--text-sm);
   letter-spacing: 0.14em;
-  text-transform: lowercase;
   color: #fff6ea;
   background:
-    linear-gradient(160deg, rgba(255, 209, 102, 0.28), rgba(224, 124, 62, 0.20) 40%, rgba(255, 111, 145, 0.22)),
+    linear-gradient(160deg, rgba(255, 209, 102, 0.28), rgba(224, 124, 62, 0.2) 40%, rgba(255, 111, 145, 0.22)),
     rgba(24, 16, 10, 0.85);
   border: none;
   cursor: pointer;
@@ -177,21 +229,19 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: bday-metal-sheen 3.4s linear infinite;
   background-size: 220% 220%;
+  animation: bday-metal-sheen 3.4s linear infinite;
 }
 
 .quotes__shuffle.metal-btn:hover,
 .quotes__shuffle.metal-btn:focus-visible {
   transform: translateY(-3px);
   filter: brightness(1.12);
-  box-shadow: 0 18px 48px rgba(224, 124, 62, 0.42), 0 0 30px rgba(255, 209, 102, 0.30);
+  box-shadow: 0 18px 48px rgba(224, 124, 62, 0.42), 0 0 30px rgba(255, 209, 102, 0.3);
   outline: none;
 }
-
 .quotes__shuffle.metal-btn:active { transform: translateY(0) scale(0.97); }
 
-/* ── Wall grid ───────────────────────────────────────────────── */
 .quotes__wall {
   width: 100%;
   margin-top: var(--space-4);
@@ -201,7 +251,7 @@
   align-items: start;
 }
 
-/* ── Exhibit card ────────────────────────────────────────────── */
+/* ── Exhibit card ───────────────────────────────────────────── */
 .quote-exhibit {
   position: relative;
   margin: 0;
@@ -218,20 +268,16 @@
 }
 
 .quote-exhibit:hover,
-.quote-exhibit:focus-visible {
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 44px rgba(224, 124, 62, 0.22);
-}
-
-.quote-exhibit:focus-visible { border-color: rgba(255, 227, 174, 0.6); }
+.quote-exhibit:focus-visible { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 44px rgba(224, 124, 62, 0.24); }
+.quote-exhibit:focus-visible { border-color: rgba(255, 227, 174, 0.65); }
 
 .quote-exhibit__frame { position: absolute; inset: 0; overflow: hidden; }
 
 .quote-exhibit__bg {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
-  transform: scale(1.12);
-  filter: saturate(1.2) brightness(0.8);
+  transform: scale(1.14);
+  filter: saturate(1.25) brightness(0.75);
   opacity: 0.9;
 }
 
@@ -242,8 +288,8 @@
   aspect-ratio: 1200 / 630;
   object-fit: cover;
   display: block;
-  filter: saturate(1.03) contrast(1.02);
   background: #101014;
+  filter: saturate(1.05) contrast(1.03);
 }
 
 .quote-exhibit__img[data-err] { display: none; }
@@ -253,23 +299,16 @@
   inset: -20%;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(
-    320px circle at var(--ex-glare-x, 50%) var(--ex-glare-y, 40%),
-    rgba(255, 255, 255, 0.18),
-    transparent 62%
-  );
+  background: radial-gradient(320px circle at var(--ex-glare-x, 50%) var(--ex-glare-y, 40%), rgba(255, 255, 255, 0.2), transparent 62%);
   opacity: 0;
   transition: opacity 0.4s ease;
 }
-
 .quote-exhibit:hover .quote-exhibit__glare { opacity: 1; }
 
-/* evidence stamp: slammed on at reveal */
 .quote-exhibit__stamp {
   position: absolute;
   z-index: 3;
-  top: 0.7rem;
-  left: 0.7rem;
+  top: 0.7rem; left: 0.7rem;
   padding: 0.32em 0.8em;
   font-family: var(--font-mono);
   font-size: 10px;
@@ -285,12 +324,10 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
-/* rare foil */
+/* rare: gold foil + 2-column hero presence */
 .quote-exhibit--rare {
-  border-color: rgba(238, 194, 127, 0.55);
-  box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.6),
-    0 0 44px rgba(238, 194, 127, 0.22);
+  border-color: rgba(238, 194, 127, 0.6);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 48px rgba(238, 194, 127, 0.24);
 }
 
 .quote-exhibit--rare .quote-exhibit__stamp {
@@ -304,8 +341,7 @@
   content: "ultra rare";
   position: absolute;
   z-index: 3;
-  top: 0.7rem;
-  right: 0.7rem;
+  top: 0.7rem; right: 0.7rem;
   padding: 0.32em 0.8em;
   font-family: var(--font-body);
   font-size: 10px;
@@ -318,8 +354,6 @@
   box-shadow: 0 4px 22px rgba(238, 194, 127, 0.5);
 }
 
-/* entrance state (JS arms .is-in per card) */
-.quote-exhibit { opacity: 1; transform: perspective(1000px) rotateX(0) rotateY(0); }
 html.js-quotes .quote-exhibit { opacity: 0; }
 html.js-quotes .quote-exhibit.is-in { opacity: 1; }
 
@@ -332,7 +366,7 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
   text-align: center;
 }
 
-/* ── Lightbox (shared language with story) ───────────────────── */
+/* ── Lightbox ───────────────────────────────────────────────── */
 .quotes__lightbox {
   position: fixed;
   inset: 0;
@@ -341,13 +375,12 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
   align-items: center;
   justify-content: center;
   padding: clamp(1rem, 4vw, 3rem);
-  background: rgba(6, 5, 8, 0.92);
+  background: rgba(6, 5, 8, 0.93);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
   transition: opacity 0.35s ease;
 }
-
 .quotes__lightbox.is-open { opacity: 1; }
 
 .quotes__lightbox img {
@@ -356,7 +389,7 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
   object-fit: contain;
   border-radius: 14px;
   border: 1px solid rgba(238, 194, 127, 0.4);
-  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 90px rgba(238, 194, 127, 0.2);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 90px rgba(238, 194, 127, 0.22);
 }
 
 .quotes__lightbox-cap {
@@ -370,8 +403,9 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
   color: #ffe3ae;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
+/* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 560px) {
   .quotes__wall { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
-  .quotes__headline { font-size: clamp(1.6rem, 1.2rem + 5vw, 2.4rem); }
+  .quotes__headline { font-size: clamp(1.6rem, 1.2rem + 5vw, 2.5rem); }
+  .quotes-hero { min-height: 34rem; }
 }
