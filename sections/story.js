@@ -614,14 +614,17 @@
       );
 
       if (titleWords.length) {
-        window.gsap.fromTo(
-          titleWords,
-          { yPercent: 118 },
-          {
-            yPercent: 0, duration: 0.95, ease: 'expo.out', stagger: 0.045,
-            scrollTrigger: { trigger: chapter.querySelector('[data-chamber-title]'), start: 'top 84%', toggleActions: 'play none none reverse' },
-          }
-        );
+        window.gsap.set(titleWords, { yPercent: 118 });
+        window.ScrollTrigger.create({
+          trigger: chapter.querySelector('[data-chamber-title]'),
+          start: 'top 88%',
+          onEnter: () => {
+            window.gsap.to(titleWords, { yPercent: 0, duration: 0.95, ease: 'expo.out', stagger: 0.045, overwrite: 'auto' });
+          },
+          onLeaveBack: () => {
+            window.gsap.to(titleWords, { yPercent: 118, duration: 0.5, ease: 'power2.in', overwrite: 'auto' });
+          },
+        });
       }
 
       if (artifact) {
