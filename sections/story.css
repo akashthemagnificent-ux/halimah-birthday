@@ -390,6 +390,8 @@ body.has-artifact-open {
   display: flex;
   align-items: center;
   justify-content: center;
+  visibility: hidden;
+  pointer-events: none;
   padding: clamp(1rem, 4vw, 3rem);
   background: rgba(6, 5, 8, 0.9);
   backdrop-filter: blur(10px);
@@ -398,7 +400,7 @@ body.has-artifact-open {
   transition: opacity 0.35s ease;
 }
 
-.story__lightbox.is-open { opacity: 1; }
+.story__lightbox.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
 
 .story__lightbox img {
   max-width: min(94vw, 900px);

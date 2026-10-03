@@ -1,88 +1,28 @@
 /* ============================================================
-   quotes — THE WALL OF ZAINAB : orbital evidence locker
-   Phase 1: pinned orbital hero — eighty quote cards hang on two
-   counter-rotating rings around a glowing ember seal; the rig turns
-   with the cursor; scrolling collapses the orbit into the wall.
-   Phase 2: DOM wall of glass exhibits, rares in gold foil.
+   quotes — the quote wall room (todo 8)
+   "Make-it-a-Quote" aesthetic: dark bot-style cards, avatar dot,
+   name + date header, big serif line, cited source footer.
+   Content is plain HTML (readable with JS blocked); quotes.js only
+   adds a staggered reveal when motion is allowed.
+   Every color/spacing/type value below is a design token.
    ============================================================ */
 
 .section--quotes {
-  position: relative;
-  isolation: isolate;
-  overflow: clip;
-  background: radial-gradient(90% 55% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
-}
-
-/* ── Phase 1: pinned orbital hero ───────────────────────────── */
-.quotes-hero {
-  position: relative;
-  height: 100svh;
-  min-height: 40rem;
-  display: grid;
-  place-items: center;
-  overflow: clip;
-}
-
-#quotes-orbit {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.quotes-void {
-  position: absolute;
-  inset: -3%;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
+  background:
+    radial-gradient(90% 55% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
   overflow: hidden;
 }
 
-.quotes-void i {
-  position: absolute;
-  display: block;
-  border-radius: 50%;
-  filter: blur(64px);
-  will-change: transform;
-  animation: quotes-void-drift 11s ease-in-out infinite alternate;
-}
-
-.quotes-void i:nth-child(1) {
-  width: 62vmax; height: 42vmax; left: -16vmax; top: -10%;
-  background: radial-gradient(closest-side, rgba(224, 124, 62, 0.26), transparent 70%);
-}
-.quotes-void i:nth-child(2) {
-  width: 56vmax; height: 40vmax; right: -14vmax; top: 34%;
-  background: radial-gradient(closest-side, rgba(255, 111, 145, 0.18), transparent 70%);
-  animation-duration: 8s; animation-delay: -3s;
-}
-.quotes-void i:nth-child(3) {
-  width: 60vmax; height: 44vmax; left: 8%; bottom: -16vmax;
-  background: radial-gradient(closest-side, rgba(124, 88, 190, 0.2), transparent 70%);
-  animation-duration: 14s; animation-delay: -6s;
-}
-
-@keyframes quotes-void-drift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(34px, -44px, 0) scale(1.12); }
-}
-
-.quotes-hero__copy {
+.quotes__content {
   position: relative;
-  z-index: 3;
   width: 100%;
-  max-width: 46rem;
+  max-width: 64rem; /* wall grid wants more columns than the reading measure */
+  margin: 0 auto;
   padding: var(--section-padding) var(--gutter);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-5);
-  text-align: center;
-  pointer-events: none;
+  gap: var(--space-6);
 }
 
 .quotes__eyebrow {
@@ -90,106 +30,35 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--color-text-muted);
+  text-align: center;
 }
 
 .quotes__headline {
-  margin: 0;
+  max-width: var(--content-width);
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(2rem, 1.3rem + 3.6vw, 3.8rem);
-  line-height: 1.16;
-  letter-spacing: -0.01em;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.3;
   color: var(--color-text);
+  text-align: center;
   text-wrap: balance;
-  text-shadow: 0 8px 70px rgba(0, 0, 0, 0.7);
 }
 
-.qthreat { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.1em; margin-bottom: -0.1em; }
-.qthreat-i { display: inline-block; will-change: transform; transform: translateY(0) rotate(0deg); }
-
-.quotes__headline .qthreat:nth-child(8) .qthreat-i,
-.quotes__headline .qthreat:nth-child(12) .qthreat-i,
-.quotes__headline .qthreat:nth-child(16) .qthreat-i,
-.quotes__headline .qthreat:nth-child(18) .qthreat-i {
-  color: var(--color-accent-glow);
+.quotes__headline-mark {
+  color: var(--color-accent);
 }
 
 .quotes__lede {
-  margin: 0;
-  max-width: 34rem;
+  max-width: 36rem;
   font-family: var(--font-display);
   font-size: var(--text-base);
   font-style: italic;
   line-height: 1.5;
   color: var(--color-accent-glow);
-}
-
-.quotes__lede em { color: var(--color-text); }
-
-.quotes-hero__cue {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.quotes-hero__cue-dot {
-  width: 0.5rem; height: 0.5rem; border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 14px var(--color-accent-glow);
-  animation: quotes-cue-pulse 1.9s ease-in-out infinite;
-}
-
-@keyframes quotes-cue-pulse {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
-  50% { transform: translateY(7px) scale(0.7); opacity: 0.4; }
-}
-
-.quotes-hero__meter {
-  width: min(100%, 18rem);
-  height: 2px;
-  margin-top: var(--space-3);
-  background: rgba(212, 168, 106, 0.2);
-  overflow: hidden;
-}
-
-.quotes-hero__meter span {
-  display: block;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-glow));
-  box-shadow: 0 0 12px var(--color-accent-glow);
-}
-
-/* ── Phase 2: the wall ──────────────────────────────────────── */
-.quotes__content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 74rem;
-  margin: 0 auto;
-  padding: var(--space-16) var(--gutter) var(--section-padding);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-5);
-}
-
-.quotes__controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
+  text-align: center;
 }
 
 .quotes__count {
-  margin: 0;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: 0.18em;
@@ -197,215 +66,434 @@
   color: var(--color-text-muted);
 }
 
-.quotes__count span { color: var(--color-accent-glow); }
-
-.quotes__shuffle.metal-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap-min);
-  padding: 0.7em 1.8em;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  letter-spacing: 0.14em;
-  color: #fff6ea;
-  background:
-    linear-gradient(160deg, rgba(255, 209, 102, 0.28), rgba(224, 124, 62, 0.2) 40%, rgba(255, 111, 145, 0.22)),
-    rgba(24, 16, 10, 0.85);
-  border: none;
-  cursor: pointer;
-  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
-  box-shadow: 0 12px 34px rgba(224, 124, 62, 0.28);
-  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), filter 0.35s var(--ease-out);
-}
-
-.quotes__shuffle.metal-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(255, 209, 102, 0.65) 30%, rgba(224, 124, 62, 0.15) 60%, rgba(255, 255, 255, 0.28));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  background-size: 220% 220%;
-  animation: bday-metal-sheen 3.4s linear infinite;
-}
-
-.quotes__shuffle.metal-btn:hover,
-.quotes__shuffle.metal-btn:focus-visible {
-  transform: translateY(-3px);
-  filter: brightness(1.12);
-  box-shadow: 0 18px 48px rgba(224, 124, 62, 0.42), 0 0 30px rgba(255, 209, 102, 0.3);
-  outline: none;
-}
-.quotes__shuffle.metal-btn:active { transform: translateY(0) scale(0.97); }
-
+/* ---- Wall grid: one column at 375px, fills outward ---- */
 .quotes__wall {
   width: 100%;
   margin-top: var(--space-4);
   display: grid;
   gap: var(--space-4);
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
   align-items: start;
 }
 
-/* ── Exhibit card ───────────────────────────────────────────── */
-.quote-exhibit {
-  position: relative;
-  margin: 0;
+/* ---- Quote card: bot-message look ---- */
+.quote-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  cursor: zoom-in;
-  background: #101014;
-  border: 1px solid rgba(245, 235, 224, 0.16);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 30px rgba(224, 124, 62, 0.1);
-  transform: perspective(1000px) rotateX(var(--ex-tilt-x, 0deg)) rotateY(var(--ex-tilt-y, 0deg));
-  transition: transform 0.25s ease-out, box-shadow 0.45s var(--ease-out);
-  will-change: transform;
-  outline: none;
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-wrap: anywhere;
 }
 
-.quote-exhibit:hover,
-.quote-exhibit:focus-visible { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 44px rgba(224, 124, 62, 0.24); }
-.quote-exhibit:focus-visible { border-color: rgba(255, 227, 174, 0.65); }
-
-.quote-exhibit__frame { position: absolute; inset: 0; overflow: hidden; }
-
-.quote-exhibit__bg {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transform: scale(1.14);
-  filter: saturate(1.25) brightness(0.75);
-  opacity: 0.9;
+.quote-card:nth-child(3n + 2) {
+  border-left-color: var(--color-secondary);
 }
 
-.quote-exhibit__img {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  aspect-ratio: 1200 / 630;
-  object-fit: cover;
-  display: block;
-  background: #101014;
-  filter: saturate(1.05) contrast(1.03);
+.quote-card:nth-child(3n) {
+  border-left-color: var(--color-accent-glow);
 }
 
-.quote-exhibit__img[data-err] { display: none; }
-
-.quote-exhibit__glare {
-  position: absolute;
-  inset: -20%;
-  z-index: 2;
-  pointer-events: none;
-  background: radial-gradient(320px circle at var(--ex-glare-x, 50%) var(--ex-glare-y, 40%), rgba(255, 255, 255, 0.2), transparent 62%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.quote-exhibit:hover .quote-exhibit__glare { opacity: 1; }
-
-.quote-exhibit__stamp {
-  position: absolute;
-  z-index: 3;
-  top: 0.7rem; left: 0.7rem;
-  padding: 0.32em 0.8em;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #ffd9a8;
-  background: rgba(12, 8, 5, 0.72);
-  border: 1px solid rgba(255, 209, 102, 0.55);
-  border-radius: 4px;
-  transform: rotate(-7deg);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+.quote-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
-/* rare: gold foil + 2-column hero presence */
-.quote-exhibit--rare {
-  border-color: rgba(238, 194, 127, 0.6);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 48px rgba(238, 194, 127, 0.24);
-}
-
-.quote-exhibit--rare .quote-exhibit__stamp {
-  color: #1a1208;
-  background: linear-gradient(120deg, #ffe3ae, #eec27f);
-  border-color: #ffe3ae;
-  box-shadow: 0 4px 22px rgba(238, 194, 127, 0.5);
-}
-
-.quote-exhibit--rare::after {
-  content: "ultra rare";
-  position: absolute;
-  z-index: 3;
-  top: 0.7rem; right: 0.7rem;
-  padding: 0.32em 0.8em;
-  font-family: var(--font-body);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #1a1208;
-  background: linear-gradient(120deg, #ffe3ae, #eec27f);
-  border-radius: 999px;
-  transform: rotate(5deg);
-  box-shadow: 0 4px 22px rgba(238, 194, 127, 0.5);
-}
-
-html.js-quotes .quote-exhibit { opacity: 0; }
-html.js-quotes .quote-exhibit.is-in { opacity: 1; }
-
-.quotes__outro {
-  margin: var(--space-6) 0 0;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: var(--text-md);
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
-/* ── Lightbox ───────────────────────────────────────────────── */
-.quotes__lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
+.quote-card__avatar {
+  flex-shrink: 0;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1rem, 4vw, 3rem);
-  background: rgba(6, 5, 8, 0.93);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-border);
+}
+
+.quote-card__who {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.quote-card__name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.quote-card__date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.quote-card__quote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.quote-card--long .quote-card__quote {
+  font-size: var(--text-base);
+  font-weight: 300;
+}
+
+.quote-card__source {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+/* ---- Staggered reveal: enhancement only.
+   Cards are fully visible by default; the hidden state applies ONLY
+   under html.js-quotes, which quotes.js sets solely when motion is
+   allowed AND IntersectionObserver exists. No-JS / reduced-motion /
+   no-observer all render the plain readable wall. ---- */
+html.js-quotes .quote-card {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+html.js-quotes .quote-card.is-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 40ms);
+}
+
+
+
+/* ---- Cute frames: each card gets a sticker-frame treatment ----
+   CSS-only frames (rounded mat + dashed inner line + corner tape).
+   Two variants alternate so the wall feels hand-decorated. */
+.quote-card {
+  position: relative;
+}
+
+.quote-card__frame,
+.quote-card__tape {
+  pointer-events: none;
+}
+
+/* variant A: warm washi frame */
+.quote-card:nth-child(odd) {
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    linear-gradient(135deg, rgba(255, 209, 102, 0.5), rgba(224, 124, 62, 0.35) 45%, rgba(255, 111, 145, 0.4)) border-box;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-md), 0 0 26px rgba(224, 124, 62, 0.12);
+}
+
+/* variant B: rosy frame */
+.quote-card:nth-child(even) {
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    linear-gradient(135deg, rgba(255, 111, 145, 0.5), rgba(201, 149, 107, 0.35) 45%, rgba(255, 209, 102, 0.4)) border-box;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-md), 0 0 26px rgba(255, 111, 145, 0.12);
+}
+
+/* washi tape strip on the top edge */
+.quote-card::before {
+  content: "";
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  width: 5.5rem;
+  height: 1.4rem;
+  transform: translateX(-50%) rotate(-3deg);
+  background: linear-gradient(180deg, rgba(255, 209, 102, 0.75), rgba(224, 124, 62, 0.65));
+  border-left: 2px dashed rgba(26, 20, 16, 0.25);
+  border-right: 2px dashed rgba(26, 20, 16, 0.25);
+  border-radius: 2px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0.9;
+}
+
+.quote-card:nth-child(even)::before {
+  transform: translateX(-50%) rotate(4deg);
+  background: linear-gradient(180deg, rgba(255, 111, 145, 0.75), rgba(201, 149, 107, 0.65));
+}
+
+/* ---- Hover pop: card lifts, straightens and glows ---- */
+html.js-quotes .quote-card {
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform 0.28s var(--ease-out),
+    box-shadow 0.28s var(--ease-out);
+}
+
+html.js-quotes .quote-card.is-visible:hover,
+html.js-quotes .quote-card.is-visible:focus-within {
+  transform: translateY(-8px) scale(1.045) rotate(0deg) !important;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 2px rgba(255, 209, 102, 0.55),
+    0 0 44px rgba(255, 209, 102, 0.35);
+  z-index: 5;
+}
+
+/* give the resting wall a playful scattered tilt that the hover undoes */
+html.js-quotes .quote-card.is-visible:nth-child(3n + 1) { transform: rotate(-1.1deg); }
+html.js-quotes .quote-card.is-visible:nth-child(3n + 2) { transform: rotate(0.9deg); }
+html.js-quotes .quote-card.is-visible:nth-child(3n) { transform: rotate(-0.6deg); }
+
+/* ---- Reading zoom: click a card and it opens big ---- */
+.quote-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 5vw, 3rem);
+  background: rgba(8, 6, 4, 0.86);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.35s ease;
-}
-.quotes__lightbox.is-open { opacity: 1; }
-
-.quotes__lightbox img {
-  max-width: min(94vw, 1000px);
-  max-height: 82vh;
-  object-fit: contain;
-  border-radius: 14px;
-  border: 1px solid rgba(238, 194, 127, 0.4);
-  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 90px rgba(238, 194, 127, 0.22);
+  transition: opacity 0.3s ease;
 }
 
-.quotes__lightbox-cap {
+.quote-zoom.is-open { opacity: 1; }
+
+.quote-zoom__card {
+  position: relative;
+  width: min(92vw, 34rem);
+  background: var(--color-surface);
+  border: 3px solid transparent;
+  background:
+    linear-gradient(var(--color-surface-alt), var(--color-surface-alt)) padding-box,
+    linear-gradient(135deg, rgba(255, 209, 102, 0.8), rgba(224, 124, 62, 0.5) 40%, rgba(255, 111, 145, 0.7)) border-box;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.7), 0 0 80px rgba(255, 209, 102, 0.25);
+  padding: var(--space-8) var(--space-6) var(--space-6);
+}
+
+.quote-zoom__card::before {
+  content: "";
   position: absolute;
-  bottom: clamp(1rem, 4vh, 2.4rem);
-  left: 0; right: 0;
-  text-align: center;
+  top: -0.9rem;
+  left: 50%;
+  width: 7rem;
+  height: 1.8rem;
+  transform: translateX(-50%) rotate(-2deg);
+  background: linear-gradient(180deg, rgba(255, 209, 102, 0.85), rgba(224, 124, 62, 0.75));
+  border-radius: 2px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.quote-zoom__quote {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+
+.quote-zoom__meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+.quote-zoom__hint {
+  margin-top: var(--space-4);
   font-family: var(--font-display);
   font-style: italic;
-  font-size: var(--text-md);
-  color: #ffe3ae;
+  font-size: var(--text-sm);
+  color: var(--color-accent-glow);
+  text-align: center;
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 560px) {
-  .quotes__wall { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
-  .quotes__headline { font-size: clamp(1.6rem, 1.2rem + 5vw, 2.5rem); }
-  .quotes-hero { min-height: 34rem; }
+/* ---- The pet: a small blob friend who hops between cards ----
+   Pure CSS creature. JS moves it (hop = squash + arc); it idles with
+   a breathing bob and blinking eyes when parked on a card. */
+.quote-pet {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: -1.9rem;
+  width: 3.4rem;
+  height: 3rem;
+  margin-left: -1.7rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.6rem) scale(0.6);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
 }
+
+/* parked: visible, bobbing */
+.quote-card.pet-here .quote-pet {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: pet-bob 2.2s ease-in-out infinite;
+}
+
+@keyframes pet-bob {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -0.35rem; }
+}
+
+/* hopping: squash, stretch, arc handled by JS-driven class */
+.quote-pet.is-hopping {
+  animation: pet-hop 0.55s var(--ease-out);
+}
+
+@keyframes pet-hop {
+  0% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(0.5rem) scale(1.25, 0.7); }
+  55% { transform: translateY(-1.6rem) scale(0.85, 1.2); }
+  80% { transform: translateY(0.1rem) scale(1.1, 0.9); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+.quote-pet__body {
+  position: absolute;
+  inset: 0.5rem 0.2rem 0.4rem;
+  background: radial-gradient(circle at 35% 30%, #ffd9a8, #f0984a 60%, #d96f2e);
+  border-radius: 48% 48% 46% 46%;
+}
+
+.quote-pet__ear {
+  position: absolute;
+  top: -0.35rem;
+  width: 0.9rem;
+  height: 1.1rem;
+  background: #f0984a;
+  border-radius: 50% 50% 40% 40%;
+}
+
+.quote-pet__ear--l { left: 0.35rem; transform: rotate(-14deg); }
+.quote-pet__ear--r { right: 0.35rem; transform: rotate(14deg); }
+
+.quote-pet__face {
+  position: absolute;
+  inset: 0;
+}
+
+.quote-pet__eye {
+  position: absolute;
+  top: 0.85rem;
+  width: 0.28rem;
+  height: 0.38rem;
+  background: #241207;
+  border-radius: 50%;
+  animation: pet-blink 4.2s ease-in-out infinite;
+}
+
+.quote-pet__eye--l { left: 0.75rem; }
+.quote-pet__eye--r { right: 0.75rem; }
+
+@keyframes pet-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.08); }
+}
+
+.quote-pet__blush {
+  position: absolute;
+  top: 1.25rem;
+  width: 0.42rem;
+  height: 0.26rem;
+  background: rgba(255, 111, 145, 0.75);
+  border-radius: 50%;
+  filter: blur(1px);
+}
+
+.quote-pet__blush--l { left: 0.42rem; }
+.quote-pet__blush--r { right: 0.42rem; }
+
+.quote-pet__mouth {
+  position: absolute;
+  top: 1.32rem;
+  left: 50%;
+  width: 0.3rem;
+  height: 0.18rem;
+  margin-left: -0.15rem;
+  border: 2px solid #241207;
+  border-top: none;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-radius: 0 0 1rem 1rem;
+}
+
+.quote-pet__feet {
+  position: absolute;
+  bottom: -0.15rem;
+  left: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.quote-pet__feet span {
+  width: 0.7rem;
+  height: 0.4rem;
+  background: #d96f2e;
+  border-radius: 50%;
+}
+
+.quote-pet__shadow {
+  position: absolute;
+  bottom: -0.3rem;
+  left: 50%;
+  width: 2.2rem;
+  height: 0.5rem;
+  margin-left: -1.1rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+.quote-pet__hearts {
+  position: absolute;
+  top: -0.9rem;
+  left: 50%;
+  font-style: normal;
+  pointer-events: none;
+}
+
+.quote-pet__hearts i {
+  position: absolute;
+  font-size: 0.8rem;
+  color: #ff6f91;
+  opacity: 0;
+}
+
+.quote-card.pet-loved .quote-pet__hearts i:nth-child(1) { animation: pet-heart 1s ease-out 0s; }
+.quote-card.pet-loved .quote-pet__hearts i:nth-child(2) { animation: pet-heart 1s ease-out 0.15s; }
+.quote-card.pet-loved .quote-pet__hearts i:nth-child(3) { animation: pet-heart 1s ease-out 0.3s; }
+
+@keyframes pet-heart {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--hx, 0.4rem), -1.6rem) scale(1.1); }
+}
+
+.quote-pet__hearts i:nth-child(2) { --hx: -0.5rem; }
+.quote-pet__hearts i:nth-child(3) { --hx: 0.9rem; }
+
+.quotes__pet-invite { color: var(--color-accent-glow); }

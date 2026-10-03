@@ -124,6 +124,7 @@
     if (document.querySelector('.story__lightbox')) return null;
     const box = document.createElement('div');
     box.className = 'story__lightbox';
+    box.hidden = true;
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
     box.setAttribute('aria-label', 'Chat screenshot, enlarged');
@@ -152,6 +153,9 @@
       img.alt = source.alt || '';
       cap.textContent = [title ? title.getAttribute('aria-label') || title.textContent : '',
         date ? date.textContent.trim() : ''].filter(Boolean).join(' — ');
+      box.hidden = false;
+      // force the layout pass first so the fade-in transition plays
+      void box.offsetWidth;
       box.classList.add('is-open');
       document.body.classList.add('has-artifact-open');
       artifact.classList.add('is-held');
@@ -166,6 +170,7 @@
       suppressClick = true;
       window.setTimeout(() => { suppressClick = false; }, 60);
       box.classList.remove('is-open');
+      box.hidden = true;
       document.body.classList.remove('has-artifact-open');
       openArt.classList.remove('is-held');
       openArt = null;
