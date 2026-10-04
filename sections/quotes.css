@@ -219,8 +219,30 @@
 
 .quote-exhibit:hover,
 .quote-exhibit:focus-visible {
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 44px rgba(224, 124, 62, 0.22);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.65),
+    0 0 0 2px rgba(255, 209, 102, 0.55),
+    0 0 48px rgba(255, 209, 102, 0.35);
+  z-index: 5;
 }
+
+/* the pop: lift, straighten, grow — playful spring, no JS needed */
+html.js-quotes .quote-exhibit {
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s var(--ease-out);
+}
+
+html.js-quotes .quote-exhibit.is-in:hover,
+html.js-quotes .quote-exhibit.is-in:focus-visible {
+  transform: perspective(1000px) translateY(-10px) scale(1.05) rotate(0deg) !important;
+}
+
+/* resting scatter tilt that the hover undoes */
+html.js-quotes .quote-exhibit.is-in:nth-child(3n + 1) { transform: perspective(1000px) rotate(-1deg); }
+html.js-quotes .quote-exhibit.is-in:nth-child(3n + 2) { transform: perspective(1000px) rotate(0.8deg); }
+html.js-quotes .quote-exhibit.is-in:nth-child(3n) { transform: perspective(1000px) rotate(-0.5deg); }
 
 .quote-exhibit:focus-visible { border-color: rgba(255, 227, 174, 0.6); }
 
@@ -375,3 +397,180 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
   .quotes__wall { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
   .quotes__headline { font-size: clamp(1.6rem, 1.2rem + 5vw, 2.4rem); }
 }
+
+/* ---- Cute frames: sticker treatment for the bot-image exhibits ----
+   Warm/rose gradient borders alternate down the wall; a washi tape
+   strip sits on each card's top edge. */
+.quote-exhibit {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#101014, #101014) padding-box,
+    linear-gradient(135deg, rgba(255, 209, 102, 0.55), rgba(224, 124, 62, 0.3) 45%, rgba(255, 111, 145, 0.45)) border-box;
+}
+.quote-exhibit:nth-child(even) {
+  background:
+    linear-gradient(#101014, #101014) padding-box,
+    linear-gradient(135deg, rgba(255, 111, 145, 0.55), rgba(201, 149, 107, 0.3) 45%, rgba(255, 209, 102, 0.45)) border-box;
+}
+.quote-exhibit--rare {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#141008, #141008) padding-box,
+    linear-gradient(135deg, #ffe3ae, #eec27f 40%, #ff9db4) border-box;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 52px rgba(238, 194, 127, 0.3);
+}
+.quote-exhibit::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: -0.65rem;
+  left: 50%;
+  width: 5rem;
+  height: 1.3rem;
+  transform: translateX(-50%) rotate(-3deg);
+  background: linear-gradient(180deg, rgba(255, 209, 102, 0.8), rgba(224, 124, 62, 0.7));
+  border-left: 2px dashed rgba(26, 20, 16, 0.3);
+  border-right: 2px dashed rgba(26, 20, 16, 0.3);
+  border-radius: 2px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+.quote-exhibit:nth-child(even)::before {
+  transform: translateX(-50%) rotate(4deg);
+  background: linear-gradient(180deg, rgba(255, 111, 145, 0.8), rgba(201, 149, 107, 0.7));
+}
+.quote-exhibit--rare::before {
+  background: linear-gradient(180deg, rgba(255, 227, 174, 0.95), rgba(238, 194, 127, 0.85));
+}
+.quotes__wall { padding-top: 0.8rem; }
+
+/* ---- The pet: a small blob friend hopping between exhibits ---- */
+.quote-pet {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: -1.8rem;
+  width: 3.2rem;
+  height: 2.9rem;
+  margin-left: -1.6rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.6rem) scale(0.6);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+}
+.quote-exhibit.pet-here .quote-pet {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: pet-bob 2.2s ease-in-out infinite;
+}
+@keyframes pet-bob {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -0.35rem; }
+}
+.quote-pet.is-hopping { animation: pet-hop 0.55s var(--ease-out); }
+@keyframes pet-hop {
+  0% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(0.5rem) scale(1.25, 0.7); }
+  55% { transform: translateY(-1.6rem) scale(0.85, 1.2); }
+  80% { transform: translateY(0.1rem) scale(1.1, 0.9); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+.quote-pet__body {
+  position: absolute;
+  inset: 0.5rem 0.2rem 0.4rem;
+  background: radial-gradient(circle at 35% 30%, #ffd9a8, #f0984a 60%, #d96f2e);
+  border-radius: 48% 48% 46% 46%;
+}
+.quote-pet__ear {
+  position: absolute;
+  top: -0.35rem;
+  width: 0.9rem;
+  height: 1.1rem;
+  background: #f0984a;
+  border-radius: 50% 50% 40% 40%;
+}
+.quote-pet__ear--l { left: 0.35rem; transform: rotate(-14deg); }
+.quote-pet__ear--r { right: 0.35rem; transform: rotate(14deg); }
+.quote-pet__face { position: absolute; inset: 0; }
+.quote-pet__eye {
+  position: absolute;
+  top: 0.85rem;
+  width: 0.28rem;
+  height: 0.38rem;
+  background: #241207;
+  border-radius: 50%;
+  animation: pet-blink 4.2s ease-in-out infinite;
+}
+.quote-pet__eye--l { left: 0.75rem; }
+.quote-pet__eye--r { right: 0.75rem; }
+@keyframes pet-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.08); }
+}
+.quote-pet__blush {
+  position: absolute;
+  top: 1.25rem;
+  width: 0.42rem;
+  height: 0.26rem;
+  background: rgba(255, 111, 145, 0.75);
+  border-radius: 50%;
+  filter: blur(1px);
+}
+.quote-pet__blush--l { left: 0.42rem; }
+.quote-pet__blush--r { right: 0.42rem; }
+.quote-pet__mouth {
+  position: absolute;
+  top: 1.32rem;
+  left: 50%;
+  width: 0.3rem;
+  height: 0.18rem;
+  margin-left: -0.15rem;
+  border: 2px solid #241207;
+  border-top: none;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-radius: 0 0 1rem 1rem;
+}
+.quote-pet__feet {
+  position: absolute;
+  bottom: -0.15rem;
+  left: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+.quote-pet__feet span {
+  width: 0.7rem;
+  height: 0.4rem;
+  background: #d96f2e;
+  border-radius: 50%;
+}
+.quote-pet__shadow {
+  position: absolute;
+  bottom: -0.3rem;
+  left: 50%;
+  width: 2.2rem;
+  height: 0.5rem;
+  margin-left: -1.1rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  filter: blur(2px);
+}
+.quote-pet__hearts { position: absolute; top: -0.9rem; left: 50%; font-style: normal; }
+.quote-pet__hearts i {
+  position: absolute;
+  font-size: 0.8rem;
+  color: #ff6f91;
+  opacity: 0;
+}
+.quote-exhibit.pet-loved .quote-pet__hearts i:nth-child(1) { animation: pet-heart 1s ease-out 0s; }
+.quote-exhibit.pet-loved .quote-pet__hearts i:nth-child(2) { animation: pet-heart 1s ease-out 0.15s; }
+.quote-exhibit.pet-loved .quote-pet__hearts i:nth-child(3) { animation: pet-heart 1s ease-out 0.3s; }
+@keyframes pet-heart {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--hx, 0.4rem), -1.6rem) scale(1.1); }
+}
+.quote-pet__hearts i:nth-child(2) { --hx: -0.5rem; }
+.quote-pet__hearts i:nth-child(3) { --hx: 0.9rem; }

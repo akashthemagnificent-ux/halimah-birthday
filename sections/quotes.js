@@ -305,6 +305,24 @@
     stamp.textContent = 'evidence ' + String(index + 1).padStart(2, '0');
     fig.appendChild(stamp);
 
+    fig.insertAdjacentHTML('beforeend',
+      '<div class="quote-pet" aria-hidden="true">' +
+      '<span class="quote-pet__shadow"></span>' +
+      '<span class="quote-pet__body">' +
+      '<span class="quote-pet__ear quote-pet__ear--l"></span>' +
+      '<span class="quote-pet__ear quote-pet__ear--r"></span>' +
+      '<span class="quote-pet__face">' +
+      '<span class="quote-pet__eye quote-pet__eye--l"></span>' +
+      '<span class="quote-pet__eye quote-pet__eye--r"></span>' +
+      '<span class="quote-pet__blush quote-pet__blush--l"></span>' +
+      '<span class="quote-pet__blush quote-pet__blush--r"></span>' +
+      '<span class="quote-pet__mouth"></span>' +
+      '</span>' +
+      '<span class="quote-pet__feet"><span></span><span></span></span>' +
+      '</span>' +
+      '<span class="quote-pet__hearts"><i>\u2665</i><i>\u2665</i><i>\u2665</i></span>' +
+      '</div>');
+
     return fig;
   }
 
@@ -328,6 +346,52 @@
       card.style.setProperty('--ex-tilt-x', '0deg');
       card.style.setProperty('--ex-tilt-y', '0deg');
     }, { passive: true });
+  }
+
+  /* The pet: parks on the hovered exhibit, hops on arrival, pops
+     hearts when its card is clicked, wanders off after hover ends. */
+  function armPet(wall) {
+    let home = null;
+    let leaveTimer = 0;
+
+    function park(card) {
+      if (home === card) return;
+      if (home) home.classList.remove('pet-here');
+      home = card;
+      if (!home) return;
+      home.classList.add('pet-here');
+      const pet = home.querySelector('.quote-pet');
+      if (pet) {
+        pet.classList.remove('is-hopping');
+        void pet.getBoundingClientRect();
+        pet.classList.add('is-hopping');
+      }
+    }
+
+    wall.addEventListener('pointerover', (e) => {
+      const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
+      if (!card) return;
+      window.clearTimeout(leaveTimer);
+      park(card);
+    });
+    wall.addEventListener('pointerout', (e) => {
+      const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
+      if (!card) return;
+      if (card.contains(e.relatedTarget)) return;
+      window.clearTimeout(leaveTimer);
+      leaveTimer = window.setTimeout(() => {
+        if (home) home.classList.remove('pet-here');
+        home = null;
+      }, 900);
+    });
+    wall.addEventListener('click', (e) => {
+      const card = e.target.closest ? e.target.closest('.quote-exhibit') : null;
+      if (!card) return;
+      park(card);
+      card.classList.remove('pet-loved');
+      void card.getBoundingClientRect();
+      card.classList.add('pet-loved');
+    }, true);
   }
 
   function createLightbox() {
@@ -447,6 +511,7 @@
 
     const lb = createLightbox();
     armTilt(wall);
+    armPet(wall);
 
     wall.addEventListener('click', (e) => {
       if (lb && e.target.closest && e.target.closest('.quotes__lightbox')) return;
