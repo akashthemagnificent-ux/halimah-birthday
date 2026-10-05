@@ -258,6 +258,10 @@
      Wall — data-driven cards, stamp, tilt, lightbox, shuffle.
      ================================================================ */
   async function loadManifest() {
+    /* content/quotes-manifest.js ships the data as a plain global so the
+       page works from file:// previews where fetch() is blocked */
+    const pre = window.QUOTES_MANIFEST;
+    if (Array.isArray(pre) && pre.length) return pre;
     const res = await fetch(MANIFEST_URL, { cache: 'force-cache' });
     if (!res.ok) throw new Error('quotes manifest ' + res.status);
     const data = await res.json();
