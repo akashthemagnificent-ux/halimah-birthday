@@ -193,6 +193,7 @@
 
 /* ── Wall grid ───────────────────────────────────────────────── */
 .quotes__wall {
+  position: relative;
   width: 100%;
   margin-top: var(--space-4);
   display: grid;
@@ -634,3 +635,28 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
 
 /* don't let the bubble steal the hover: it rides inside the pet */
 .quote-pet__bubble { pointer-events: none; }
+
+/* ---- Flying pet: one shared jumper, positioned by GSAP x/y ---- */
+.quote-pet--flyer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin-left: 0;
+  z-index: 8;
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
+  animation: none;
+  will-change: transform;
+}
+
+.quote-pet--flyer.is-flying {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* the per-card pet must not animate while the flyer is in transit:
+   park() holds it at opacity 0 inline until landing */
+.quote-exhibit.pet-here .quote-pet {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}

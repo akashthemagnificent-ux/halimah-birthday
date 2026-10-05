@@ -270,6 +270,7 @@
     fig.className = 'quote-exhibit' + (item.rare ? ' quote-exhibit--rare' : '');
     fig.tabIndex = 0;
     fig.setAttribute('data-quote-id', item.id);
+    fig.setAttribute('data-qi', String(index));
     fig.setAttribute('aria-label', 'Quote exhibit ' + (index + 1) + (item.rare ? ', ultra rare' : ''));
 
     const frame = document.createElement('span');
@@ -437,36 +438,150 @@
   ];
 
   function armPet(wall) {
+    if (!wall) return;
     let home = null;
     let leaveTimer = 0;
+    let sayTimer = 0;
+    let flight = null;
+    let flyer = null;
 
-    function park(card) {
-      if (home === card) return;
-      if (home) home.classList.remove('pet-here');
-      home = card;
-      if (!home) return;
-      home.classList.add('pet-here');
-      const pet = home.querySelector('.quote-pet');
-      if (pet) {
-        pet.classList.remove('is-hopping');
-        void pet.getBoundingClientRect();
-        pet.classList.add('is-hopping');
-        sayPhrase(home, pet);
-      }
+    /* one shared pet that physically jumps between cards; per-card pets
+       stay hidden until the flyer lands on them */
+    function ensureFlyer() {
+      if (flyer) return flyer;
+      const tpl = wall.querySelector('.quote-pet');
+      if (!tpl) return null;
+      flyer = tpl.cloneNode(true);
+      flyer.className = 'quote-pet quote-pet--flyer';
+      flyer.removeAttribute('style');
+      const bub = flyer.querySelector('.quote-pet__bubble');
+      if (bub) bub.textContent = '';
+      wall.appendChild(flyer);
+      return flyer;
+    }
+
+    /* wall-relative anchor of a card's pet at its FINAL size: the
+       transition is frozen for the measurement so we read the end state,
+       including any hover transform on the card itself */
+    function visualAnchor(card) {
+      const pet = card.querySelector('.quote-pet');
+      if (!pet) return null;
+      const wr = wall.getBoundingClientRect();
+      const keep = pet.style.transition;
+      pet.style.transition = 'none';
+      const r = pet.getBoundingClientRect();
+      pet.style.transition = keep;
+      return { x: r.left - wr.left, y: r.top - wr.top };
     }
 
     /* the pet says its line for this exhibit, then the bubble fades */
-    let sayTimer = 0;
     function sayPhrase(card, pet) {
       const bubble = pet.querySelector('.quote-pet__bubble');
       if (!bubble) return;
-      const idx = Array.prototype.indexOf.call(card.parentNode.children, card);
-      bubble.textContent = PHRASES[idx] || PHRASES[0];
+      const qi = Number(card.dataset.qi);
+      bubble.textContent = PHRASES[Number.isInteger(qi) ? qi : 0] || PHRASES[0];
       window.clearTimeout(sayTimer);
       card.classList.remove('pet-says');
       void bubble.getBoundingClientRect();
       card.classList.add('pet-says');
       sayTimer = window.setTimeout(() => card.classList.remove('pet-says'), 2600);
+    }
+
+    /* reveal the per-card pet with hop + phrase */
+    function land(card) {
+      const pet = card.querySelector('.quote-pet');
+      if (!pet) return;
+      card.classList.add('pet-here');
+      pet.style.opacity = '';
+      pet.style.visibility = '';
+      pet.classList.remove('is-hopping');
+      void pet.getBoundingClientRect();
+      pet.classList.add('is-hopping');
+      sayPhrase(card, pet);
+    }
+
+    /* squash-stretch arc from -> to; on complete the per-card pet takes over */
+    function flightTo(from, to, card) {
+      const g = window.gsap;
+      const fl = ensureFlyer();
+      if (!fl || !g) { land(card); return; }
+      if (flight) { flight.kill(); flight = null; }
+
+      const dx = to.x - from.x;
+      const dist = Math.sqrt(dx * dx + (to.y - from.y) * (to.y - from.y));
+      const arc = Math.min(180, Math.max(70, dist * 0.42));
+      const peak = Math.min(from.y, to.y) - arc;
+      const dir = dx >= 0 ? 1 : -1;
+      const D = 0.52;
+
+      g.set(fl, { x: from.x, y: from.y, scaleX: 1, scaleY: 1, rotation: 0, opacity: 1 });
+      fl.classList.add('is-flying');
+
+      const tl = g.timeline({
+        onComplete() {
+          fl.classList.remove('is-flying');
+          g.set(fl, { opacity: 0 });
+          flight = null;
+          if (home === card) {
+            land(card);
+          } else {
+            /* cursor moved on or left: never strand a hidden pet */
+            card.classList.remove('pet-here');
+            const p = card.querySelector('.quote-pet');
+            if (p) { p.style.opacity = ''; p.style.visibility = ''; }
+          }
+        },
+      });
+
+      tl.to(fl, { x: to.x, duration: D, ease: 'power1.inOut' }, 0);
+      tl.to(fl, { y: peak, duration: D * 0.5, ease: 'power2.out' }, 0);
+      tl.to(fl, { y: to.y, duration: D * 0.5, ease: 'power2.in' }, D * 0.5);
+      tl.to(fl, { scaleX: 1.3, scaleY: 0.72, duration: 0.07, ease: 'power2.out' }, 0);
+      tl.to(fl, { scaleX: 0.9, scaleY: 1.2, duration: 0.16, ease: 'power1.inOut' }, 0.07);
+      tl.to(fl, { scaleX: 1.25, scaleY: 0.78, duration: 0.08, ease: 'power2.in' }, D);
+      tl.to(fl, { scaleX: 1, scaleY: 1, duration: 0.18, ease: 'back.out(3)' }, D + 0.08);
+      tl.to(fl, { rotation: dir * 8, duration: 0.16, ease: 'power1.out' }, 0.05);
+      tl.to(fl, { rotation: 0, duration: 0.2, ease: 'power1.inOut' }, D - 0.22);
+      flight = tl;
+    }
+
+    function park(card) {
+      if (home === card) return;
+      const prev = home;
+
+      /* launch point: mid-air flyer position when interrupting a jump,
+         else where the previous pet visibly sits right now */
+      let from = null;
+      if (flight && flyer) {
+        const g = window.gsap;
+        from = { x: g.getProperty(flyer, 'x'), y: g.getProperty(flyer, 'y') };
+        flight.kill();
+        flight = null;
+      } else if (prev) {
+        from = visualAnchor(prev);
+      }
+
+      if (prev) {
+        const pp = prev.querySelector('.quote-pet');
+        if (pp) { pp.style.visibility = 'hidden'; pp.style.opacity = '0'; }
+        prev.classList.remove('pet-here');
+      }
+
+      home = card;
+      if (!home) return;
+
+      /* target pet: full size but invisible until the flyer lands on it */
+      home.classList.add('pet-here');
+      const tp = home.querySelector('.quote-pet');
+      if (tp) {
+        tp.style.transition = '';
+        tp.style.opacity = '0';
+        tp.style.visibility = '';
+        tp.classList.remove('is-hopping');
+      }
+
+      if (!from) { land(home); return; }
+      flightTo(from, visualAnchor(home), home);
     }
 
     wall.addEventListener('pointerover', (e) => {
@@ -481,7 +596,11 @@
       if (card.contains(e.relatedTarget)) return;
       window.clearTimeout(leaveTimer);
       leaveTimer = window.setTimeout(() => {
-        if (home) home.classList.remove('pet-here');
+        if (home) {
+          home.classList.remove('pet-here');
+          const p = home.querySelector('.quote-pet');
+          if (p) { p.style.opacity = ''; p.style.visibility = ''; }
+        }
         home = null;
       }, 900);
     });
