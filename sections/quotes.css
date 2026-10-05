@@ -206,7 +206,9 @@
   position: relative;
   margin: 0;
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  /* no overflow:hidden here — the pet and washi tape hang over the top
+     edge; the image layers below clip their own content instead */
+  overflow: visible;
   cursor: zoom-in;
   background: #101014;
   border: 1px solid rgba(245, 235, 224, 0.16);
@@ -246,7 +248,7 @@ html.js-quotes .quote-exhibit.is-in:nth-child(3n) { transform: perspective(1000p
 
 .quote-exhibit:focus-visible { border-color: rgba(255, 227, 174, 0.6); }
 
-.quote-exhibit__frame { position: absolute; inset: 0; overflow: hidden; }
+.quote-exhibit__frame { position: absolute; inset: 0; overflow: hidden; border-radius: var(--radius-lg); }
 
 .quote-exhibit__bg {
   width: 100%;
@@ -264,6 +266,7 @@ html.js-quotes .quote-exhibit.is-in:nth-child(3n) { transform: perspective(1000p
   aspect-ratio: 1200 / 630;
   object-fit: cover;
   display: block;
+  border-radius: var(--radius-lg);
   filter: saturate(1.03) contrast(1.02);
   background: #101014;
 }
@@ -272,7 +275,9 @@ html.js-quotes .quote-exhibit.is-in:nth-child(3n) { transform: perspective(1000p
 
 .quote-exhibit__glare {
   position: absolute;
-  inset: -20%;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   z-index: 2;
   pointer-events: none;
   background: radial-gradient(
@@ -367,10 +372,18 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.35s ease;
+  /* invisible overlay must not swallow hover/click while closed */
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
 }
 
-.quotes__lightbox.is-open { opacity: 1; }
+.quotes__lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.35s ease, visibility 0s;
+}
 
 .quotes__lightbox img {
   max-width: min(94vw, 1000px);
