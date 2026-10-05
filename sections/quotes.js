@@ -320,7 +320,8 @@
       '</span>' +
       '<span class="quote-pet__feet"><span></span><span></span></span>' +
       '</span>' +
-      '<span class="quote-pet__hearts"><i>\u2665</i><i>\u2665</i><i>\u2665</i></span>' +
+      '<span class="quote-pet__bubble"></span>' +
+'<span class="quote-pet__hearts"><i>\u2665</i><i>\u2665</i><i>\u2665</i></span>' +
       '</div>');
 
     return fig;
@@ -350,6 +351,91 @@
 
   /* The pet: parks on the hovered exhibit, hops on arrival, pops
      hearts when its card is clicked, wanders off after hover ends. */
+  /* 80 unique pet phrases, index-aligned with content/quotes-manifest.json.
+     The pet is its own little character: cute, playful, sweet. */
+  const PHRASES = [
+    "hihi! read this one!!",
+    "boop! this quote's a good one",
+    "yesss this!! this this this",
+    "hehe, classic right??",
+    "omgosh this one!!",
+    "stop, this one still makes me smile",
+    "a certified banger, trust me",
+    "you'll like this one, i promise",
+    "ehehe, so true bestie",
+    "this one's warm and fuzzy, look!",
+    "one of my faves, not gonna lie",
+    "aww, this one!!",
+    "read it read it read it!!",
+    "heehee, this one's silly",
+    "this quote gives hugs, okay?",
+    "i giggled way too hard at this",
+    "honestly? icon behavior",
+    "this one's a little hug on paper",
+    "you can't tell me this isn't cute",
+    "heehee, quotes am i right",
+    "soft hours only for this one",
+    "this one smells like sunshine",
+    "brace yourself, it's a sweet one",
+    "okay but look at this one!!",
+    "this quote and i are best friends",
+    "a lil bit feral, a lil bit sweet",
+    "this one's got main character energy",
+    "eeek, this one!!",
+    "everything about this is yes",
+    "this is the vibe, the whole vibe",
+    "cozy detected, proceed gently",
+    "i knitted this quote with love",
+    "this one's stitched with glitter",
+    "heehee, trust, just read it",
+    "this quote gives good dreams",
+    "soft hours, please enjoy",
+    "a tiny firework of a quote!!",
+    "this one's my emotional support text",
+    "glowy, glowy little quote",
+    "you gotta smile at this one, rules",
+    "this one's wrapped in a blanket",
+    "sweet like late-night snacks",
+    "pat pat, this quote pats back",
+    "heehee, this one's a cheeky lil thing",
+    "warning: cuteness ahead",
+    "this quote knows a secret about you",
+    "warm socks energy, this one",
+    "giggles included at no extra cost",
+    "this one's my happy place",
+    "soft and a little bit silly",
+    "floaty! this quote makes me floaty",
+    "butterflies, but like, the nice kind",
+    "this one's a pocketful of confetti",
+    "squee! okay okay look!!",
+    "i saved this one for a nice moment",
+    "this quote tastes like candy",
+    "happy little accident of a quote!!",
+    "this one's basically a warm hug",
+    "twinkle twinkle, little quote",
+    "heehee, this one winks at you",
+    "comfy vibes only on this card",
+    "this quote is a tiny adventure",
+    "marshmallow soft, this one",
+    "wiggly with excitement, look!!",
+    "this one's my cozy corner",
+    "sugar rush but make it a quote",
+    "glitter in text form, yesss",
+    "this quote and i are giggling",
+    "home is where this quote is",
+    "ohh you found a shiny one!!",
+    "pssst.. this one's a keeper",
+    "ooh la la, ultra rare!!",
+    "you have good eyes, huhu",
+    "special delivery, just for you",
+    "this one made my heart do a flip",
+    "treasure detected!! *sparkle*",
+    "shh.. not everyone gets to see this",
+    "you really went digging, i love it",
+    "gold star for finding me!!",
+    "hehe this one's my little secret",
+  ];
+
   function armPet(wall) {
     let home = null;
     let leaveTimer = 0;
@@ -365,7 +451,22 @@
         pet.classList.remove('is-hopping');
         void pet.getBoundingClientRect();
         pet.classList.add('is-hopping');
+        sayPhrase(home, pet);
       }
+    }
+
+    /* the pet says its line for this exhibit, then the bubble fades */
+    let sayTimer = 0;
+    function sayPhrase(card, pet) {
+      const bubble = pet.querySelector('.quote-pet__bubble');
+      if (!bubble) return;
+      const idx = Array.prototype.indexOf.call(card.parentNode.children, card);
+      bubble.textContent = PHRASES[idx] || PHRASES[0];
+      window.clearTimeout(sayTimer);
+      card.classList.remove('pet-says');
+      void bubble.getBoundingClientRect();
+      card.classList.add('pet-says');
+      sayTimer = window.setTimeout(() => card.classList.remove('pet-says'), 2600);
     }
 
     wall.addEventListener('pointerover', (e) => {
