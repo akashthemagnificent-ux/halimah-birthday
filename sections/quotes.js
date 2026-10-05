@@ -438,12 +438,13 @@
   ];
 
   function armPet(wall) {
-    if (!wall) return;
+    if (!wall) return null;
     let home = null;
     let leaveTimer = 0;
     let sayTimer = 0;
     let flight = null;
     let flyer = null;
+    let suspended = false;
 
     /* one shared pet that physically jumps between cards; per-card pets
        stay hidden until the flyer lands on them */
@@ -546,6 +547,7 @@
     }
 
     function park(card) {
+      if (suspended) return;
       if (home === card) return;
       const prev = home;
 
@@ -612,9 +614,33 @@
       void card.getBoundingClientRect();
       card.classList.add('pet-loved');
     }, true);
+
+    /* lightbox is open: finish any mid-air jump (never strand the target
+       pet), hide the flyer, and swallow every bubble until it closes */
+    function suspend() {
+      suspended = true;
+      window.clearTimeout(leaveTimer);
+      window.clearTimeout(sayTimer);
+      if (flight) {
+        if (window.gsap) flight.progress(1); else flight = null;
+      }
+      if (flyer) {
+        flyer.classList.remove('is-flying');
+        if (window.gsap) window.gsap.set(flyer, { opacity: 0 });
+      }
+      const saying = wall.querySelectorAll('.quote-exhibit.pet-says');
+      for (let i = 0; i < saying.length; i += 1) saying[i].classList.remove('pet-says');
+    }
+
+    function resume() {
+      suspended = false;
+      window.clearTimeout(leaveTimer);
+    }
+
+    return { suspend, resume };
   }
 
-  function createLightbox() {
+  function createLightbox(hooks) {
     if (document.querySelector('.quotes__lightbox')) return;
     const box = document.createElement('div');
     box.className = 'quotes__lightbox';
@@ -644,6 +670,7 @@
       box.classList.add('is-open');
       document.body.classList.add('has-artifact-open');
       openCard = card;
+      if (hooks && hooks.onOpen) hooks.onOpen(card);
       if (window.gsap) {
         window.gsap.fromTo(img, { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'expo.out' });
       }
@@ -655,6 +682,7 @@
       box.classList.remove('is-open');
       document.body.classList.remove('has-artifact-open');
       openCard = null;
+      if (hooks && hooks.onClose) hooks.onClose();
     }
 
     box.addEventListener('click', close);
@@ -729,9 +757,12 @@
     const rare = section.querySelector('[data-quotes-rare]');
     if (rare) rare.textContent = String(items.filter((x) => x.rare).length);
 
-    const lb = createLightbox();
     armTilt(wall);
-    armPet(wall);
+    const pet = armPet(wall);
+    const lb = createLightbox({
+      onOpen: () => { if (pet) pet.suspend(); },
+      onClose: () => { if (pet) pet.resume(); },
+    });
 
     wall.addEventListener('click', (e) => {
       if (lb && e.target.closest && e.target.closest('.quotes__lightbox')) return;
