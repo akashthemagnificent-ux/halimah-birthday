@@ -278,7 +278,16 @@
     // review the full site before 19 Oct. Inert on the real link (no param).
     var preview = false;
     try {
-      preview = /(?:^|[?&])preview=1(?:&|$)/.test(window.location.search || '');
+      var loc = window.location;
+      preview = /(?:^|[?&])preview=1(?:&|$)/.test(loc.search || '');
+      // Local opens are always the owner reviewing: double-clicking the file
+      // or serving the folder locally must show the full site without a param.
+      // The real hosted link (any other origin) keeps the countdown gate.
+      if (!preview && (loc.protocol === 'file:' ||
+          loc.hostname === 'localhost' || loc.hostname === '127.0.0.1' ||
+          loc.hostname === '[::1]')) {
+        preview = true;
+      }
     } catch (err) { preview = false; }
     var remaining = preview ? 0 : renderCountdown(target, now);
 

@@ -41,6 +41,9 @@
   }
 
   async function fetchNames() {
+    /* content/physics-names.js ships a plain global so this works on file:// */
+    const pre = window.PHYSICS_NAMES;
+    if (pre && Array.isArray(pre.hearts) && pre.hearts.length) return pre.hearts;
     const res = await fetch(NAMES_URL, { cache: 'no-cache' });
     if (!res.ok) throw new Error('names http ' + res.status);
     const data = await res.json();

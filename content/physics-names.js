@@ -1,0 +1,37 @@
+/* physics names — plain global so the nook works from file:// previews. */
+window.PHYSICS_NAMES = {
+  "note": "Canonical heart names for the todo-15 physics playground. Single source of truth: the section fetches this file, and audits/task-15-acceptance.mjs asserts the rendered DOM matches it. No name is hardcoded in the markup or the section JS, so there is no drift. Provenance per name: attested = present in the cited site content file; plan = named in the work plan's IS-1 row (DM export is not vendored in this repo, so no local citation line exists).",
+  "hearts": [
+    {
+      "name": "Zai",
+      "owner": "her",
+      "source": "attested",
+      "citation": "content/chapters.md (verbatim DM: \"this will help you zai\"); also content/quotes source dms"
+    },
+    {
+      "name": "Halimah",
+      "owner": "her",
+      "source": "attested",
+      "citation": "content/lore.md Room 8 (verbatim: \"GOODNIGHT MY HALIMAH\")"
+    },
+    {
+      "name": "princess",
+      "owner": "you",
+      "source": "attested",
+      "citation": "index.html scratch headline (\"scratch it out, princess\")"
+    },
+    {
+      "name": "Ash",
+      "owner": "you",
+      "source": "attested",
+      "attest_as": "Akash",
+      "citation": "content/lore.md Room 8 (verbatim: \"GOODNIGHT MY AKASH\"); 'Ash' is the familiar short form of the attested full name 'Akash'"
+    },
+    {
+      "name": "hubby",
+      "owner": "you",
+      "source": "plan",
+      "citation": ".omo/plans/halimah-birthday-site.md IS-1 (names for each other: princess, Ash, hubby); DM export not vendored locally"
+    }
+  ]
+};
