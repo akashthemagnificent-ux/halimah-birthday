@@ -1,10 +1,11 @@
 /* ============================================================
    physics — Physics playground (todo 15)
-   Bonus corner in the gag locker: shovable floating hearts.
+   Bonus corner in the gag locker: a real-time 3D heart orbit.
    Progressive enhancement: the static names row is the base state
-   (reduced-motion / over-budget / library-blocked). The canvas +
-   floating hearts layer only appears when matter-js loads and
-   motion is allowed. Heart/canvas sizing is fluid so it fits 375px.
+   (three.js blocked). The 3D orbit canvas layers in only after
+   matter-js flicks the hearts awake — hearts stay simulated bodies,
+   their frozen positions become the orbit radii. Sizing is fluid so
+   it fits 375px.
    ============================================================ */
 
 .section--physics {
@@ -137,34 +138,42 @@
   min-height: 1em;
 }
 
-/* The floating hearts are absolutely-positioned name bubbles on the canvas;
-   physics.js writes their transform each frame. */
-.physics__heart {
+/* ---- 3D heart orbit: full-bleed canvas inside the stage.
+   Labels ride the canvas as three.js sprites (physics.js paints each
+   name once to an offscreen canvas), so names stay glued to hearts at
+   any viewport width. The static row is the only no-WebGL fallback. ---- */
+.physics__orbit {
   position: absolute;
-  left: 0;
-  top: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-accent);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: var(--shadow-md), var(--shadow-glow);
-  will-change: transform;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
 }
 
-.physics__heart::before {
-  content: "\2665";
-  color: var(--color-accent);
-  font-size: 1em;
+.physics__orbit:active {
+  cursor: grabbing;
+}
+
+.physics__orbit[hidden] {
+  display: none;
+}
+
+/* Shimmer that plays once when the orbit wakes, under the canvas. */
+.physics__stage.is-awake::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 60% at 50% 55%, rgba(240, 152, 74, 0.22) 0%, rgba(240, 152, 74, 0) 70%);
+  animation: physics-wake 1.6s ease-out 1;
+}
+
+@keyframes physics-wake {
+  from { opacity: 0; }
+  25% { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .physics__play {

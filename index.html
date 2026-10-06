@@ -483,12 +483,7 @@
         <span class="gags__shot-glare" aria-hidden="true"></span>
         <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
       </figure>
-      <blockquote class="gags__gag" data-testid="gag-lines-buddy">
-        <p>DO NOT CALL ME THAT AGAIN</p>
-        <p>Ima still call u it</p>
-        <p>I don&#x27;t like it, I am more than just a &quot;buddy&quot; and I want to hear that from you</p>
-        <cite>from our chats &#183; halimah dms-5.txt:2323,2330 &#183; dms-11.txt:705</cite>
-      </blockquote>
+      <p class="gags__source" data-testid="gag-lines-buddy"><cite>from our chats &#183; halimah dms-5.txt:2323,2330 &#183; dms-11.txt:705</cite></p>
       <p class="gags__closer" data-testid="gag-closer-buddy"><span class="gags__closer-label">affection closer</span>I am not her buddy, I am her person, and her teasing only works because we both know it.</p>
     </article>
     <article class="gags__card" data-gags-card="goodboy" data-gi="1" data-testid="gag-card-goodboy" tabindex="0">
@@ -502,12 +497,7 @@
         <span class="gags__shot-glare" aria-hidden="true"></span>
         <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
       </figure>
-      <blockquote class="gags__gag" data-testid="gag-lines-goodboy">
-        <p>You can call me your Goodboy anytime</p>
-        <p>call me a goodboy and I won&#x27;t send it &mdash; Goodboy</p>
-        <p>GOTTA USE CHATGPT TO CALL ME GOODBOY NOW</p>
-        <cite>from our chats &#183; halimah dms-2.txt:1604 &#183; dms-3.txt:954,957 &#183; dms-11.txt:979</cite>
-      </blockquote>
+      <p class="gags__source" data-testid="gag-lines-goodboy"><cite>from our chats &#183; halimah dms-2.txt:1604 &#183; dms-3.txt:954,957 &#183; dms-11.txt:979</cite></p>
       <p class="gags__closer" data-testid="gag-closer-goodboy"><span class="gags__closer-label">affection closer</span>She says it rarely, which is exactly why each one lands. Her good boy, always.</p>
     </article>
     <article class="gags__card" data-gags-card="hashbrown" data-gi="2" data-testid="gag-card-hashbrown" tabindex="0">
@@ -521,11 +511,7 @@
         <span class="gags__shot-glare" aria-hidden="true"></span>
         <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
       </figure>
-      <blockquote class="gags__gag" data-testid="gag-lines-hashbrown">
-        <p>Hope u like hash browns &#x1F979;&#x1F979;</p>
-        <p>I AM CRYING &#x1F62D; WHAT MADE YOU NAME ME HASHBROWN</p>
-        <cite>from our chats &#183; halimah dms-1.txt:50-51</cite>
-      </blockquote>
+      <p class="gags__source" data-testid="gag-lines-hashbrown"><cite>from our chats &#183; halimah dms-1.txt:50-51</cite></p>
       <p class="gags__closer" data-testid="gag-closer-hashbrown"><span class="gags__closer-label">affection closer</span>Hashbrown stuck because she picked it. I would rather be her hashbrown than anyone else&#x27;s anything.</p>
     </article>
     <article class="gags__card" data-gags-card="spider" data-gi="3" data-testid="gag-card-spider" tabindex="0">
@@ -559,12 +545,7 @@
           <circle cx="63" cy="61" r="3" fill="#e07c3e" opacity="0.6" />
         </svg>
       </div>
-      <blockquote class="gags__gag" data-testid="gag-lines-spider">
-        <p>I HAVE ARACHNOPHOBIA</p>
-        <p>And I love sending u spider pics</p>
-        <p>Would u love me if I was a spider &#x1F97A;&#x1F97A;</p>
-        <cite>from our chats &#183; halimah dms-3.txt:1608 &#183; dms-9.txt:436 &#183; dms-8.txt:1020</cite>
-      </blockquote>
+      <p class="gags__source" data-testid="gag-lines-spider"><cite>from our chats &#183; halimah dms-3.txt:1608 &#183; dms-9.txt:436 &#183; dms-8.txt:1020</cite></p>
       <p class="gags__closer" data-testid="gag-closer-spider"><span class="gags__closer-label">affection closer</span>She could send him anything, even eight-legged nightmares, and he would still open every single one smiling.</p>
       <button class="gags__spider-btn" type="button" data-gags-boop data-testid="gag-spider-boop">boop the spider</button>
     </article>
@@ -573,18 +554,20 @@
 </section>
 
 <!-- 5b. physics — Physics playground (todo 15)
-     Bonus corner inside the gag locker. Shovable floating hearts with
-     their names, lazy-loaded matter-js, static names row whenever motion
-     is reduced / the library is blocked / the weight budget breaks.
-     Names render from content/physics-names.json (single source of truth,
-     fetched by sections/physics.js); no name is hardcoded in this markup. -->
+     Bonus corner inside the gag locker. A real-time 3D heart orbit
+     (three.js, eager vendor): five glowing hearts circling one warm
+     medallion, flickable with pointer, gentle collisions. Static names
+     row whenever three.js is blocked. Names render from
+     content/physics-names.js (single source of truth); no name is
+     hardcoded in this markup. -->
 <section id="physics" class="section section--physics section--gags" aria-label="Physics playground">
 <div class="physics__content">
   <p class="physics__eyebrow">bonus corner</p>
-  <h2 class="physics__headline">shove a heart</h2>
-  <p class="physics__lede">drag any heart &mdash; they knock into each other, gently</p>
+  <h2 class="physics__headline">a tiny orbit of us</h2>
+  <p class="physics__lede">five hearts circling one glow &mdash; flick one and the orbit remembers</p>
 
   <div class="physics__stage" data-physics-stage>
+    <canvas class="physics__orbit" data-physics-orbit data-testid="physics-orbit" aria-label="A tiny 3D orbit of glowing hearts"></canvas>
     <div class="physics__static" data-physics-static data-testid="physics-static" hidden>
       <ul class="physics__chips" data-physics-chips data-testid="physics-chips"></ul>
       <p class="physics__note" data-physics-note data-testid="physics-note"></p>
@@ -592,7 +575,7 @@
   </div>
 
   <button class="physics__play" type="button" data-physics-play data-testid="physics-play" hidden>
-    let them float
+    wake the orbit
   </button>
   <p class="physics__status" role="status" data-physics-status data-testid="physics-status"></p>
 </div>
