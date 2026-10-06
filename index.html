@@ -461,17 +461,28 @@
 
 <!-- 6. gags — Gag locker (todo 9)
      Four exhibits, each ending in an affection closer (IS-5).
-     Spider is a cute inline SVG, never a photo. -->
+     Spider is a cute inline SVG, never a photo. Real chat screenshots
+     (assets/chats/ss * buddy/goodboy/hashbrown/spider) ride the cards
+     at their natural aspect — they are not uniform, on purpose. -->
 <section id="gags" class="section section--gags" aria-label="Gag locker">
+<canvas id="gags-locker" class="gags-locker" aria-hidden="true"></canvas>
+<div class="gags-void" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div class="gags__content">
   <p class="gags__eyebrow">the gag locker &#183; four exhibits</p>
   <h2 class="gags__headline">certified lore</h2>
   <p class="gags__lede">every joke in here ends the same way &mdash; with you being loved</p>
-  <div class="gags__grid">
-    <article class="gags__card" data-gags-card="buddy" data-testid="gag-card-buddy">
+  <div class="gags__grid" data-gags-grid>
+    <article class="gags__card" data-gags-card="buddy" data-gi="0" data-testid="gag-card-buddy" tabindex="0">
       <p class="gags__card-num">exhibit 01</p>
       <h3 class="gags__card-title">the buddy war</h3>
       <p class="gags__card-setup">She knows I cannot stand being called buddy. Saying it anyway became her favourite sport.</p>
+      <figure class="gags__shot" data-gags-shot>
+        <span class="gags__tape gags__tape--l" aria-hidden="true"></span>
+        <span class="gags__tape gags__tape--r" aria-hidden="true"></span>
+        <img class="gags__shot-img" src="assets/chats/ss 1 buddy.webp" alt="Chat screenshot: the buddy war, from our chats" loading="lazy" decoding="async" data-testid="gag-shot-buddy">
+        <span class="gags__shot-glare" aria-hidden="true"></span>
+        <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
+      </figure>
       <blockquote class="gags__gag" data-testid="gag-lines-buddy">
         <p>DO NOT CALL ME THAT AGAIN</p>
         <p>Ima still call u it</p>
@@ -480,10 +491,17 @@
       </blockquote>
       <p class="gags__closer" data-testid="gag-closer-buddy"><span class="gags__closer-label">affection closer</span>I am not her buddy, I am her person, and her teasing only works because we both know it.</p>
     </article>
-    <article class="gags__card" data-gags-card="goodboy" data-testid="gag-card-goodboy">
+    <article class="gags__card" data-gags-card="goodboy" data-gi="1" data-testid="gag-card-goodboy" tabindex="0">
       <p class="gags__card-num">exhibit 02</p>
       <h3 class="gags__card-title">good-boy bargain</h3>
       <p class="gags__card-setup">He asked. She rationed. Every single goodboy had to be earned, and the negotiation is on record.</p>
+      <figure class="gags__shot" data-gags-shot>
+        <span class="gags__tape gags__tape--l" aria-hidden="true"></span>
+        <span class="gags__tape gags__tape--r" aria-hidden="true"></span>
+        <img class="gags__shot-img" src="assets/chats/ss 2 goodboy.webp" alt="Chat screenshot: the good-boy bargain, from our chats" loading="lazy" decoding="async" data-testid="gag-shot-goodboy">
+        <span class="gags__shot-glare" aria-hidden="true"></span>
+        <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
+      </figure>
       <blockquote class="gags__gag" data-testid="gag-lines-goodboy">
         <p>You can call me your Goodboy anytime</p>
         <p>call me a goodboy and I won&#x27;t send it &mdash; Goodboy</p>
@@ -492,10 +510,17 @@
       </blockquote>
       <p class="gags__closer" data-testid="gag-closer-goodboy"><span class="gags__closer-label">affection closer</span>She says it rarely, which is exactly why each one lands. Her good boy, always.</p>
     </article>
-    <article class="gags__card" data-gags-card="hashbrown" data-testid="gag-card-hashbrown">
+    <article class="gags__card" data-gags-card="hashbrown" data-gi="2" data-testid="gag-card-hashbrown" tabindex="0">
       <p class="gags__card-num">exhibit 03</p>
       <h3 class="gags__card-title">hashbrown origin</h3>
       <p class="gags__card-setup">Out of nowhere, she named me after a fried potato side dish. I questioned it, she had no explanation, and that somehow made it better.</p>
+      <figure class="gags__shot" data-gags-shot>
+        <span class="gags__tape gags__tape--l" aria-hidden="true"></span>
+        <span class="gags__tape gags__tape--r" aria-hidden="true"></span>
+        <img class="gags__shot-img" src="assets/chats/ss 3 hashbrown.webp" alt="Chat screenshot: the hashbrown naming, from our chats" loading="lazy" decoding="async" data-testid="gag-shot-hashbrown">
+        <span class="gags__shot-glare" aria-hidden="true"></span>
+        <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
+      </figure>
       <blockquote class="gags__gag" data-testid="gag-lines-hashbrown">
         <p>Hope u like hash browns &#x1F979;&#x1F979;</p>
         <p>I AM CRYING &#x1F62D; WHAT MADE YOU NAME ME HASHBROWN</p>
@@ -503,10 +528,17 @@
       </blockquote>
       <p class="gags__closer" data-testid="gag-closer-hashbrown"><span class="gags__closer-label">affection closer</span>Hashbrown stuck because she picked it. I would rather be her hashbrown than anyone else&#x27;s anything.</p>
     </article>
-    <article class="gags__card" data-gags-card="spider" data-testid="gag-card-spider">
+    <article class="gags__card" data-gags-card="spider" data-gi="3" data-testid="gag-card-spider" tabindex="0">
       <p class="gags__card-num">exhibit 04</p>
       <h3 class="gags__card-title">spider-pic amnesty</h3>
       <p class="gags__card-setup">He has arachnophobia. She sends spider pics as a love language. The system clearly works.</p>
+      <figure class="gags__shot" data-gags-shot>
+        <span class="gags__tape gags__tape--l" aria-hidden="true"></span>
+        <span class="gags__tape gags__tape--r" aria-hidden="true"></span>
+        <img class="gags__shot-img" src="assets/chats/ss 4 spider.webp" alt="Chat screenshot: spider-pic amnesty, from our chats" loading="lazy" decoding="async" data-testid="gag-shot-spider">
+        <span class="gags__shot-glare" aria-hidden="true"></span>
+        <figcaption class="gags__stamp">screenshot &#183; tap to zoom</figcaption>
+      </figure>
       <div class="gags__spider" aria-hidden="true">
         <svg viewBox="0 0 96 96" role="img" aria-label="A cute smiling cartoon spider" data-testid="gag-spider-svg">
           <g stroke="#c9956b" stroke-width="4" stroke-linecap="round" fill="none">

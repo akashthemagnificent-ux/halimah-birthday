@@ -1,19 +1,64 @@
 /* ============================================================
-   gags — gag locker room (todo 9)
+   gags — gag locker room (todo 9) — rebuilt
    Four exhibits, each ending in an affection closer (IS-5).
+   Case-file exhibits: real chat screenshots taped in at natural
+   size, cursor tilt + glare, tap-to-zoom lightbox, and a spider
+   mascot that swings between cards on a silk thread.
    Spiders are cute/stylized inline SVG only — never photoreal.
    ============================================================ */
 
 .section--gags {
+  position: relative;
   background:
     radial-gradient(90% 50% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
   overflow: hidden;
 }
 
+/* ---- locker void: silk threads + slow dust behind everything ---- */
+.gags-locker {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.gags-void {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.gags-void i {
+  position: absolute;
+  top: -4%;
+  width: 1px;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(245, 235, 224, 0.16), rgba(245, 235, 224, 0.02));
+  transform-origin: 50% 0;
+  animation: gags-thread-sway 7.5s ease-in-out infinite alternate;
+}
+
+.gags-void i:nth-child(1) { left: 9%;  animation-duration: 8.5s; }
+.gags-void i:nth-child(2) { left: 27%; height: 30%; animation-duration: 6.5s; animation-delay: -2s; }
+.gags-void i:nth-child(3) { left: 46%; animation-duration: 9.5s; animation-delay: -4s; }
+.gags-void i:nth-child(4) { left: 63%; height: 36%; animation-duration: 7s;  animation-delay: -1s; }
+.gags-void i:nth-child(5) { left: 78%; animation-duration: 8s;   animation-delay: -3s; }
+.gags-void i:nth-child(6) { left: 92%; height: 26%; animation-duration: 6s;  animation-delay: -5s; }
+
+@keyframes gags-thread-sway {
+  from { transform: rotate(-1.6deg); }
+  to   { transform: rotate(1.6deg); }
+}
+
 .gags__content {
   position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: var(--content-width);
+  max-width: calc(var(--content-width) * 1.7);
   margin: 0 auto;
   padding: var(--section-padding) var(--gutter);
   display: flex;
@@ -31,12 +76,32 @@
 }
 
 .gags__headline {
+  position: relative;
   margin-top: calc(-1 * var(--space-4));
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: 500;
   line-height: 1.15;
   color: var(--color-text);
+}
+
+/* rubber stamp slammed over the headline */
+.gags__headline::after {
+  content: "certified";
+  position: absolute;
+  top: -0.9em;
+  right: -1.6em;
+  padding: 0.28em 0.6em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #ffd9a8;
+  border: 1.5px solid rgba(255, 209, 102, 0.55);
+  border-radius: 4px;
+  transform: rotate(8deg);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .gags__lede {
@@ -50,6 +115,7 @@
 
 /* ---- Card grid: one column on phones, two up on wide ---- */
 .gags__grid {
+  position: relative;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
@@ -65,8 +131,9 @@
   }
 }
 
-/* ---- Exhibit card ---- */
+/* ---- Exhibit card: case file ---- */
 .gags__card {
+  position: relative;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
@@ -76,6 +143,21 @@
   flex-direction: column;
   gap: var(--space-4);
   opacity: 1;
+  overflow: visible;
+  cursor: default;
+  outline: none;
+  transform: perspective(1000px) rotateX(var(--ga-tilt-x, 0deg)) rotateY(var(--ga-tilt-y, 0deg));
+  transition: box-shadow 0.45s var(--ease-out), border-color 0.45s ease;
+  will-change: transform;
+}
+
+.gags__card:hover,
+.gags__card:focus-visible {
+  border-color: rgba(224, 124, 62, 0.55);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(224, 124, 62, 0.35),
+    0 0 34px rgba(224, 124, 62, 0.14);
 }
 
 .gags__card-num {
@@ -100,6 +182,105 @@
   color: var(--color-text-muted);
 }
 
+/* ---- Screenshot taped into the file: natural size, never cropped ----
+   The four real screenshots differ in aspect (295x512 … 640x509);
+   the frame hugs the image instead of forcing a ratio. */
+.gags__shot {
+  position: relative;
+  margin: var(--space-2) auto var(--space-1);
+  display: flex;
+  justify-content: center;
+  cursor: zoom-in;
+}
+
+.gags__shot-img {
+  display: block;
+  max-width: min(100%, 340px);
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 235, 224, 0.18);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.5),
+    0 0 0 6px rgba(245, 235, 224, 0.05),
+    0 0 26px rgba(224, 124, 62, 0.1);
+  transform: rotate(-1.1deg);
+  transition: transform 0.4s var(--ease-out), box-shadow 0.4s ease;
+}
+
+.gags__card:nth-child(2n) .gags__shot-img { transform: rotate(1deg); }
+
+.gags__shot:hover .gags__shot-img {
+  transform: rotate(0deg) scale(1.03);
+  box-shadow:
+    0 24px 54px rgba(0, 0, 0, 0.62),
+    0 0 0 6px rgba(245, 235, 224, 0.08),
+    0 0 34px rgba(224, 124, 62, 0.22);
+}
+
+/* washi tape corners */
+.gags__tape {
+  position: absolute;
+  z-index: 2;
+  width: 68px;
+  height: 20px;
+  background: linear-gradient(115deg, rgba(255, 233, 196, 0.5), rgba(238, 194, 127, 0.32));
+  border-left: 1px dashed rgba(255, 255, 255, 0.35);
+  border-right: 1px dashed rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.gags__tape--l {
+  top: -8px;
+  left: max(0px, calc(50% - 190px));
+  transform: rotate(-7deg);
+}
+
+.gags__tape--r {
+  top: -6px;
+  right: max(0px, calc(50% - 190px));
+  transform: rotate(6deg);
+}
+
+/* glare follows the cursor over the shot */
+.gags__shot-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 10px;
+  background: radial-gradient(
+    260px circle at var(--ga-glare-x, 50%) var(--ga-glare-y, 40%),
+    rgba(255, 255, 255, 0.16),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.gags__shot:hover .gags__shot-glare { opacity: 1; }
+
+.gags__stamp {
+  position: absolute;
+  z-index: 2;
+  bottom: -10px;
+  right: max(0px, calc(50% - 200px));
+  padding: 0.3em 0.75em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ffd9a8;
+  background: rgba(12, 8, 5, 0.78);
+  border: 1px solid rgba(255, 209, 102, 0.5);
+  border-radius: 4px;
+  transform: rotate(-4deg);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ---- Verbatim gag lines: transcript block ---- */
 .gags__gag {
   margin: 0;
   padding: var(--space-4);
@@ -117,9 +298,13 @@
   color: var(--color-text);
 }
 
+.gags__gag p:nth-child(odd) { opacity: 0.92; }
+
 .gags__gag cite {
+  margin-top: var(--space-1);
   font-size: var(--text-xs);
   font-style: normal;
+  font-family: var(--font-mono);
   color: var(--color-text-muted);
   opacity: 0.8;
 }
@@ -185,6 +370,208 @@
   outline-offset: 3px;
 }
 
+.gags__spider svg.is-wiggling {
+  animation: spider-wiggle 600ms var(--ease-in-out);
+  transform-origin: 50% 30%;
+}
+
+@keyframes spider-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  50% { transform: rotate(6deg); }
+  75% { transform: rotate(-4deg); }
+}
+
+/* ============================================================
+   Spider mascot: swings between cards on a silk thread.
+   Same architecture as the quote pet (per-card hidden until the
+   flyer lands) with a thread line drawn up to the grid top.
+   ============================================================ */
+.gag-spider {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: -2.4rem;
+  width: 3rem;
+  height: 3rem;
+  margin-left: -1.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.6rem) scale(0.6);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+}
+
+.gag-spider svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* silk thread from the grid top down to the spider */
+.gag-spider__thread {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 2px);
+  width: 1.5px;
+  height: var(--thread-len, 0px);
+  margin-left: -0.75px;
+  background: linear-gradient(180deg, rgba(245, 235, 224, 0.05), rgba(245, 235, 224, 0.45));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.gags__card.pet-here .gag-spider,
+.gag-spider--flyer.is-flying .gag-spider__thread {
+  opacity: 1;
+}
+
+.gags__card.pet-here .gag-spider {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: gag-spider-bob 2.4s ease-in-out infinite;
+}
+
+.gags__card.pet-here .gag-spider.is-hopping {
+  animation: gag-spider-drop 0.55s var(--ease-out);
+}
+
+@keyframes gag-spider-drop {
+  0%   { transform: translateY(-1.4rem) scale(0.7); }
+  55%  { transform: translateY(0.15rem) scale(1.12, 0.88); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes gag-spider-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(0.18rem) rotate(2deg); }
+}
+
+.gag-spider--flyer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin-left: 0;
+  z-index: 8;
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
+  animation: none;
+  will-change: transform;
+}
+
+.gag-spider--flyer.is-flying {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* little heart pop on click */
+.gags__card.pet-loved .gag-spider::after {
+  content: "\2665";
+  position: absolute;
+  top: -0.5rem;
+  right: -0.4rem;
+  font-size: 1rem;
+  color: #ff8fa3;
+  animation: gag-heart-pop 0.9s var(--ease-out) forwards;
+}
+
+@keyframes gag-heart-pop {
+  0%   { transform: translateY(0) scale(0.4); opacity: 0; }
+  30%  { transform: translateY(-0.5rem) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-1.6rem) scale(0.9); opacity: 0; }
+}
+
+/* ---- Spider speech bubble ---- */
+.gag-spider__bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.55rem);
+  transform: translateX(-50%) translateY(0.3rem) scale(0.7);
+  transform-origin: 50% 100%;
+  width: max-content;
+  max-width: 11.5rem;
+  padding: 0.42em 0.75em;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.35;
+  font-style: italic;
+  text-align: center;
+  color: #241207;
+  background: linear-gradient(160deg, #fff7e6, #ffe9c4);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s var(--ease-out);
+}
+
+.gag-spider__bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top-color: #ffe9c4;
+}
+
+.gags__card.pet-says .gag-spider__bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* ============================================================
+   Lightbox: tap a screenshot to read it full size.
+   CLOSED state must not swallow pointer events (lesson from the
+   story lightbox bug): visibility + pointer-events gate below.
+   ============================================================ */
+.gags__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(6, 5, 8, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  cursor: zoom-out;
+}
+
+.gags__lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.35s ease, visibility 0s;
+}
+
+.gags__lightbox img {
+  max-width: min(94vw, 780px);
+  max-height: 86vh;
+  object-fit: contain;
+  border-radius: 14px;
+  border: 1px solid rgba(238, 194, 127, 0.4);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 90px rgba(238, 194, 127, 0.18);
+}
+
+.gags__lightbox-cap {
+  position: absolute;
+  bottom: clamp(1rem, 4vh, 2.4rem);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: #ffe3ae;
+}
+
 /* ---- Scroll reveal (JS adds .is-visible; content readable without it) ---- */
 html.js-gags .gags__card {
   opacity: 0;
@@ -199,17 +586,14 @@ html.js-gags .gags__card.is-visible {
   transform: none;
 }
 
-.gags__spider svg.is-wiggling {
-  animation: spider-wiggle 600ms var(--ease-in-out);
-  transform-origin: 50% 30%;
+/* after reveal, tilt takes over via the custom property */
+html.js-gags .gags__card.is-visible {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out),
+    box-shadow 0.45s var(--ease-out),
+    border-color 0.45s ease;
 }
 
-@keyframes spider-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-8deg); }
-  50% { transform: rotate(6deg); }
-  75% { transform: rotate(-4deg); }
-}
-
-/* ---- Reduced motion: static, fully readable, no animation ---- */
-
+/* ---- Reduced motion: static, fully readable, no animation ----
+   Personal site: owner override — full motion always. */
