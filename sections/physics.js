@@ -2,7 +2,7 @@
    physics — bonus corner: a tiny orbit of us (todo 15).
 
    Two engines, one moment:
-   - matter-js SIMULATES: five heart bodies with zero gravity, a
+   - matter-js SIMULATES: nine heart bodies with zero gravity, a
      radial spring pulling each toward the ring, a constant tangential
      drive, and soft mutual repulsion. Flicks and drags are real
      impulses on real bodies.
@@ -104,6 +104,16 @@
 
   /* ---------------- 3D label sprites ---------------- */
 
+  const LABEL_H = 128;
+  const NAME_FONT = '600 60px "Space Grotesk", system-ui, sans-serif';
+  const NAME_X = 100;
+
+  function labelWidth(name) {
+    const probe = document.createElement('canvas').getContext('2d');
+    probe.font = NAME_FONT;
+    return Math.max(260, NAME_X + Math.ceil(probe.measureText(name).width) + 18);
+  }
+
   function paintLabel(canvas, name, toneCss) {
     const ctx = canvas.getContext('2d');
     const W = canvas.width;
@@ -126,17 +136,20 @@
     ctx.stroke();
     ctx.textBaseline = 'middle';
     ctx.fillStyle = toneCss;
-    ctx.font = '600 54px "Space Grotesk", system-ui, sans-serif';
-    ctx.fillText('\u2665', 34, H / 2 + 3);
+    ctx.font = '600 64px "Space Grotesk", system-ui, sans-serif';
+    ctx.fillText('\u2665', 30, H / 2 + 3);
     ctx.fillStyle = '#f5ebe0';
-    ctx.font = '600 46px "Space Grotesk", system-ui, sans-serif';
-    ctx.fillText(name, 104, H / 2 + 2);
+    ctx.font = NAME_FONT;
+    ctx.fillText(name, NAME_X, H / 2 + 3);
   }
 
   function makeLabel(THREE, name, toneCss) {
+    /* dynamic-width pill sized to the name: text is ~60px on a 128px canvas
+       at 0.72 world height, which lands ~14 on-screen px on the desktop
+       stage (the old 0.45 sprite rendered names at ~4px). */
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 128;
+    canvas.height = LABEL_H;
+    canvas.width = labelWidth(name);
     paintLabel(canvas, name, toneCss);
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -145,9 +158,19 @@
       map: tex, transparent: true, depthWrite: false, depthTest: false,
     });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(1.8, 0.45, 1);
+    const H_WORLD = 0.72;
+    const fit = () => sprite.scale.set(H_WORLD * (canvas.width / LABEL_H), H_WORLD, 1);
+    fit();
     sprite.renderOrder = 10;
-    return { sprite, repaint: () => { paintLabel(canvas, name, toneCss); tex.needsUpdate = true; } };
+    return {
+      sprite, height: H_WORLD,
+      repaint: () => {
+        canvas.width = labelWidth(name);
+        paintLabel(canvas, name, toneCss);
+        fit();
+        tex.needsUpdate = true;
+      },
+    };
   }
 
   /* ---------------- extruded heart geometry ---------------- */
@@ -207,7 +230,7 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-    camera.position.set(0, 1.8, 11.4);
+    camera.position.set(0, 1.8, 13.4);
     camera.lookAt(0, 0.1, 0);
 
     scene.add(new THREE.AmbientLight(0xffe9d0, 0.55));
@@ -264,6 +287,7 @@
     engine.gravity.y = 0;
     const half = { x: 4, y: 3 };
     let ringR = 3.1;
+    let repRange = 1.7;
     const wallOpts = { isStatic: true, friction: 0, restitution: 0.5 };
     const walls = {
       top: Matter.Bodies.rectangle(0, 0, 10, 1, wallOpts),
@@ -280,7 +304,13 @@
       const vHalfW = vHalfH * (w / h);
       half.x = vHalfW;
       half.y = vHalfH;
-      ringR = Math.max(1.6, Math.min(3.1, vHalfW - 1.3, vHalfH - 0.9));
+      /* 2.33 = label radial offset (0.95) + widest trimmed pill half (~1.28)
+         + margin — keeps side labels inside the frustum on any aspect. */
+      ringR = Math.max(1.6, Math.min(3.4, vHalfW - 2.33, vHalfH - 1.5));
+      /* repulsion only prevents overlap during flicks/drags: its range tracks
+         the resting pair spacing (0.75x), so it is INACTIVE at rest and can
+         no longer jostle the ring (the mobile 24s-period bug). */
+      repRange = Math.min(2.2, 2 * ringR * Math.sin(Math.PI / hearts.length) * 0.75);
       const t = 4; /* thick: no tunneling at capped fling speeds */
       Matter.Body.setPosition(walls.top, { x: 0, y: half.y + t / 2 });
       Matter.Body.setPosition(walls.bottom, { x: 0, y: -half.y - t / 2 });
@@ -405,6 +435,7 @@
       flingV = null;
       if (window.__physics) window.__physics.lastPick = idx;
       if (idx < 0) return;
+      if (window.__physics) window.__physics.dragging = items[idx].name;
       dragIndex = idx;
       dragTarget = planePoint(ev);
       canvas.setPointerCapture && canvas.setPointerCapture(ev.pointerId);
@@ -440,13 +471,13 @@
           const nx = p.x / d;
           const ny = p.y / d;
           Matter.Body.setVelocity(it.body, {
-            x: it.body.velocity.x + nx * 2.6 - ny * 1.6,
-            y: it.body.velocity.y + ny * 2.6 + nx * 1.6,
+            x: it.body.velocity.x + nx * 0.30 - ny * 0.18,
+            y: it.body.velocity.y + ny * 0.30 + nx * 0.18,
           });
           it.pop = 1;
         } else if (flingV) {
-          const vx = Math.max(-9, Math.min(9, flingV.x));
-          const vy = Math.max(-9, Math.min(9, flingV.y));
+          const vx = Math.max(-0.6, Math.min(0.6, flingV.x));
+          const vy = Math.max(-0.6, Math.min(0.6, flingV.y));
           Matter.Body.setVelocity(it.body, {
             x: it.body.velocity.x * 0.3 + vx,
             y: it.body.velocity.y * 0.3 + vy,
@@ -465,6 +496,27 @@
     /* ---- sim step: radial spring + tangential drive + soft repulsion ---- */
     function stepSim() {
       const bs = items.map((it) => it.body);
+      /* Angular formation: chain each body to its sorted CCW neighbour with a
+         40deg target gap (raw gap error — wrapping inverts the giant-gap
+         case). Reaction forces cancel, so global rotation is untouched
+         (swirl owns the period). kT=0.005: gaps hold 40.0deg, flick peaks
+         at ~2.4deg and settles in ~2s (Node tuner vs vendor/matter.min.js). */
+      const K_SLOT = 0.005;
+      const SLOT = TAU / items.length;
+      const ang = bs.map((b) => Math.atan2(b.position.y, b.position.x));
+      const ord = bs.map((_, i) => i).sort((a, b) => ang[a] - ang[b]);
+      const slotF = bs.map(() => ({ x: 0, y: 0 }));
+      for (let k = 0; k < ord.length; k += 1) {
+        const back = ord[k];
+        const front = ord[(k + 1) % ord.length];
+        const gap = (k === ord.length - 1 ? ang[ord[0]] + TAU : ang[front]) - ang[back] - SLOT;
+        const pb = bs[back].position, db = Math.hypot(pb.x, pb.y) || 1;
+        const pf = bs[front].position, df = Math.hypot(pf.x, pf.y) || 1;
+        slotF[back].x += gap * K_SLOT * (-pb.y / db) * bs[back].mass;
+        slotF[back].y += gap * K_SLOT * (pb.x / db) * bs[back].mass;
+        slotF[front].x += -gap * K_SLOT * (-pf.y / df) * bs[front].mass;
+        slotF[front].y += -gap * K_SLOT * (pf.x / df) * bs[front].mass;
+      }
       for (let i = 0; i < items.length; i += 1) {
         const b = bs[i];
         if (i === dragIndex && dragTarget) {
@@ -484,18 +536,18 @@
         /* spring toward the ring — stiff enough to beat the swirl */
         const radial = (d - ringR) * 0.014 * b.mass;
         /* constant swirl, same direction for all */
-        const swirl = 0.00028 * b.mass;
-        let fx = -nx * radial + -ny * swirl;
-        let fy = -ny * radial + nx * swirl;
-        /* gentle mutual repulsion */
+        const swirl = 4e-6 * b.mass;
+        let fx = -nx * radial + -ny * swirl + slotF[i].x;
+        let fy = -ny * radial + nx * swirl + slotF[i].y;
+        /* gentle mutual repulsion (range set by resting spacing) */
         for (let j = 0; j < items.length; j += 1) {
           if (j === i) continue;
           const q = bs[j].position;
           const dx = p.x - q.x;
           const dy = p.y - q.y;
           const dd = Math.hypot(dx, dy);
-          if (dd > 0.001 && dd < 2.2) {
-            const push = ((2.2 - dd) / 2.2) * 0.008 * b.mass;
+          if (dd > 0.001 && dd < repRange) {
+            const push = ((repRange - dd) / repRange) * 0.008 * b.mass;
             fx += (dx / dd) * push;
             fy += (dy / dd) * push;
           }
@@ -503,14 +555,15 @@
         Matter.Body.applyForce(b, b.position, { x: fx, y: fy });
         /* speed cap so a big flick never escapes the frame */
         const sp = Math.hypot(b.velocity.x, b.velocity.y);
-        if (sp > 2.4) {
+        if (sp > 0.6) {
           Matter.Body.setVelocity(b, {
-            x: (b.velocity.x / sp) * 2.4, y: (b.velocity.y / sp) * 2.4,
+            x: (b.velocity.x / sp) * 0.6, y: (b.velocity.y / sp) * 0.6,
           });
         }
       }
-      /* two substeps: halves per-step travel so fast hearts meet walls */
-      Matter.Engine.update(engine, 1000 / 120);
+      /* one fixed 8.33ms substep per call — the frame loop's wall-clock
+         accumulator decides how many calls a frame earns (frame-rate
+         independent: 60Hz, 144Hz and headless 2fps all simulate real time) */
       Matter.Engine.update(engine, 1000 / 120);
     }
 
@@ -533,22 +586,42 @@
     window.addEventListener('resize', resize);
     resize();
 
+    const STEP_MS = 1000 / 120;
+    let simAcc = 0;
+    let simS = 0;
+    let lastMs = performance.now();
+
     function frame() {
       raf = requestAnimationFrame(frame);
       const suspended = paused || !inView || !running ||
         document.body.classList.contains('has-artifact-open');
+      const nowMs = performance.now();
       if (suspended) {
         clock.getElapsedTime();
+        lastMs = nowMs;
+        simAcc = 0;
         return;
       }
       const t = clock.getElapsedTime();
-      stepSim();
+
+      /* wall-clock stepping: earn fixed 8.33ms substeps from real elapsed
+         time, so the orbit takes the same wall seconds at 60Hz, 144Hz or
+         headless 2fps (the old one-step-per-frame ran 2.4x fast at 144Hz).
+         Cap catch-up at 1000ms (~120 substeps, ~4ms of work): real-time at
+         any frame rate above 1fps, and a backgrounded tab can never spiral. */
+      simAcc += Math.min(nowMs - lastMs, 1000);
+      lastMs = nowMs;
+      while (simAcc >= STEP_MS) {
+        simAcc -= STEP_MS;
+        simS += STEP_MS;
+        stepSim();
+      }
 
       pointer.x += (pointer.tx - pointer.x) * 0.045;
       pointer.y += (pointer.ty - pointer.y) * 0.045;
       const az = pointer.x * 0.35;
       const el = 1.8 - pointer.y * 0.5;
-      camera.position.set(Math.sin(az) * 11.4, el, Math.cos(az) * 11.4);
+      camera.position.set(Math.sin(az) * 13.4, el, Math.cos(az) * 13.4);
       camera.lookAt(0, 0.1, 0);
 
       /* medallion breathes */
@@ -567,15 +640,24 @@
         it.mesh.scale.setScalar(s);
         it.mesh.rotation.y = Math.sin(t * 0.7 + it.phase) * 0.35;
         it.mesh.rotation.z = Math.sin(t * 0.9 + it.phase * 1.7) * 0.1;
-        it.label.sprite.position.set(p.x, p.y + 1.15 + bob * 0.3, 0.35);
+        /* radial label ring: each name sits just outside the orbit along its
+           heart's own radius — 40° of arc per label (2.97 world units) beats
+           the widest pill (2.7), so nine labels can never collide. */
+        const d = Math.hypot(p.x, p.y) || 1;
+        const lr = ringR + 0.95;
+        it.label.sprite.position.set((p.x / d) * lr, (p.y / d) * lr + bob * 0.25, 0.35);
+        /* labels fade in only after the entrance rain settles (hearts are
+           scattered before that, so radial directions would jitter) */
+        it.label.sprite.material.opacity = Math.min(1, Math.max(0, (t - 1.4) / 0.6));
         /* comet trail: remember where this heart has been; collapse to a
            dot while the entrance rain is still falling (no long streaks) */
         if (t < 1.5) it.hist.length = 0;
         it.hist.unshift({ x: p.x, y: p.y, z: 0.15 + bob, t });
         while (it.hist.length > 2 && t - it.hist[it.hist.length - 1].t > 0.45) it.hist.pop();
-        if (it.hist.length > 20) it.hist.pop();
+        if (it.hist.length > 72) it.hist.pop();
+        const stride = Math.max(1, Math.floor((it.hist.length - 1) / 19));
         for (let k = 0; k < 20; k += 1) {
-          const hp = it.hist[Math.min(k, it.hist.length - 1)] || { x: p.x, y: p.y, z: 0.15 };
+          const hp = it.hist[Math.min(k * stride, it.hist.length - 1)] || { x: p.x, y: p.y, z: 0.15 };
           it.trailArr[k * 3] = hp.x;
           it.trailArr[k * 3 + 1] = hp.y;
           it.trailArr[k * 3 + 2] = hp.z;
@@ -600,7 +682,9 @@
 
     staticWrap.hidden = true;
     stage.classList.add('is-awake');
-    setStatus(status, 'five hearts awake \u2014 flick one');
+    const NUM_WORD = ['zero', 'one', 'two', 'three', 'four', 'five', 'six',
+      'seven', 'eight', 'nine', 'ten'];
+    setStatus(status, (NUM_WORD[items.length] || items.length) + ' hearts awake \u2014 flick one');
     window.__physics = {
       mode: 'orbit',
       names: hearts.map((h) => h.name),
@@ -614,7 +698,45 @@
         v: +Math.hypot(it.body.velocity.x, it.body.velocity.y).toFixed(2),
       })),
       lastPick: -1,
+      metrics: () => {
+        const r = canvas.getBoundingClientRect();
+        const worldH = 2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
+        const pxPerUnit = r.height / worldH;
+        const mAng = items.map((it) => Math.atan2(it.body.position.y, it.body.position.x))
+          .sort((a, b) => a - b);
+        let gapDev = 0;
+        for (let k = 0; k < mAng.length; k += 1) {
+          const g = ((k === mAng.length - 1 ? mAng[0] + TAU : mAng[k + 1]) - mAng[k]) * 180 / Math.PI;
+          gapDev = Math.max(gapDev, Math.abs(g - 360 / mAng.length));
+        }
+        return {
+          stageW: Math.round(r.width), stageH: Math.round(r.height),
+          ringR: +ringR.toFixed(2), simS: +(simS / 1000).toFixed(2),
+          gapDev: +gapDev.toFixed(1),
+          labelTextPx: +(items.length ? items[0].label.height * pxPerUnit * (60 / 128) : 0).toFixed(1),
+          labelHWorld: items.length ? items[0].label.height : 0,
+        };
+      },
       pickAt: (cx, cy) => pickIndex(cx, cy),
+      labelRect: (i) => {
+        const it = items[i];
+        if (!it) return null;
+        const c = it.label.sprite.position;
+        const sx = it.label.sprite.scale.x / 2;
+        const sy = it.label.sprite.scale.y / 2;
+        const pts = [
+          new THREE.Vector3(c.x, c.y, c.z),
+          new THREE.Vector3(c.x + sx, c.y, c.z),
+          new THREE.Vector3(c.x, c.y + sy, c.z),
+        ].map((v) => v.project(camera));
+        const r = canvas.getBoundingClientRect();
+        const toPx = (v) => ({
+          x: r.left + ((v.x + 1) / 2) * r.width,
+          y: r.top + ((1 - v.y) / 2) * r.height,
+        });
+        const ctr = toPx(pts[0]); const px = toPx(pts[1]); const py = toPx(pts[2]);
+        return { x: ctr.x, y: ctr.y, w: Math.abs(px.x - ctr.x) * 2, h: Math.abs(py.y - ctr.y) * 2 };
+      },
       heartScreen: (i) => {
         const it = items[i];
         if (!it) return null;

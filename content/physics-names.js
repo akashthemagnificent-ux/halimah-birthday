@@ -32,6 +32,33 @@ window.PHYSICS_NAMES = {
       "owner": "you",
       "source": "plan",
       "citation": ".omo/plans/halimah-birthday-site.md IS-1 (names for each other: princess, Ash, hubby); DM export not vendored locally"
+    },
+    {
+      "name": "Cutiepie",
+      "owner": "her",
+      "source": "attested",
+      "attest_as": "CUTIEE",
+      "citation": "content/lore.md Room 8 goodnights (verbatim: \"GOODNIGHT MY HALIMAH MY BABYY MY SWEETHEART MY CUTIEE\", src: halimah dms-14.txt:275)"
+    },
+    {
+      "name": "sweetheart",
+      "owner": "her",
+      "source": "attested",
+      "citation": "content/lore.md Room 8 goodnights (verbatim: \"GOODNIGHT MY HALIMAH MY BABYY MY SWEETHEART MY CUTIEE\", src: halimah dms-14.txt:275)"
+    },
+    {
+      "name": "baby",
+      "owner": "her",
+      "source": "attested",
+      "attest_as": "BABYY",
+      "citation": "content/lore.md Room 8 goodnights (verbatim: \"GOODNIGHT MY HALIMAH MY BABYY MY SWEETHEART MY CUTIEE\", src: halimah dms-14.txt:275)"
+    },
+    {
+      "name": "wifey",
+      "owner": "her",
+      "source": "attested",
+      "attest_as": "wife",
+      "citation": "index.html story chapter 10 (\"Be My Wife\"; verbatim: \"You are my wife\", 26 Aug 2026); also sections/story.html (verbatim: \"BE MY GIRLFRIEND AND MY WIFE\")"
     }
   ]
 };

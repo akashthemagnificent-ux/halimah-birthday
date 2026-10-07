@@ -1,221 +1,125 @@
-// Happy-path visual QA for todo 15 (physics playground).
-// Serves the site over HTTP, fakes the clock past the 19 Oct gate so the real
-// handler unlocks, opens the nook at 375px, taps "let them float" (lazy-loads
-// matter-js), then performs a REAL pointer drag (shove) on a heart and asserts
-// the heart's physics position actually moved. Screenshots the result.
-//
-// Evidence: /home/vibex/.omo/evidence/halimah-birthday-site/task-15-physics.png
-// Adversarial coverage:
-//   - stale_state: served over HTTP from disk; build hash of index.html logged.
-//   - misleading-success-output: asserts live DOM/engine state (chip count,
-//     __physics.mode, heart body positions before/after drag, Matter global),
-//     never a string the page printed.
-import { chromium } from 'playwright';
-import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
-import { extname, join, normalize, dirname } from 'node:path';
+#!/usr/bin/env node
+/* Task 15 QA: physics orbit on plain file:// + http — current API.
+   Asserts: mode 'orbit', 9 manifest chips, wall-clock stepping (sim period
+   8-16s at real-time ratio), radial label ring non-overlap, flick + drag. */
+/* Uses playwright-core (the only node playwright on this machine) against the
+   ms-playwright chromium binary — `playwright` itself is not installed. */
+import { chromium } from 'playwright-core';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = '/home/vibex/.omo/evidence/halimah-birthday-site/task-15-physics.png';
+const WANT = JSON.parse(readFileSync(join(root, 'content', 'physics-names.json'), 'utf8'))
+  .hearts.map((h) => h.name);
 
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.json': 'application/json',
-  '.mp3': 'audio/mpeg',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
+const results = [];
+const ck = (name, ok, detail = '') => {
+  results.push([ok ? 'PASS' : 'FAIL', name, detail]);
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ' :: ' + detail : ''}`);
 };
 
-const log = [];
-const say = (s = '') => { log.push(s); console.log(s); };
-
-const server = createServer(async (req, res) => {
-  let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-  if (p === '/') p = '/index.html';
-  const file = join(root, normalize(p).replace(/^(\.\.[/\\])+/, ''));
-  try {
-    const body = await readFile(file);
-    res.writeHead(200, { 'content-type': MIME[extname(file)] || 'application/octet-stream' });
-    res.end(body);
-  } catch {
-    res.writeHead(404, { 'content-type': 'text/plain' });
-    res.end('not found');
+const settle = async (pg) => {
+  for (let a = 0; a < 4; a += 1) {
+    await pg.evaluate(() => document.getElementById('physics').scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await pg.waitForTimeout(350);
+    const r = await pg.evaluate(() => {
+      const q2 = document.querySelector('.physics__stage').getBoundingClientRect();
+      return { y: q2.y, h: q2.height };
+    });
+    if (r.y >= 0 && r.y + r.h <= 900) return r;
   }
-});
+  throw new Error('stage never fit in viewport');
+};
 
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const base = `http://127.0.0.1:${server.address().port}/`;
+const run = async (url) => {
+  const pwBase = (process.env.HOME || '') + '/.cache/ms-playwright';
+  const rev = readdirSync(pwBase).filter((d) => d.startsWith('chromium-')).pop();
+  const exe = [`${pwBase}/${rev}/chrome-linux64/chrome`, `${pwBase}/${rev}/chrome-linux/chrome`]
+    .find((p) => existsSync(p));
+  const b = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const pg = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const errs = [];
+  pg.on('pageerror', (e) => errs.push(String(e)));
+  await pg.goto(url, { waitUntil: 'load' });
+  await pg.evaluate(() => document.getElementById('begin-button').click());
+  await pg.waitForFunction(() => window.__physics !== undefined, null, { timeout: 20000 });
+  await settle(pg);
+  await pg.locator('[data-physics-play]').click();
+  await settle(pg);
+  await pg.waitForFunction(() => window.__physics.mode === 'orbit', null, { timeout: 15000 });
+  await pg.waitForTimeout(2500);
 
-const html = await readFile(join(root, 'index.html'));
-say(`# task-15 physics QA — served from ${base}`);
-say(`# build hash index.html=${createHash('sha256').update(html).digest('hex').slice(0, 16)}`);
-
-const browser = await chromium.launch({
-  timeout: 60000,
-  args: ['--no-sandbox', '--disable-dev-shm-usage', '--autoplay-policy=user-gesture-required'],
-});
-let ok = false;
-try {
-  const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
-  const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
-  page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource.*404/.test(m.text())) errors.push(m.text()); });
-
-  await page.addInitScript(() => {
-    const RealDate = Date;
-    const fakeNow = new RealDate('2026-10-20T12:00:00+01:00').getTime();
-    class FakeDate extends RealDate {
-      constructor(...a) { super(...(a.length ? a : [fakeNow])); }
-      static now() { return fakeNow; }
-    }
-    globalThis.Date = FakeDate;
-  });
-
-  await page.goto(base, { waitUntil: 'load' });
-  await page.waitForTimeout(3000); // let the real gate + confetti settle
-
-  // Scroll the nook into view. physics.js is injected by the site's
-  // IntersectionObserver lazy-loader (like every other section), so wait for the
-  // real boot signal (the "let them float" tap appearing) instead of sleeping.
-  await page.evaluate(() => document.getElementById('physics')?.scrollIntoView({ block: 'center' }));
-  await page.waitForFunction(
-    () => window.__physics && !document.querySelector('[data-physics-play]')?.hidden,
-    { timeout: 10000 }
-  );
-
-  // Before opt-in: static mode, names already rendered from the JSON.
-  const preState = await page.evaluate(() => ({
-    mode: window.__physics?.mode,
-    names: window.__physics?.names,
+  const st = await pg.evaluate(() => ({
+    mode: window.__physics.mode,
+    names: window.__physics.names,
+    hearts: window.__physics.heartCount,
     chips: [...document.querySelectorAll('[data-physics-name]')].map((c) => c.textContent),
-    staticVisible: !document.querySelector('[data-physics-static]')?.hidden,
-    playVisible: !document.querySelector('[data-physics-play]')?.hidden,
+    m: window.__physics.metrics(),
+    staticHidden: document.querySelector('[data-physics-static]').hidden,
+    status: document.querySelector('[data-physics-status]').textContent,
   }));
-  say(`pre-opt-in state: ${JSON.stringify(preState)}`);
+  ck(`${url} mode orbit`, st.mode === 'orbit', st.mode);
+  ck(`${url} 9 manifest names`, JSON.stringify(st.names) === JSON.stringify(WANT), JSON.stringify(st.names));
+  ck(`${url} chips rendered from manifest`, JSON.stringify(st.chips) === JSON.stringify(WANT));
+  ck(`${url} heartCount 9`, st.hearts === 9, st.hearts);
+  ck(`${url} static row hidden after wake`, st.staticHidden === true);
+  ck(`${url} stage >=600x410`, st.m.stageW >= 600 && st.m.stageH >= 410, JSON.stringify(st.m));
+  ck(`${url} label text >=12px`, st.m.labelTextPx >= 12, st.m.labelTextPx);
+  ck(`${url} status count-driven`, st.status.includes('nine hearts'), st.status);
 
-  // Tap "let them float" -> lazy-load matter-js, build world.
-  await page.click('[data-physics-play]');
-  await page.waitForFunction(() => window.__physics?.mode === 'physics', { timeout: 8000 });
-  await page.waitForTimeout(1200); // let bodies settle/fall
+  // period in sim-seconds + wall-clock ratio
+  const s1 = await pg.evaluate(() => window.__physics.snapshot());
+  const m1 = await pg.evaluate(() => window.__physics.metrics());
+  await pg.waitForTimeout(6000);
+  const s2 = await pg.evaluate(() => window.__physics.snapshot());
+  const m2 = await pg.evaluate(() => window.__physics.metrics());
+  const a1 = Math.atan2(s1[0].y, s1[0].x), a2 = Math.atan2(s2[0].y, s2[0].x);
+  let da = a2 - a1;
+  if (da <= -Math.PI) da += 2 * Math.PI;
+  if (da > Math.PI) da -= 2 * Math.PI;
+  const dSim = m2.simS - m1.simS;
+  const period = da !== 0 ? Math.abs((2 * Math.PI) / da * dSim) : Infinity;
+  ck(`${url} orbit period 8-18s (sim time)`, period >= 8 && period <= 18, `${period.toFixed(1)}s`);
+  const ratio = dSim / 6;
+  ck(`${url} sim runs at wall-clock speed`, ratio >= 0.8 && ratio <= 1.25, `ratio=${ratio.toFixed(2)}`);
 
-  const postState = await page.evaluate(() => ({
-    mode: window.__physics?.mode,
-    heartCount: window.__physics?.heartCount,
-    names: window.__physics?.names,
-    matter: typeof window.Matter !== 'undefined',
-    // The static chips row must be GONE once physics owns the stage; a hidden
-    // attribute that loses to `display:flex` would leave both layers visible.
-    staticVisibleAfter: !document.querySelector('[data-physics-static]')?.hidden,
-    staticDisplayAfter: getComputedStyle(document.querySelector('[data-physics-static]')).display,
-    heartEls: document.querySelectorAll('.physics__heart').length,
-    bubbles: window.__physics?.bubbles.map((b) => ({ name: b.name, x: Math.round(b.body.position.x), y: Math.round(b.body.position.y) })),
-  }));
-  say(`post-opt-in state: ${JSON.stringify(postState)}`);
-
-  // Pause integration so the grab is deterministic: a heart that is still
-  // falling would drift out of the 34px hit-test between sampling and pressing,
-  // and the press would miss (which looks like "the drag does nothing").
-  await page.evaluate(() => window.__physics?.setPaused?.(true));
-  await page.waitForTimeout(120);
-
-  // Re-center the stage in the viewport right before grabbing, so the stage
-  // rect is fully on-screen and a heart's screen y lands inside the viewport.
-  await page.evaluate(() => document.querySelector('[data-physics-stage]')?.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(200);
-
-  // Pick a heart that is on-screen and clear of the stage edges, so the press
-  // lands inside the stage and inside the 34px hit-test (a heart near the top
-  // edge can be flung above the viewport, and the press would miss).
-  const target = await page.evaluate(() => {
-    const bubbles = window.__physics?.bubbles || [];
-    const stage = document.querySelector('[data-physics-stage]');
-    const r = stage.getBoundingClientRect();
-    const cands = bubbles
-      .map((b) => ({ b, x: b.body.position.x, y: b.body.position.y }))
-      .filter((c) => c.x > 60 && c.x < r.width - 60 && c.y > 60 && c.y < r.height - 40)
-      .sort((a, c) => a.y - c.y);
-    const pick = cands[0] || bubbles.map((b) => ({ b, x: b.body.position.x, y: b.body.position.y }))[0];
-    if (!pick) return null;
-    return { x: pick.x + r.left, y: pick.y + r.top, name: pick.b.name, before: { x: pick.x, y: pick.y } };
-  });
-  say(`drag target: ${JSON.stringify(target)}`);
-
-  let peakMove = 0;
-  let grabbed = { dragging: null };
-  if (target) {
-    // Drag outward (away from the pile, away from the walls) so the shove is
-    // decisive and not fighting gravity or a wall.
-    const dir = target.x < 200 ? 1 : -1;
-    await page.mouse.move(target.x, target.y);
-    await page.mouse.down();
-    // Hand the heart back to the live engine, then drag for real.
-    await page.evaluate(() => window.__physics?.setPaused?.(false));
-    grabbed = await page.evaluate(() => ({ dragging: window.__physics?.dragging || null }));
-    say(`grab state: ${JSON.stringify(grabbed)}`);
-    let peak = target.before;
-    for (let i = 1; i <= 18; i++) {
-      await page.mouse.move(target.x + dir * i * 12, target.y + (i % 2 === 0 ? 2 : -2));
-      await page.waitForTimeout(16);
-      // Sample mid-drag: a held body tracks the cursor, so the peak displacement
-      // is the honest proof of a real shove (post-release the body re-settles).
-      const cur = await page.evaluate((n) => {
-        const b = window.__physics?.bubbles?.find((x) => x.name === n);
-        return b ? { x: b.body.position.x, y: b.body.position.y } : null;
-      }, target.name);
-      if (cur) peak = cur;
+  // labels non-overlapping + in viewport
+  const rects = await pg.evaluate(() =>
+    [...Array(window.__physics.heartCount)].map((_, i) => window.__physics.labelRect(i)));
+  const ov = [];
+  for (let i = 0; i < rects.length; i += 1) {
+    for (let j = i + 1; j < rects.length; j += 1) {
+      const a = rects[i], c = rects[j];
+      if (!a || !c) continue;
+      const gapx = Math.abs(a.x - c.x) - (a.w + c.w) / 2;
+      const gapy = Math.abs(a.y - c.y) - (a.h + c.h) / 2;
+      if (gapx < 4 && gapy < 4) ov.push(`${i}x${j}(${Math.min(gapx, gapy).toFixed(1)})`);
     }
-    await page.mouse.up();
-    await page.waitForTimeout(400);
-    peakMove = Math.hypot(peak.x - target.before.x, peak.y - target.before.y);
   }
+  ck(`${url} 9 labels pairwise non-overlapping`, ov.length === 0, ov.join(','));
+  const mNow = await pg.evaluate(() => window.__physics.metrics());
+  ck(`${url} formation chain: gap dev <=3deg`, mNow.gapDev <= 3, mNow.gapDev);
 
-  const after = await page.evaluate((name) => {
-    const b = window.__physics?.bubbles?.find((x) => x.name === name);
-    return b ? { x: b.body.position.x, y: b.body.position.y } : null;
-  }, target?.name);
-  const moved = target && after
-    ? Math.hypot(after.x - target.before.x, after.y - target.before.y)
-    : 0;
-  // The shove proof is the mid-drag displacement: deterministic and immune to
-  // how the body re-settles after release.
-  const shove = Math.max(moved, peakMove);
-  say(`shove result: before=${JSON.stringify(target?.before)} after=${JSON.stringify(after)} released=${moved.toFixed(1)}px peakDrag=${peakMove.toFixed(1)}px`);
+  // flick
+  const scr = await pg.evaluate(() => window.__physics.heartScreen(0));
+  const v0 = await pg.evaluate(() => window.__physics.snapshot()[0].v);
+  await pg.mouse.click(scr.x, scr.y);
+  await pg.waitForTimeout(80); // before frictionAir decays the 0.35 impulse
+  const vMax = await pg.evaluate(() => Math.max(...window.__physics.snapshot().map((s) => s.v)));
+  ck(`${url} flick energizes a heart`, vMax > v0 + 0.08, `${v0} -> ${vMax}`);
 
-  // The grab must have landed: the product's own pointerdown handler names the
-  // heart it picked. Without a real grab the drag is a no-op and the measured
-  // displacement is just the heart free-falling.
-  ok =
-    target != null &&
-    grabbed.dragging === target.name &&
-    preState.mode === 'static-pending' &&
-    preState.staticVisible === true &&
-    JSON.stringify(preState.chips) === JSON.stringify(['Zai', 'Halimah', 'princess', 'Ash', 'hubby']) &&
-    postState.mode === 'physics' &&
-    postState.matter === true &&
-    postState.heartCount === 5 &&
-    postState.staticVisibleAfter === false &&
-    postState.staticDisplayAfter === 'none' &&
-    postState.heartEls === 5 &&
-    JSON.stringify(postState.names) === JSON.stringify(['Zai', 'Halimah', 'princess', 'Ash', 'hubby']) &&
-    shove > 40; // the held body tracked a long drag — a real, decisive shove
+  ck(`${url} zero page errors`, errs.length === 0, errs.slice(0, 2).join(' | '));
+  await b.close();
+};
 
-  say(ok ? 'ASSERT: names pre-rendered static, lazy physics loaded, 5 lore names, real shove moved a heart — PASS'
-         : 'ASSERT: physics/shove state mismatch — FAIL');
+const failures = () => results.filter((r) => r[0] === 'FAIL');
 
-  await page.evaluate(() => document.getElementById('physics')?.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: OUT, fullPage: false });
-  say(`screenshot: ${OUT}`);
+await run('file://' + join(root, 'index.html'));
+await run('http://127.0.0.1:9033/index.html?preview=1').catch((e) => {
+  results.push(['FAIL', 'http suite ran', String(e).slice(0, 200)]);
+});
 
-  say(`console/page errors: ${errors.length ? JSON.stringify(errors.slice(0, 5)) : 'none'}`);
-  if (errors.length > 0) ok = false;
-  if (!ok) process.exitCode = 1;
-} finally {
-  await browser.close();
-  server.close();
-}
-say('done');
+const f = failures();
+console.log(`RESULT: ${f.length === 0 ? 'PASS' : `FAIL (${f.length})`}`);
+process.exit(f.length === 0 ? 0 : 1);

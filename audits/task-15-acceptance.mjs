@@ -1,15 +1,15 @@
-/* Task 15 acceptance: physics playground — lazy-load + weight budget (<150KB)
-   or static fallback; names rendered from the lore pack (no hardcode drift).
-   Fails loudly (non-zero exit) on any violation.
+/* Task 15 acceptance: physics playground — vendored weight budget (<150KB),
+   eager vendor stack (owner override: no lazy gating on a personal site),
+   static fallback on failure; names rendered from the lore pack (no hardcode
+   drift). Fails loudly (non-zero exit) on any violation.
 
    Checks:
    1. vendor/matter.min.js present and raw bytes < 150KB.
-   2. matter-js is NOT referenced by a <script>/<link> in index.html (lazy:
-      not render-blocking, not in the critical path). It is fetched at runtime
-      by sections/physics.js only after a user tap.
-   3. sections/physics.js: 150KB budget constant + a runtime byte-size check
-      before executing the lib, reduced-motion -> static branch, and it reads
-      names from content/physics-names.json (the single source of truth).
+   2. index.html eagerly loads matter.min.js + sections/physics.js via script
+      tags (owner override: vendor stack is on the critical path; the section
+      still degrades to the static names row if WebGL/Matter fail at tap time).
+   3. sections/physics.js: full-motion owner override + static fallback branch,
+      and it reads names from content/physics-names.json (single source of truth).
    4. content/physics-names.json holds exactly the canonical name set; every
       'attested' name appears (case-insensitive word match) in its cited local
       source file; 'plan'-sourced names carry a plan citation and no false claim
@@ -29,7 +29,8 @@ const CSS = path.join(ROOT, 'sections/physics.css');
 const NAMES = path.join(ROOT, 'content/physics-names.json');
 
 const BUDGET_BYTES = 150 * 1024;
-const CANONICAL = ['Zai', 'Halimah', 'princess', 'Ash', 'hubby'];
+const CANONICAL = ['Zai', 'Halimah', 'princess', 'Ash', 'hubby',
+  'Cutiepie', 'sweetheart', 'baby', 'wifey'];
 
 let failures = 0;
 function check(label, condition, detail = '') {
@@ -44,27 +45,32 @@ const libBytes = libOk ? fs.statSync(LIB).size : Infinity;
 check('matter.min.js vendored locally', libOk);
 check('matter.min.js raw bytes < 150KB budget', libBytes < BUDGET_BYTES, `${libBytes} B`);
 
-// 2. Lazy: not referenced by a blocking tag in index.html.
+// 2. Eager vendor stack (owner override: personal site, no lazy gating).
 const index = fs.readFileSync(INDEX, 'utf8');
 check(
-  'index.html does not load matter.min.js via <script>/<link> (lazy, not critical path)',
-  !/<(script|link)[^>]*matter\.min\.js/i.test(index)
+  'index.html eagerly loads matter.min.js via <script> (owner override)',
+  /<script[^>]*src="vendor\/matter\.min\.js"/.test(index)
 );
 check('index.html links sections/physics.css', index.includes('sections/physics.css'));
-// Section JS (including physics.js) is loaded by the site's IntersectionObserver
-// lazy-loader manifest, NOT a static <script> tag — so it is off the critical path.
 check(
-  'physics.js is registered in the LAZY_SECTIONS manifest (loader-lazy)',
-  /['"]physics['"]\s*:\s*\[[^\]]*sections\/physics\.js/.test(index)
+  'index.html eagerly loads sections/physics.js via <script>',
+  /<script[^>]*src="sections\/physics\.js"/.test(index)
 );
 check('index.html contains the physics section anchor', index.includes('id="physics"'));
 
-// 3. Runtime budget guard + reduced-motion fallback in the section JS.
+// 3. Section JS contract: full-motion owner override + static fallback + data.
 const js = fs.readFileSync(JS, 'utf8');
-check('physics.js declares a 150KB budget constant', /BUDGET_BYTES\s*=\s*150\s*\*\s*1024/.test(js));
-check('physics.js size-checks the lib before executing it', /arrayBuffer\(\)/.test(js) && /byteLength\s*>=\s*BUDGET_BYTES/.test(js));
-check('physics.js honors prefers-reduced-motion', /prefers-reduced-motion/.test(js) && /initStatic/.test(js));
+check(
+  'physics.js full-motion owner override (prefersReducedMotion -> false)',
+  /function prefersReducedMotion\(\)/.test(js) && /return false/.test(js)
+);
+check(
+  'physics.js keeps the static names fallback branch (initStatic)',
+  /initStatic/.test(js) && /WebGL unavailable/.test(js)
+);
 check('physics.js reads names from content/physics-names.json', js.includes('content/physics-names.json'));
+check('physics.js steps the sim from wall-clock time (frame-rate independent)',
+  /simAcc/.test(js) && /performance\.now\(\)/.test(js));
 
 // 4. Names data: exact canonical set; attestations real; plan-sourced honest.
 const namesRaw = fs.readFileSync(NAMES, 'utf8');
@@ -109,7 +115,7 @@ for (const h of hearts) {
 
 // 5. No hardcoded-name drift in the section sources or the index physics region.
 const physicsStart = index.indexOf('<!-- 5b. physics');
-const physicsEnd = index.indexOf('<!-- 6. scratch');
+const physicsEnd = index.indexOf('<!-- 7. scratch');
 const indexPhysics = physicsStart >= 0 && physicsEnd > physicsStart
   ? index.slice(physicsStart, physicsEnd)
   : '';

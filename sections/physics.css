@@ -19,7 +19,9 @@
   width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-8) var(--gutter) var(--space-10);
+  /* horizontal padding comes from .section already — doubling the gutter
+     shrank the mobile stage to 326px and starved the label ring */
+  padding: var(--space-8) 0 var(--space-10);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,8 +54,8 @@
 .physics__stage {
   position: relative;
   width: 100%;
-  max-width: 26rem;
-  min-height: 15rem;
+  max-width: 40rem;
+  min-height: 26rem;
   margin-top: var(--space-3);
   display: flex;
   align-items: center;
@@ -203,6 +205,6 @@
 /* On very short/narrow viewports keep the stage from dominating. */
 @media (max-width: 420px) {
   .physics__stage {
-    min-height: 13rem;
+    min-height: 20rem;
   }
 }
