@@ -136,10 +136,14 @@ check('replay re-arms the panel',
   /if \(nodes\.replay\) \{\s*\n\s*nodes\.replay\.addEventListener\('click'/.test(js)
     && /classList\.remove\('is-done'\)/.test(js)
     && /repaint\(\)/.test(js));
-check('reduced-motion is read and switches to tap mode',
-  /prefers-reduced-motion: reduce/.test(js) && /scratchMode.*'tap'|'tap'/.test(js));
-check('reduced-motion tap calls the same unlock path',
-  /unlock\('tap'\)/.test(js));
+check('owner override: motion always on (no reduced-motion gate in JS)',
+  /const prefersReducedMotion = \(\) => false/.test(js)
+    && /state\.mode = 'scratch'; \/\* personal site: full motion \*\//.test(js),
+  'personal site: full motion always');
+check('3D camera stage present (perspective + moving foil sheen)',
+  /perspective: 1100px/.test(css) && /\.scratch__card::after/.test(css)
+    && /var\(--tilt-gx/.test(css),
+  'pop-in, pointer tilt, sheen tracking');
 check('tap button visibility is driven by [hidden], not a class',
   !/classList\.toggle\('is-reduced-motion'/.test(js) && !/\.is-reduced-motion\s*\{/.test(css),
   'avoids out-specifying the [hidden] attribute');
@@ -148,8 +152,8 @@ check('card is thumb-sized (min 240px wide)',
   css.match(/width: min\((\d+px)/)?.[1]);
 check('cover has touch-action none so scratching never scrolls the page',
   /touch-action: none/.test(css));
-check('CSS honors prefers-reduced-motion',
-  /@media \(prefers-reduced-motion: reduce\)/.test(css));
+check('unlock dissolves the last foil specks (reads as a 100% clear)',
+  /\.scratch__cover\.is-done[\s\S]{0,200}?opacity: 0/.test(css));
 check('CSS defines every class the markup uses', (() => {
   const used = new Set();
   for (const m of index.matchAll(/class="(scratch[^"]*)"/g)) m[1].split(/\s+/).forEach((c) => used.add(c));
@@ -171,8 +175,14 @@ check('locked-state mount is guarded (no panel cached while detached)',
 console.log('\n--- runtime (Chromium, real DOM + real threshold logic) ---');
 let runtimeNote = 'skipped';
 try {
-  const { chromium } = await import('playwright');
-  const browser = await chromium.launch();
+  /* playwright-core is the only node playwright on this machine; launch the
+     ms-playwright chromium binary directly (same recipe as task-15). */
+  const { chromium } = await import('playwright-core');
+  const pwBase = (process.env.HOME || '') + '/.cache/ms-playwright';
+  const rev = fs.readdirSync(pwBase).filter((d) => d.startsWith('chromium-')).pop();
+  const exe = [`${pwBase}/${rev}/chrome-linux64/chrome`, `${pwBase}/${rev}/chrome-linux/chrome`]
+    .find((p) => fs.existsSync(p));
+  const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   try {
     const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
     const errors = [];
@@ -181,10 +191,13 @@ try {
     // post-unlock DOM (with chapter 13 present) is what we inspect.
     await page.addInitScript(() => {
       const RealDate = Date;
-      const fakeNow = new RealDate('2026-10-20T12:00:00+01:00').getTime();
+      // The fake clock must ADVANCE with real time (constant offset): a
+      // frozen Date.now() stalls gsap's ticker, so card pop-ins never run.
+      const target = new RealDate('2026-10-20T12:00:00+01:00').getTime();
+      const offset = target - RealDate.now();
       class FakeDate extends RealDate {
-        constructor(...a) { super(...(a.length ? a : [fakeNow])); }
-        static now() { return fakeNow; }
+        constructor(...a) { super(...(a.length ? a : [RealDate.now() + offset])); }
+        static now() { return RealDate.now() + offset; }
       }
       globalThis.Date = FakeDate;
     });
@@ -228,6 +241,8 @@ try {
     // real pointer events across the cover so the product's own erase and
     // threshold logic run. A synthetic band-fill would only re-test the mock.
     await page.locator('[data-scratch-cover]').scrollIntoViewIfNeeded();
+    // the card now pops in from a 3D camera angle: measure at rest, not mid-flight
+    await page.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 8000 });
     await page.waitForTimeout(250);
     const box = await page.locator('[data-scratch-cover]').boundingBox();
     const vp = page.viewportSize();
@@ -240,12 +255,15 @@ try {
       return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === c;
     });
     check('cover canvas is the top element at its own centre (not covered)', topIsCover);
-    const rowStep = box.height / 6;
-    for (let row = 0; row < 6 && !(await page.evaluate(() => window.__scratchPanel.unlocked)); row += 1) {
+    // dense sweep: at the 97% threshold the suite must clear the foil the
+    // way a human does (overlapping rows, fine x-step), not skim it
+    const rows = 14;
+    const rowStep = box.height / rows;
+    for (let row = 0; row < rows && !(await page.evaluate(() => window.__scratchPanel.unlocked)); row += 1) {
       const y = box.y + rowStep * (row + 0.5);
       await page.mouse.move(box.x + 4, y);
       await page.mouse.down();
-      for (let x = box.x + 4; x <= box.x + box.width - 4; x += 16) {
+      for (let x = box.x + 4; x <= box.x + box.width - 4; x += 10) {
         await page.mouse.move(x, y);
       }
       await page.mouse.up();
@@ -297,7 +315,7 @@ try {
   }
 
   // Reduced-motion path in its own context.
-  const rmBrowser = await chromium.launch();
+  const rmBrowser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   try {
     const rmContext = await rmBrowser.newContext({
       viewport: { width: 375, height: 812 },
@@ -306,50 +324,52 @@ try {
     const rmPage = await rmContext.newPage();
     await rmPage.addInitScript(() => {
       const RealDate = Date;
-      const fakeNow = new RealDate('2026-10-20T12:00:00+01:00').getTime();
+      const target = new RealDate('2026-10-20T12:00:00+01:00').getTime();
+      const offset = target - RealDate.now();
       class FakeDate extends RealDate {
-        constructor(...a) { super(...(a.length ? a : [fakeNow])); }
-        static now() { return fakeNow; }
+        constructor(...a) { super(...(a.length ? a : [RealDate.now() + offset])); }
+        static now() { return RealDate.now() + offset; }
       }
       globalThis.Date = FakeDate;
     });
     await rmPage.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'load' });
     await rmPage.evaluate(() => document.getElementById('scratch')?.scrollIntoView());
     await rmPage.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 10000 });
-    const rm = await rmPage.evaluate(async () => {
-      const btn = document.querySelector('[data-scratch-tap]');
-      const before = {
-        mode: window.__scratchPanel.mode,
-        btnHidden: btn.hidden,
-        cardHidden: document.querySelector('[data-scratch-card]').hidden,
-        btnVisible: btn.offsetParent !== null,
-      };
-      btn.click();
-      await new Promise((r) => setTimeout(r, 120));
-      return {
-        ...before,
-        unlocked: window.__scratchPanel.unlocked,
-        method: window.__scratchPanel.method,
-        btnVisibleAfter: btn.offsetParent !== null,
-        text: document.querySelector('[data-scratch-reveal-text]')?.textContent ?? '',
-      };
-    });
-    check('reduced motion switches the panel to tap mode', rm.mode === 'tap', rm.mode);
-    check('reduced motion hides the scratch card', rm.cardHidden === true);
-    check('reduced motion shows a real, visible tap button',
-      rm.btnHidden === false && rm.btnVisible === true,
-      `hidden=${rm.btnHidden} visible=${rm.btnVisible}`);
-    check('tap reveals the secret without any scratching',
-      rm.unlocked === true && rm.method === 'tap', `method=${rm.method}`);
-    check('tap reveal writes the secret', rm.text.includes(SECRET));
-    check('tap button disappears after use', rm.btnVisibleAfter === false,
-      'the [hidden] fix holds');
+    const rm = await rmPage.evaluate(() => ({
+      mode: window.__scratchPanel.mode,
+      btnHidden: document.querySelector('[data-scratch-tap]').hidden,
+      cardHidden: document.querySelector('[data-scratch-card]').hidden,
+    }));
+    check('owner override: reduced motion changes nothing (mode stays scratch)',
+      rm.mode === 'scratch', rm.mode);
+    check('card stays visible and the tap button stays hidden under reduce',
+      rm.cardHidden === false && rm.btnHidden === true,
+      `cardHidden=${rm.cardHidden} btnHidden=${rm.btnHidden}`);
+    // the card must still be really scratchable (and resumable) under reduce
+    await rmPage.locator('[data-scratch-cover]').scrollIntoViewIfNeeded();
+    await rmPage.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 8000 });
+    await rmPage.waitForTimeout(250);
+    const rmBox = await rmPage.locator('[data-scratch-cover]').boundingBox();
+    const rmY = rmBox.y + rmBox.height * 0.3;
+    await rmPage.mouse.move(rmBox.x + 6, rmY);
+    await rmPage.mouse.down();
+    for (let x = rmBox.x + 6; x <= rmBox.x + rmBox.width - 6; x += 10) {
+      await rmPage.mouse.move(x, rmY);
+    }
+    await rmPage.mouse.up();
+    await rmPage.waitForTimeout(300);
+    const rm1 = await rmPage.evaluate(() => ({
+      percent: window.__scratchPanel.percent,
+      unlocked: window.__scratchPanel.unlocked,
+    }));
+    check('scratching still works under a reduce preference',
+      rm1.percent > 0 && rm1.unlocked === false, `percent=${rm1.percent} unlocked=${rm1.unlocked}`);
   } finally {
     await rmBrowser.close();
   }
 
   // ---- STALE STATE: locked -> live unlock must still mount and work ----
-  const ssBrowser = await chromium.launch();
+  const ssBrowser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   try {
     const ssPage = await ssBrowser.newPage({ viewport: { width: 375, height: 812 } });
     const ssErrors = [];
@@ -358,10 +378,11 @@ try {
     // panel mounted here would be a cached reference to a detached subtree.
     await ssPage.addInitScript(() => {
       const RealDate = Date;
-      const before = new RealDate('2026-10-18T23:59:00+01:00').getTime();
+      const target = new RealDate('2026-10-18T23:59:00+01:00').getTime();
+      const offset = target - RealDate.now();
       class FakeDate extends RealDate {
-        constructor(...a) { super(...(a.length ? a : [before])); }
-        static now() { return before; }
+        constructor(...a) { super(...(a.length ? a : [RealDate.now() + offset])); }
+        static now() { return RealDate.now() + offset; }
       }
       globalThis.Date = FakeDate;
     });
@@ -382,10 +403,11 @@ try {
     // Cross the target live, the way the countdown gate really does it.
     await ssPage.evaluate(() => {
       const RealDate = Date;
-      const after = new RealDate('2026-10-19T00:01:00+01:00').getTime();
+      const target = new RealDate('2026-10-19T00:01:00+01:00').getTime();
+      const offset = target - RealDate.now();
       class FakeDate extends RealDate {
-        constructor(...a) { super(...(a.length ? a : [after])); }
-        static now() { return after; }
+        constructor(...a) { super(...(a.length ? a : [RealDate.now() + offset])); }
+        static now() { return RealDate.now() + offset; }
       }
       globalThis.Date = FakeDate;
       document.getElementById('begin-button')?.click();
@@ -409,13 +431,14 @@ try {
       JSON.stringify(liveState));
 
     await ssPage.locator('[data-scratch-cover]').scrollIntoViewIfNeeded();
+    await ssPage.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 8000 });
     await ssPage.waitForTimeout(250);
     const ssBox = await ssPage.locator('[data-scratch-cover]').boundingBox();
-    for (let row = 0; row < 8; row += 1) {
-      const y = ssBox.y + (ssBox.height / 8) * (row + 0.5);
+    for (let row = 0; row < 14; row += 1) {
+      const y = ssBox.y + (ssBox.height / 14) * (row + 0.5);
       await ssPage.mouse.move(ssBox.x + 6, y);
       await ssPage.mouse.down();
-      for (let x = ssBox.x + 6; x <= ssBox.x + ssBox.width - 6; x += 14) {
+      for (let x = ssBox.x + 6; x <= ssBox.x + ssBox.width - 6; x += 10) {
         await ssPage.mouse.move(x, y);
       }
       await ssPage.mouse.up();

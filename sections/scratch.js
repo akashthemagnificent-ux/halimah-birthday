@@ -17,7 +17,11 @@
   'use strict';
 
   const SECTION_ID = 'scratch';
-  const CLEAR_THRESHOLD = 55; // % of cover pixels erased before unlock
+  /* 97% unlock: the reader scratches essentially the whole foil themselves.
+     The last stubborn specks (stride-4 alpha sampling keeps a few islands
+     alive) dissolve with the foil on unlock, so the experience reads as a
+     full 100% clear while the threshold line below still holds. */
+  const CLEAR_THRESHOLD = 97; // % of cover pixels erased before unlock
   const SAMPLE_STEP = 4; // sample every Nth pixel (keeps phones smooth)
   /* personal site: full motion always */
 
@@ -151,7 +155,7 @@
       tap: q('[data-scratch-tap]'),
     };
 
-    const state = { unlocked: false, method: null, percent: 0, mode: 'scratch' };
+    const state = { unlocked: false, method: null, percent: 0, mode: 'scratch', anim: 'idle' };
 
     function repaint() {
       paintSecret(secretCanvas);
@@ -160,7 +164,7 @@
     repaint();
 
     function setPercent(p) {
-      state.percent = Math.round(p);
+      state.percent = Math.min(100, Math.round(p));
       section.dataset.scratchPercent = String(state.percent);
       if (nodes.percent && state.percent > 0) {
         nodes.percent.textContent = `${state.percent}% cleared`;
@@ -176,13 +180,16 @@
       state.method = method;
       section.dataset.scratchUnlocked = 'true';
       section.dataset.scratchMethod = method;
-      coverCanvas.classList.add('is-done');
+      coverCanvas.classList.add('is-done'); /* foil dissolves (CSS) */
+      scratching = false; /* any in-flight stroke ends here: the flourish
+                             takes the card, so keep screen coords stable */
       if (nodes.hint) nodes.hint.hidden = true;
-      if (nodes.percent) nodes.percent.classList.remove('is-visible');
+      setPercent(100); /* last few % dissolve with the foil: reads 100% */
       if (nodes.revealText) nodes.revealText.textContent = SECRET_TEXT;
       if (nodes.revealSource) nodes.revealSource.textContent = SECRET_SOURCE;
       if (nodes.reveal) nodes.reveal.classList.add('is-visible');
       if (nodes.replay) nodes.replay.classList.add('is-visible');
+      playUnlockFlourish();
       section.dispatchEvent(
         new CustomEvent('scratch:unlock', { bubbles: true, detail: { method } }),
       );
@@ -192,6 +199,18 @@
       const p = clearedPercent(coverCanvas);
       setPercent(p);
       if (p >= CLEAR_THRESHOLD) unlock('scratch');
+    }
+    /* getImageData over the whole cover is too heavy for every pointermove:
+       coalesce checks to one per animation frame. The final stroke still
+       counts because pointerup re-checks synchronously. */
+    let measureQueued = false;
+    function queueThresholdCheck() {
+      if (measureQueued) return;
+      measureQueued = true;
+      requestAnimationFrame(() => {
+        measureQueued = false;
+        if (!state.unlocked) checkThreshold();
+      });
     }
 
     let scratching = false;
@@ -211,24 +230,40 @@
 
     coverCanvas.addEventListener('pointerdown', (e) => {
       if (state.unlocked) return;
+      /* Lock the card flat to the camera before the first dab so screen
+         coordinates map 1:1 onto canvas pixels for the whole stroke (a
+         tilted card turns getBoundingClientRect into the AABB of a quad). */
+      flattenCard();
       scratching = true;
-      coverCanvas.setPointerCapture?.(e.pointerId);
+      try { coverCanvas.setPointerCapture?.(e.pointerId); } catch { /* stale */ }
       eraseAt(e.clientX, e.clientY);
-      checkThreshold();
+      queueThresholdCheck();
       e.preventDefault();
     });
     coverCanvas.addEventListener('pointermove', (e) => {
       if (!scratching || state.unlocked) return;
+      /* A release that was never seen must not erase on hover: mouse and
+         pen moves report buttons === 0 once the button is up. */
+      if (e.pointerType !== 'touch' && e.buttons === 0) { stopScratch(e); return; }
       eraseAt(e.clientX, e.clientY);
-      checkThreshold();
+      queueThresholdCheck();
     });
     const stopScratch = (e) => {
       if (!scratching) return;
       scratching = false;
-      coverCanvas.releasePointerCapture?.(e.pointerId);
+      if (e && e.pointerId != null) {
+        try { coverCanvas.releasePointerCapture?.(e.pointerId); } catch { /* gone */ }
+      }
+      restTilt(); /* camera eases back to neutral; next pointerdown resumes */
     };
     coverCanvas.addEventListener('pointerup', stopScratch);
     coverCanvas.addEventListener('pointercancel', stopScratch);
+    coverCanvas.addEventListener('lostpointercapture', stopScratch);
+    /* Safety net: if the release lands outside the canvas (or the window
+       lost focus mid-stroke), these leave the panel resumable instead of
+       stuck with a stale dragging flag. */
+    window.addEventListener('pointerup', stopScratch);
+    window.addEventListener('pointercancel', stopScratch);
 
     if (nodes.replay) {
       nodes.replay.addEventListener('click', () => {
@@ -242,13 +277,170 @@
         if (nodes.reveal) nodes.reveal.classList.remove('is-visible');
         if (nodes.replay) nodes.replay.classList.remove('is-visible');
         if (nodes.percent) nodes.percent.classList.remove('is-visible');
+        if (nodes.percent) nodes.percent.textContent = '';
         if (nodes.hint) nodes.hint.hidden = false;
         // Purge the revealed text too: a secret must not sit in the DOM
         // behind a hidden overlay after the panel is re-armed.
         if (nodes.revealText) nodes.revealText.textContent = '';
         if (nodes.revealSource) nodes.revealSource.textContent = '';
         repaint();
+        playCardAnim(true); /* fresh card flies back in from the camera */
       });
+    }
+
+    /* ---- 3D camera card -------------------------------------------
+       House style (birthday/gags/quotes): window.gsap guarded, scrolled in
+       with IntersectionObserver. Three moments:
+         1. pop-in   the card flies up from below, pitched back like a
+                     camera crane settling onto a face-on product shot;
+         2. hover    the card leans toward the pointer (rotateX/Y) with a
+                     specular foil sheen that tracks the tilt;
+         3. unlock   a short flourish: punch scale + rotateY sweep + sheen
+                     light-sweep across the foil as it dissolves.
+       state.anim ('hidden' -> 'popping' -> 'idle') is exposed on the QA
+       surface so suites can wait for a stable card before measuring. */
+    state.anim = 'idle';
+    const hasCam = typeof window.gsap !== 'undefined' && !!card;
+
+    function playCardAnim(isReplay) {
+      if (!hasCam) return;
+      state.anim = 'popping';
+      window.gsap.killTweensOf(card);
+      window.gsap.fromTo(
+        card,
+        { y: 120, rotateX: 56, rotateY: -16, rotateZ: -5, scale: 0.84, autoAlpha: 0 },
+        {
+          y: 0, rotateX: 0, rotateY: 0, rotateZ: 0, scale: 1, autoAlpha: 1,
+          duration: isReplay ? 0.9 : 1.15,
+          ease: 'back.out(1.5)',
+          clearProps: 'all',
+          onComplete() {
+            state.anim = 'idle';
+            tiltX = tiltY = tTiltX = tTiltY = 0;
+          },
+        },
+      );
+      const eyebrow = q('.scratch__eyebrow');
+      const headline = q('.scratch__headline');
+      if (eyebrow && headline) {
+        window.gsap.from([eyebrow, headline], {
+          y: 16, autoAlpha: 0, duration: 0.7, stagger: 0.09, delay: 0.25,
+          ease: 'power3.out', clearProps: 'all',
+        });
+      }
+    }
+
+    /* pointer-follow camera tilt */
+    let tiltX = 0, tiltY = 0, tTiltX = 0, tTiltY = 0, tiltRAF = 0;
+    const MAX_RX = 8, MAX_RY = 11;
+
+    function restTilt() {
+      tTiltX = 0;
+      tTiltY = 0;
+      ensureTiltLoop();
+    }
+
+    function ensureTiltLoop() {
+      if (tiltRAF) return;
+      const tick = () => {
+        tiltX += (tTiltX - tiltX) * 0.09;
+        tiltY += (tTiltY - tiltY) * 0.09;
+        if (hasCam && !scratching && state.anim === 'idle') {
+          window.gsap.set(card, { rotateX: tiltX, rotateY: tiltY });
+          section.style.setProperty('--tilt-gx', `${50 + tiltY * 3}%`);
+          section.style.setProperty('--tilt-gy', `${45 - tiltX * 3}%`);
+        }
+        const settled = Math.abs(tTiltX - tiltX) < 0.02 && Math.abs(tTiltY - tiltY) < 0.02;
+        if (settled && tTiltX === 0 && tTiltY === 0) {
+          if (hasCam) {
+            window.gsap.set(card, { rotateX: 0, rotateY: 0 });
+            section.style.setProperty('--tilt-gx', '50%');
+            section.style.setProperty('--tilt-gy', '45%');
+          }
+          tiltRAF = 0; /* neutral and settled: stop burning frames */
+          return;
+        }
+        tiltRAF = requestAnimationFrame(tick);
+      };
+      tiltRAF = requestAnimationFrame(tick);
+    }
+
+    /* Grab = lock flat. Also catches the card mid-pop: the reader grabs it
+       out of the air and the entrance resolves instantly at face-on. */
+    function flattenCard() {
+      tTiltX = 0; tTiltY = 0; tiltX = 0; tiltY = 0;
+      if (!hasCam) return;
+      window.gsap.killTweensOf(card);
+      window.gsap.set(card, { rotateX: 0, rotateY: 0, rotateZ: 0, x: 0, y: 0, scale: 1, autoAlpha: 1 });
+      if (state.anim !== 'idle') state.anim = 'idle';
+      section.style.setProperty('--tilt-gx', '50%');
+      section.style.setProperty('--tilt-gy', '45%');
+    }
+
+    function playUnlockFlourish() {
+      if (!hasCam) return;
+      state.anim = 'popping'; /* hold hover-tilt until the flourish settles */
+      window.gsap.killTweensOf(card);
+      const tl = window.gsap.timeline();
+      tl.to(card, { scale: 1.05, rotateY: -12, duration: 0.3, ease: 'power3.out' }, 0)
+        .to(card, { scale: 1, rotateY: 0, duration: 1.1, ease: 'elastic.out(1, 0.5)' }, 0.3);
+      const sheen = { x: 8 };
+      tl.to(sheen, {
+        x: 92, duration: 0.9, ease: 'power2.inOut',
+        onUpdate() { section.style.setProperty('--tilt-gx', `${sheen.x}%`); },
+      }, 0.1);
+      tl.eventCallback('onComplete', () => {
+        state.anim = 'idle';
+        tiltX = tiltY = tTiltX = tTiltY = 0;
+        section.style.setProperty('--tilt-gx', '50%');
+        section.style.setProperty('--tilt-gy', '45%');
+      });
+    }
+
+    section.addEventListener('pointermove', (e) => {
+      if (state.unlocked || scratching || state.anim !== 'idle') return;
+      if (e.pointerType === 'touch' || !card) return; /* touch: no hover camera */
+      const r = card.getBoundingClientRect();
+      const nx = (e.clientX - (r.left + r.width / 2)) / Math.max(1, r.width / 2);
+      const ny = (e.clientY - (r.top + r.height / 2)) / Math.max(1, r.height / 2);
+      tTiltX = Math.max(-1, Math.min(1, -ny)) * MAX_RX;
+      tTiltY = Math.max(-1, Math.min(1, nx)) * MAX_RY;
+      ensureTiltLoop();
+    });
+    section.addEventListener('pointerleave', restTilt);
+
+    /* Entrance: pre-hide only when both gsap and IO exist (otherwise the
+       card stays plain-static and visible), then pop when scrolled in. */
+    if (hasCam && 'IntersectionObserver' in window) {
+      state.anim = 'hidden';
+      window.gsap.set(card, { y: 120, rotateX: 56, rotateY: -16, rotateZ: -5, scale: 0.84, autoAlpha: 0 });
+      const io = new IntersectionObserver((entries) => {
+        for (const en of entries) {
+          if (en.isIntersecting) {
+            io.disconnect();
+            playCardAnim(false);
+            break;
+          }
+        }
+      }, { threshold: 0.3 });
+      io.observe(card);
+      /* Rescue only a card that is genuinely visible but never popped (odd
+         IO paths, gate re-insert). A timer alone would fire while the card
+         is simply still below the fold, flipping anim to 'idle' before the
+         real pop and making QA measure a card that is still in flight. */
+      let rescueTicks = 0;
+      const rescue = window.setInterval(() => {
+        if (state.anim !== 'hidden') { window.clearInterval(rescue); return; }
+        const r = card.getBoundingClientRect();
+        const inView = r.top < (window.innerHeight || 0) && r.bottom > 0;
+        if (inView && (rescueTicks += 1) >= 2) {
+          window.gsap.set(card, { clearProps: 'all' });
+          state.anim = 'idle';
+          window.clearInterval(rescue);
+        } else if (!inView) {
+          rescueTicks = 0;
+        }
+      }, 1000);
     }
 
     function applyMotionMode() {
@@ -267,9 +459,26 @@
       });
     }
 
+    /* Viewport resizes are frequent on mobile (URL bar) and used to wipe
+       the foil back to fresh, destroying progress mid-scratch. Height-only
+       changes keep the same pixel size: leave the scratched pixels alone.
+       On a genuine size change (orientation), re-blit the old cover scaled
+       so progress survives that too. */
     const refit = () => {
       if (state.unlocked) return;
-      repaint();
+      /* offsetWidth/Height are layout px: unlike getBoundingClientRect they
+         ignore the card's tilt, so a hover lean can never fake a resize. */
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.max(1, Math.round(coverCanvas.offsetWidth * dpr));
+      const h = Math.max(1, Math.round(coverCanvas.offsetHeight * dpr));
+      if (w === coverCanvas.width && h === coverCanvas.height) return;
+      const keep = document.createElement('canvas');
+      keep.width = coverCanvas.width;
+      keep.height = coverCanvas.height;
+      keep.getContext('2d').drawImage(coverCanvas, 0, 0);
+      paintSecret(secretCanvas);
+      const { ctx } = fitCanvas(coverCanvas);
+      ctx.drawImage(keep, 0, 0, keep.width, keep.height, 0, 0, w, h);
     };
     window.addEventListener('resize', refit);
     window.addEventListener('orientationchange', refit);
@@ -307,6 +516,7 @@
       get percent() { return panel.state.percent; },
       get threshold() { return CLEAR_THRESHOLD; },
       get mode() { return panel.state.mode; },
+      get anim() { return panel.state.anim; },
       get source() { return SECRET_SOURCE; },
     };
     return true;
