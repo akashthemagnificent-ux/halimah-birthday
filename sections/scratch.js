@@ -30,7 +30,13 @@
     'to talk to you and probably call you and play with you and spend time ' +
     "with you for one more day and there's literally nothing better i " +
     'could ask for.';
-  const SECRET_SOURCE = 'halimah dms-6.txt:952';
+  const SECRET_SOURCE = 'halimah dms-6.txt:952'; /* provenance in code only, never rendered */
+  /* the copy that fades in under the card after it clears: a continuation,
+     not a repeat of what the foil was hiding */
+  const REVEAL_TEXT =
+    'Truly, you make everyday worth living. Waking up to your messages, wa' +
+    'iting to talk to you, waiting to hit the end of the week to call and ' +
+    'hear your voice is worth living and seeing another day my love. I love you so much.';
 
   const prefersReducedMotion = () => false; /* personal site: full motion */
 
@@ -149,7 +155,6 @@
       percent: q('[data-scratch-percent]'),
       reveal: q('[data-scratch-reveal]'),
       revealText: q('[data-scratch-reveal-text]'),
-      revealSource: q('[data-scratch-reveal-source]'),
       hint: q('[data-scratch-hint]'),
       replay: q('[data-scratch-replay]'),
       tap: q('[data-scratch-tap]'),
@@ -185,8 +190,7 @@
                              takes the card, so keep screen coords stable */
       if (nodes.hint) nodes.hint.hidden = true;
       setPercent(100); /* last few % dissolve with the foil: reads 100% */
-      if (nodes.revealText) nodes.revealText.textContent = SECRET_TEXT;
-      if (nodes.revealSource) nodes.revealSource.textContent = SECRET_SOURCE;
+      if (nodes.revealText) nodes.revealText.textContent = REVEAL_TEXT;
       if (nodes.reveal) nodes.reveal.classList.add('is-visible');
       if (nodes.replay) nodes.replay.classList.add('is-visible');
       playUnlockFlourish();
@@ -282,7 +286,6 @@
         // Purge the revealed text too: a secret must not sit in the DOM
         // behind a hidden overlay after the panel is re-armed.
         if (nodes.revealText) nodes.revealText.textContent = '';
-        if (nodes.revealSource) nodes.revealSource.textContent = '';
         repaint();
         playCardAnim(true); /* fresh card flies back in from the camera */
       });

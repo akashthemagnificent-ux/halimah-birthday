@@ -15,8 +15,8 @@ assert.ok(
   'threat line not verbatim in index.html quotes headline',
 );
 assert.ok(
-  idx.includes('data-threat="halimah dms-2.txt:1037"'),
-  'threat headline missing source citation',
+  !/data-threat=/.test(idx),
+  'dead citation attribute should stay gone from the quotes headline',
 );
 
 // Cards live inside the quotes section only.

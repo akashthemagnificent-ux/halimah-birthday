@@ -217,6 +217,13 @@ function toText(htmlFragment) {
   return decodeEntities(withoutTags).replace(/\s+/g, ' ').trim();
 }
 
+/* Provenance citations were dropped from the site copy by owner decree; the
+   source field still compares as the human label ("from our chats"), with
+   any dms-*.txt:n citation removed identically on every side. */
+function stripCites(s) {
+  return s.replace(/\s*(?:\u00b7\s*)?(?:halimah\s+)?dms[-\w]*\.txt:\s*[\d,\s-]+/gi, '').trim();
+}
+
 function innerOf(block, tagRe) {
   const m = block.match(tagRe);
   return m ? m[1] : null;
@@ -249,7 +256,7 @@ function extractArticles(html) {
       quote: quote === null ? null : toText(quote),
       title: title === null ? null : toText(title),
       voiceover: voiceover === null ? null : toText(voiceover),
-      source: source === null ? null : toText(source),
+      source: source === null ? null : stripCites(toText(source)),
       date:
         timeM === null
           ? null
@@ -301,7 +308,7 @@ function extractDeck(md) {
       quote: toText(quotes.join('\n')),
       title: toText(title),
       voiceover: toText(voice),
-      source: toText(`from our chats \u00b7 ${src}`),
+      source: stripCites(toText(`from our chats \u00b7 ${src}`)),
       date: { text: toText(dateDisp), datetime: iso },
       kicker: toText(num),
     };
@@ -367,6 +374,9 @@ if (args.writeBaseline) {
 } else if (existsSync(args.baseline)) {
   baselineExisted = true;
   baseline = JSON.parse(readFileSync(args.baseline, 'utf8'));
+  for (const ch of Object.values(baseline)) {
+    if (ch && typeof ch.source === 'string') ch.source = stripCites(ch.source);
+  }
   diffSets('vs baseline', live, baseline, errors);
 } else {
   baseline = live;

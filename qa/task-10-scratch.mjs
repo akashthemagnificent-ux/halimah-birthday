@@ -140,6 +140,10 @@ async function desktopLeg(browser, url, tag) {
     isDone: document.querySelector('[data-scratch-cover]').classList.contains('is-done'),
     reveal: document.querySelector('[data-scratch-reveal]').classList.contains('is-visible'),
     revealLen: (document.querySelector('[data-scratch-reveal-text]')?.textContent || '').length,
+    revealOk: (() => {
+      const t = document.querySelector('[data-scratch-reveal-text]')?.textContent || '';
+      return t.startsWith('Truly, you make everyday worth living') && !t.startsWith('For me');
+    })(),
     hintHidden: document.querySelector('[data-scratch-hint]')?.hidden,
     replay: document.querySelector('[data-scratch-replay]').classList.contains('is-visible'),
     dataset: document.getElementById('scratch').dataset.scratchPercent,
@@ -147,7 +151,7 @@ async function desktopLeg(browser, url, tag) {
   check(`${tag}: full sweep unlocks via scratch`, done.u && done.m === 'scratch', `method=${done.m}`);
   check(`${tag}: reads a full 100% clear`, done.p === 100 && done.display === '100% cleared' && done.dataset === '100', `${done.p} "${done.display}"`);
   check(`${tag}: foil dissolves (is-done) and reveal+replay appear`, done.isDone && done.reveal && done.replay && done.hintHidden, JSON.stringify({ isDone: done.isDone, reveal: done.reveal, replay: done.replay }));
-  check(`${tag}: secret written into reveal by JS (length only, not logged)`, done.revealLen > 150, `${done.revealLen} chars`);
+  check(`${tag}: continuation written into reveal by JS, not the card secret`, done.revealOk && done.revealLen > 150, `${done.revealLen} chars`);
   await settleCard(page); // flourish must settle back to idle
   check(`${tag}: unlock flourish settles to idle`, (await page.evaluate(() => window.__scratchPanel.anim)) === 'idle');
 
@@ -164,7 +168,7 @@ async function desktopLeg(browser, url, tag) {
     };
   });
   check(`${tag}: replay re-arms panel and starts a fresh pop`, rp.anim === 'popping' && !rp.u && rp.p === 0 && !rp.reveal, `anim=${rp.anim} p=${rp.p}`);
-  check(`${tag}: replay purges the secret from the DOM`, rp.leak === false, `leak=${rp.leak}`);
+  check(`${tag}: replay purges secret + continuation from the DOM`, rp.leak === false, `leak=${rp.leak}`);
   check(`${tag}: replay clears the 100% display`, rp.display === '', `"${rp.display}"`);
   await settleCard(page);
 

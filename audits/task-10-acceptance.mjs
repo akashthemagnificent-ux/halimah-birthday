@@ -71,6 +71,10 @@ check('secret matches dms-6.txt:952 verbatim',
   SECRET.length > 0 ? 'substring of source line 952' : 'empty secret');
 check('scratch.js cites its source line',
   /const SECRET_SOURCE = 'halimah dms-6\.txt:952'/.test(js));
+check('reveal copy ships as a continuation, written only by JS',
+  /const REVEAL_TEXT =/.test(js) &&
+  /revealText\.textContent = REVEAL_TEXT/.test(js) &&
+  !/revealText\.textContent = SECRET_TEXT/.test(js));
 
 console.log('\n--- secret must NOT appear in any HTML file ---');
 const htmlFiles = [];
@@ -269,7 +273,7 @@ try {
       await page.mouse.up();
     }
 
-    const scratchResult = await page.evaluate(() => ({
+    const scratchResult = await page.evaluate((secret) => ({
       unlocked: window.__scratchPanel.unlocked,
       method: window.__scratchPanel.method,
       percent: window.__scratchPanel.percent,
@@ -277,7 +281,8 @@ try {
       revealVisible: document.querySelector('[data-scratch-reveal]')?.classList.contains('is-visible'),
       replayVisible: document.querySelector('[data-scratch-replay]')?.classList.contains('is-visible'),
       sectionFlag: document.getElementById('scratch')?.dataset.scratchUnlocked,
-    }));
+      bodyHasSecret: document.body.textContent.includes(secret),
+    }), SECRET);
     check('unlock FIRES at the clear threshold',
       scratchResult.unlocked === true, `method=${scratchResult.method}`);
     check('unlock was triggered by scratching, not by a bypass',
@@ -285,8 +290,12 @@ try {
     check('percent reached the threshold',
       scratchResult.percent >= initial.threshold,
       `${scratchResult.percent} >= ${initial.threshold}`);
-    check('secret appears in the DOM only AFTER unlock',
-      scratchResult.revealedText.includes(SECRET), 'reveal text written by JS');
+    check('reveal shows the continuation copy after unlock',
+      scratchResult.revealedText.startsWith('Truly, you make everyday worth living') &&
+      !scratchResult.revealedText.includes(SECRET),
+      `reveal length ${scratchResult.revealedText.length}`);
+    check('the card secret still never enters the DOM text (canvas only)',
+      scratchResult.bodyHasSecret === false);
     check('reveal and replay become visible',
       scratchResult.revealVisible === true && scratchResult.replayVisible === true);
     check('section state flag is set', scratchResult.sectionFlag === 'true');
@@ -451,7 +460,8 @@ try {
     }));
     check('panel still works after the live unlock (no stale state)',
       ssAfter.unlocked === true && ssAfter.method === 'scratch', JSON.stringify({ ...ssAfter, text: '' }));
-    check('secret reveals correctly after the live unlock', ssAfter.text.includes(SECRET));
+    check('continuation reveals correctly after the live unlock',
+      ssAfter.text.startsWith('Truly, you make everyday worth living'));
     check('no page errors during the locked-to-unlocked run', ssErrors.length === 0, ssErrors.join(' | '));
   } finally {
     await ssBrowser.close();

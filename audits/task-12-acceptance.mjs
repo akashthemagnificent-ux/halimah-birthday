@@ -30,6 +30,7 @@ check('devotion: here-for-you-now', html.toLowerCase().includes('yes i am here f
 check('devotion: if-everyone-leaves', html.toLowerCase().includes('if everyone leaves, i am here for you'));
 check('devotion: proud of you', html.toLowerCase().includes('i love you so much and i am proud of you'));
 check('devotion: vow', html.includes('IN THE END YOU'));
-check('sources cited', html.includes('dms-6.txt:951-953') && html.includes('dms-10.txt:213,218,221') && html.includes('dms-12.txt:2639-2640'));
+check('finale credits keep the prose, no citation blobs site-wide',
+  html.includes('woven from our chats') && !/dms[-\w]*\.txt:\d/.test(html));
 console.log(fails === 0 ? 'ACCEPTANCE: ALL PASS' : 'ACCEPTANCE: ' + fails + ' FAILURES');
 process.exit(fails ? 1 : 0);
