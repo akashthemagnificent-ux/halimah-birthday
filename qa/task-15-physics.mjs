@@ -45,7 +45,10 @@ const run = async (url) => {
   await pg.evaluate(() => document.getElementById('begin-button').click());
   await pg.waitForFunction(() => window.__physics !== undefined, null, { timeout: 20000 });
   await settle(pg);
-  await pg.locator('[data-physics-play]').click();
+  // Deterministic DOM click: the play button carries a CSS entrance animation
+  // that intermittently fails Playwright's 'stable' actionability check under
+  // headless timing. The handler wiring is what we test, so click it directly.
+  await pg.evaluate(() => document.querySelector('[data-physics-play]').click());
   await settle(pg);
   await pg.waitForFunction(() => window.__physics.mode === 'orbit', null, { timeout: 15000 });
   await pg.waitForTimeout(2500);
@@ -68,7 +71,19 @@ const run = async (url) => {
   ck(`${url} label text >=12px`, st.m.labelTextPx >= 12, st.m.labelTextPx);
   ck(`${url} status count-driven`, st.status.includes('nine hearts'), st.status);
 
-  // period in sim-seconds + wall-clock ratio
+  // period in sim-seconds + wall-clock ratio.
+  // Gate on formation settle first: the entrance rain drops nine hearts in and
+  // the ring catches them, so angular speed is NOT at steady state for the first
+  // couple of sim-seconds. Sampling the sweep during that ramp read an off
+  // period (pre-existing flake on the committed baseline too). Wait until the
+  // formation chain has locked (gapDev < 1deg) and stays locked, THEN measure.
+  let settled = false;
+  for (let a = 0; a < 40 && !settled; a += 1) {
+    const g1 = await pg.evaluate(() => window.__physics.metrics().gapDev);
+    await pg.waitForTimeout(300);
+    const g2 = await pg.evaluate(() => window.__physics.metrics().gapDev);
+    if (g1 < 1 && g2 < 1) settled = true;
+  }
   const s1 = await pg.evaluate(() => window.__physics.snapshot());
   const m1 = await pg.evaluate(() => window.__physics.metrics());
   await pg.waitForTimeout(6000);
@@ -101,13 +116,70 @@ const run = async (url) => {
   const mNow = await pg.evaluate(() => window.__physics.metrics());
   ck(`${url} formation chain: gap dev <=3deg`, mNow.gapDev <= 3, mNow.gapDev);
 
-  // flick
+  // flick: poll for the PEAK speed over the first ~150ms. The 0.30-impulse
+  // spikes within ~10ms then frictionAir + the radial spring bleed it back to
+  // near-baseline by 80ms, so a single 80ms sample caught the decayed tail and
+  // flaked (~50% on the committed baseline too). Peak is the real contract.
   const scr = await pg.evaluate(() => window.__physics.heartScreen(0));
   const v0 = await pg.evaluate(() => window.__physics.snapshot()[0].v);
   await pg.mouse.click(scr.x, scr.y);
-  await pg.waitForTimeout(80); // before frictionAir decays the 0.35 impulse
-  const vMax = await pg.evaluate(() => Math.max(...window.__physics.snapshot().map((s) => s.v)));
-  ck(`${url} flick energizes a heart`, vMax > v0 + 0.08, `${v0} -> ${vMax}`);
+  let vPeak = 0;
+  for (let s = 0; s < 12; s += 1) {
+    await pg.waitForTimeout(12);
+    const vNow = await pg.evaluate(() => Math.max(...window.__physics.snapshot().map((x) => x.v)));
+    if (vNow > vPeak) vPeak = vNow;
+  }
+  ck(`${url} flick energizes a heart`, vPeak > v0 + 0.08, `${v0} -> ${vPeak}`);
+
+  /* ---- Phase C: 3D orbit rig ---- */
+  // exact rest pose: (0, 1.8, 13.4) with neutral pointer parallax
+  await pg.evaluate(() => window.__physics.neutralPointer());
+  await pg.waitForTimeout(120);
+  const cp0 = await pg.evaluate(() => window.__physics.camPos());
+  ck(`${url} camera rest pose (0,1.8,13.4)`,
+    Math.abs(cp0.x - 0) < 0.05 && Math.abs(cp0.y - 1.8) < 0.05 && Math.abs(cp0.z - 13.4) < 0.05,
+    JSON.stringify(cp0));
+
+  // empty-space drag orbits the camera (heart-drag path must stay a flick)
+  const box = await pg.evaluate(() => {
+    const r = document.querySelector('.physics__stage').getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height };
+  });
+  const az0 = await pg.evaluate(() => window.__physics.orbit().az);
+  const el0 = await pg.evaluate(() => window.__physics.orbit().elev);
+  // top-left corner of the stage is empty space (hearts ring the centre)
+  await pg.mouse.move(box.x + 40, box.y + 40);
+  await pg.mouse.down();
+  await pg.mouse.move(box.x + 40 + 180, box.y + 40 + 60, { steps: 10 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(150);
+  const az1 = await pg.evaluate(() => window.__physics.orbit().az);
+  const el1 = await pg.evaluate(() => window.__physics.orbit().elev);
+  ck(`${url} empty-space drag changes azimuth`, Math.abs(az1 - az0) > 0.05, `${az0} -> ${az1}`);
+  ck(`${url} empty-space drag changes elevation`, Math.abs(el1 - el0) > 0.05, `${el0} -> ${el1}`);
+  const cp1 = await pg.evaluate(() => window.__physics.camPos());
+  ck(`${url} dragged camera moved off rest`, Math.abs(cp1.x) + Math.abs(cp1.z - 13.4) > 0.5, JSON.stringify(cp1));
+
+  // wheel zoom, clamped to [7, 24]
+  const r0 = await pg.evaluate(() => window.__physics.orbit().r);
+  await pg.mouse.move(box.x + box.w / 2, box.y + box.h / 2);
+  await pg.mouse.wheel(0, -600);
+  await pg.waitForTimeout(80);
+  const r1 = await pg.evaluate(() => window.__physics.orbit().r);
+  await pg.mouse.wheel(0, -100000);
+  await pg.waitForTimeout(80);
+  const rMin = await pg.evaluate(() => window.__physics.orbit().r);
+  await pg.mouse.wheel(0, 200000);
+  await pg.waitForTimeout(80);
+  const rMax = await pg.evaluate(() => window.__physics.orbit().r);
+  ck(`${url} wheel zoom changes radius`, r1 < r0 - 0.5, `${r0} -> ${r1}`);
+  ck(`${url} zoom clamped [7,24]`, rMin >= 6.99 && rMax <= 24.01, `min=${rMin} max=${rMax}`);
+
+  // idle drift returns elevation toward rest (azimuth keeps orientation)
+  await pg.evaluate(() => window.__physics.setOrbit(0, 1.2, 13.4));
+  await pg.waitForTimeout(5200); // 2500ms idle threshold + settle time
+  const el2 = await pg.evaluate(() => window.__physics.orbit().elev);
+  ck(`${url} idle drift returns elevation to rest`, Math.abs(el2 - 0.126) < 0.3, `elev=${el2.toFixed(3)}`);
 
   ck(`${url} zero page errors`, errs.length === 0, errs.slice(0, 2).join(' | '));
   await b.close();

@@ -266,6 +266,22 @@
     ring.rotation.x = -0.08;
     world.add(ring);
 
+    /* Orbital guide rings: three faint concentric circles in the orbit plane
+       so the hearts read as a little solar system once the camera can orbit.
+       The innermost tracks the heart ring exactly (ringR is set in layoutSim
+       and mirrored onto guideA.scale). Render-side only — sim untouched. */
+    const guideMat = new THREE.MeshBasicMaterial({
+      color: 0xf0a04e, transparent: true, opacity: 0.16,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const guideGeo = new THREE.TorusGeometry(1, 0.012, 6, 96);
+    const guideA = new THREE.Mesh(guideGeo, guideMat);            /* at ringR */
+    const guideB = new THREE.Mesh(guideGeo, guideMat.clone());    /* 1.7x ringR */
+    guideB.material.opacity = 0.10;
+    const guideC = new THREE.Mesh(guideGeo, guideMat.clone());    /* 0.45x ringR */
+    guideC.material.opacity = 0.10;
+    world.add(guideA, guideB, guideC);
+
     /* soft starfield behind the orbit */
     const starGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(150 * 3);
@@ -329,6 +345,9 @@
       Matter.Body.setVertices(walls.left, sideVerts.map((v) => ({ x: -v.x, y: v.y })));
       Matter.Body.setVertices(walls.right, sideVerts);
       ring.scale.setScalar(ringR);
+      guideA.scale.setScalar(ringR);
+      guideB.scale.setScalar(ringR * 1.7);
+      guideC.scale.setScalar(ringR * 0.45);
     }
     layoutSim();
 
@@ -394,6 +413,40 @@
     let lastPT = null;
     let flingV = null;
 
+    /* ---- 3D orbit rig: spherical camera (azimuth / elevation / radius)
+       around the medallion. Rest pose resolves to EXACTLY the shipped
+       face-on view (0, 1.8, 13.4) fov 42, so every QA pin (labelTextPx via
+       camera.z, 9-label non-overlap, period, gapDev) stays byte-identical
+       until the user drags EMPTY space. Empty-space drag = free 360 azimuth
+       + elevation tilt with release inertia + slow idle drift back to front;
+       wheel and two-finger pinch = clamped dolly zoom. Dragging a HEART still
+       flicks it — that path is untouched. The 2D sim is never modified (the
+       z-bob is render-side), so periods/gapDev are unaffected by the camera. */
+    const REST_AZ = 0;
+    const REST_ELEV = Math.atan2(1.7, 13.4);   /* y-offset 1.7 over z 13.4 */
+    const REST_R = Math.hypot(1.7, 13.4);      /* -> (0, 1.8, 13.4) exactly */
+    const ELEV_MIN = -0.45;
+    const ELEV_MAX = 1.45;
+    const R_MIN = 7;
+    const R_MAX = 24;
+    const clampElev = (v) => Math.max(ELEV_MIN, Math.min(ELEV_MAX, v));
+    const clampR = (v) => Math.max(R_MIN, Math.min(R_MAX, v));
+    const orbit = {
+      az: REST_AZ, elev: REST_ELEV, r: REST_R,
+      vAz: 0, vElev: 0, lastInput: performance.now(),
+    };
+    let orbiting = false;
+    let orbitLast = null;
+    const labelV = new THREE.Vector3();
+    /* two-finger pinch zoom */
+    const actPtrs = new Map();
+    let pinchD0 = 0;
+    let pinchR0 = 0;
+    function pinchDist() {
+      const p = [...actPtrs.values()];
+      return Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+    }
+
     /* Fat-finger pick: nearest heart within PICK_R of the pointer ray.
        Exact triangle raycast is too brittle — on slow devices (and under
        headless swiftshader) the heart drifts between aim and click, so a
@@ -434,7 +487,30 @@
       lastPT = { x: ev.clientX, y: ev.clientY };
       flingV = null;
       if (window.__physics) window.__physics.lastPick = idx;
-      if (idx < 0) return;
+      actPtrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (actPtrs.size >= 2) {
+        /* second finger down -> pinch zoom takes over; drop any single-finger
+           orbit / heart drag so the gesture stays clean */
+        orbiting = false;
+        dragIndex = -1;
+        dragTarget = null;
+        pinchD0 = pinchDist();
+        pinchR0 = orbit.r;
+        if (window.__physics) window.__physics.dragging = null;
+        ev.preventDefault();
+        return;
+      }
+      if (idx < 0) {
+        /* empty space -> grab the camera for a 360 orbit */
+        orbiting = true;
+        orbitLast = { x: ev.clientX, y: ev.clientY };
+        orbit.vAz = 0;
+        orbit.vElev = 0;
+        orbit.lastInput = performance.now();
+        canvas.setPointerCapture && canvas.setPointerCapture(ev.pointerId);
+        ev.preventDefault();
+        return;
+      }
       if (window.__physics) window.__physics.dragging = items[idx].name;
       dragIndex = idx;
       dragTarget = planePoint(ev);
@@ -444,6 +520,30 @@
     canvas.addEventListener('pointermove', (ev) => {
       pointer.tx = ((ev.clientX / window.innerWidth) - 0.5) * 2;
       pointer.ty = ((ev.clientY / window.innerHeight) - 0.5) * 2;
+      if (actPtrs.has(ev.pointerId)) {
+        actPtrs.get(ev.pointerId).x = ev.clientX;
+        actPtrs.get(ev.pointerId).y = ev.clientY;
+      }
+      if (actPtrs.size >= 2 && pinchD0 > 0) {
+        /* two-finger pinch = dolly zoom (fingers apart -> zoom in) */
+        const d = pinchDist();
+        if (d > 0) orbit.r = clampR(pinchR0 * (pinchD0 / d));
+        orbit.lastInput = performance.now();
+        ev.preventDefault();
+        return;
+      }
+      if (orbiting && orbitLast) {
+        const dx = ev.clientX - orbitLast.x;
+        const dy = ev.clientY - orbitLast.y;
+        orbit.az += dx * 0.006;                            /* drag right swings camera right */
+        orbit.elev = clampElev(orbit.elev - dy * 0.005);   /* drag up raises camera to look from above */
+        orbit.vAz = dx * 0.006;
+        orbit.vElev = -dy * 0.005;
+        orbitLast = { x: ev.clientX, y: ev.clientY };
+        orbit.lastInput = performance.now();
+        ev.preventDefault();
+        return;
+      }
       if (dragIndex < 0) return;
       const pt = planePoint(ev);
       if (pt) {
@@ -460,6 +560,14 @@
       ev.preventDefault();
     });
     function endDrag(ev) {
+      if (actPtrs.has(ev.pointerId)) actPtrs.delete(ev.pointerId);
+      if (actPtrs.size < 2) pinchD0 = 0;
+      if (orbiting) {
+        orbiting = false;
+        orbitLast = null;
+        orbit.lastInput = performance.now();
+        /* inertia keeps whatever velocity the last pointermove recorded */
+      }
       if (dragIndex >= 0) {
         const it = items[dragIndex];
         const quick = performance.now() - downAt < 260;
@@ -492,6 +600,15 @@
     }
     canvas.addEventListener('pointerup', endDrag);
     canvas.addEventListener('pointercancel', endDrag);
+
+    /* wheel = clamped dolly zoom (touch pinch is handled in pointermove).
+       preventDefault stops the page scrolling while the cursor is over the
+       stage, which is the expected behaviour for a zoomable 3D view. */
+    canvas.addEventListener('wheel', (ev) => {
+      orbit.r = clampR(orbit.r + ev.deltaY * 0.012);
+      orbit.lastInput = performance.now();
+      ev.preventDefault();
+    }, { passive: false });
 
     /* ---- sim step: radial spring + tangential drive + soft repulsion ---- */
     function stepSim() {
@@ -619,9 +736,50 @@
 
       pointer.x += (pointer.tx - pointer.x) * 0.045;
       pointer.y += (pointer.ty - pointer.y) * 0.045;
-      const az = pointer.x * 0.35;
-      const el = 1.8 - pointer.y * 0.5;
-      camera.position.set(Math.sin(az) * 13.4, el, Math.cos(az) * 13.4);
+
+      /* 3D orbit pose: release inertia + slow idle drift-back run first, then
+         build the spherical camera. At REST (orbit.az=0, elev=REST_ELEV,
+         r=REST_R, parallax 0) this resolves to EXACTLY (0, 1.8, 13.4) — the
+         shipped face-on view — so every QA pin stays byte-identical until the
+         user actually drags empty space. The old parallax mapping is kept to
+         within 0.01 world units (<0.5px), so labelRect/metrics are unchanged. */
+      if (!orbiting) {
+        /* release inertia + idle auto-level, both WALL-CLOCK based so the
+           settle takes the same real time at 60fps, 144fps or throttled
+           headless (a frame-count lerp flakes when the frame rate dips). */
+        const rawMs = nowMs - (orbit.lastFrame || nowMs);
+        orbit.lastFrame = nowMs;
+        /* inertia uses a capped dt (a multi-second stall must not teleport the
+           camera); the auto-level ease below is self-limiting so it uses the
+           FULL elapsed time and always finishes on schedule even when headless
+           throttles the frame rate to a few fps. */
+        const dt = Math.min(rawMs, 100) / 1000;
+        orbit.az += orbit.vAz * (dt * 60);
+        orbit.elev = clampElev(orbit.elev + orbit.vElev * (dt * 60));
+        const decay = Math.exp(-dt * 4.5);
+        orbit.vAz *= decay;
+        orbit.vElev *= decay;
+        if (Math.abs(orbit.vAz) < 1e-4) orbit.vAz = 0;
+        if (Math.abs(orbit.vElev) < 1e-4) orbit.vElev = 0;
+        if (nowMs - orbit.lastInput > 2500) {
+          /* auto-level: ease elevation back to the rest pose and swing the
+             azimuth to the nearest front-facing angle (orientation is kept,
+             zoom persists). Exponential ease with tau=0.42s over the REAL
+             frame gap -> ~99% settled 1.8s after idle, frame-rate independent. */
+          const azT = Math.round(orbit.az / TAU) * TAU;
+          const k = 1 - Math.exp(-(rawMs / 1000) / 0.42);
+          orbit.az += (azT - orbit.az) * k;
+          orbit.elev += (REST_ELEV - orbit.elev) * k;
+        }
+      }
+      const az = orbit.az + pointer.x * 0.35;
+      const elev = clampElev(orbit.elev - pointer.y * 0.03731);
+      const horizR = orbit.r * Math.cos(elev);
+      camera.position.set(
+        horizR * Math.sin(az),
+        0.1 + orbit.r * Math.sin(elev),
+        horizR * Math.cos(az)
+      );
       camera.lookAt(0, 0.1, 0);
 
       /* medallion breathes */
@@ -648,7 +806,13 @@
         it.label.sprite.position.set((p.x / d) * lr, (p.y / d) * lr + bob * 0.25, 0.35);
         /* labels fade in only after the entrance rain settles (hearts are
            scattered before that, so radial directions would jitter) */
-        it.label.sprite.material.opacity = Math.min(1, Math.max(0, (t - 1.4) / 0.6));
+        /* Labels fade in only after the entrance rain settles, then hide when
+           they swing BEHIND the camera during a 3D orbit (a sprite projected
+           through a backward camera draws on the wrong side of the frame). */
+        it.label.sprite.getWorldPosition(labelV);
+        const behind = labelV.applyMatrix4(camera.matrixWorldInverse).z > -0.4;
+        it.label.sprite.material.opacity =
+          behind ? 0 : Math.min(1, Math.max(0, (t - 1.4) / 0.6));
         /* comet trail: remember where this heart has been; collapse to a
            dot while the entrance rain is still falling (no long streaks) */
         if (t < 1.5) it.hist.length = 0;
@@ -698,6 +862,24 @@
         v: +Math.hypot(it.body.velocity.x, it.body.velocity.y).toFixed(2),
       })),
       lastPick: -1,
+      /* Phase C orbit rig — QA drives/reads these */
+      orbit: () => ({
+        az: +orbit.az.toFixed(3), elev: +orbit.elev.toFixed(3),
+        r: +orbit.r.toFixed(2), azDeg: +(orbit.az * 180 / Math.PI).toFixed(1),
+        elevDeg: +(orbit.elev * 180 / Math.PI).toFixed(1),
+        orbiting,
+      }),
+      restPose: { az: REST_AZ, elev: +REST_ELEV.toFixed(4), r: +REST_R.toFixed(3) },
+      setOrbit: (az, elev, r) => {
+        if (az !== undefined) orbit.az = az;
+        if (elev !== undefined) orbit.elev = clampElev(elev);
+        if (r !== undefined) orbit.r = clampR(r);
+        orbit.vAz = 0; orbit.vElev = 0; orbiting = false;
+        orbit.lastInput = performance.now();
+      },
+      /* zero the idle parallax so a QA rest-pose read is exact */
+      neutralPointer: () => { pointer.tx = 0; pointer.ty = 0; pointer.x = 0; pointer.y = 0; },
+      camPos: () => ({ x: +camera.position.x.toFixed(3), y: +camera.position.y.toFixed(3), z: +camera.position.z.toFixed(3) }),
       metrics: () => {
         const r = canvas.getBoundingClientRect();
         const worldH = 2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
