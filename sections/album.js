@@ -1,7 +1,9 @@
-/* album — page-flip photo album (todo 11)
-   Pages ship as markup: every slot is an illustrated PLACEHOLDER.
-   A detached Image probe swaps in a real photo only after it loads,
-   so a missing or wrong-named file can never surface a broken icon. */
+/* album — her childhood page-flip book (todo 11)
+   Pages ship as markup: placeholder cover + 42 baby photo slots +
+   placeholder last page. A detached Image probe swaps in the real
+   photo only after it loads, so a missing or wrong-named file can
+   never surface a broken icon. Every flip also drives the section
+   background palette, the counter, the page dots, and the keyboard. */
 (() => {
   'use strict';
 
@@ -37,6 +39,8 @@
       img.decoding = 'async';
       img.src = slot.getAttribute('data-photo');
       slot.textContent = '';
+      slot.classList.remove('album__placeholder');
+      slot.classList.add('album__photo');
       slot.appendChild(img);
       supplied += 1;
     });
@@ -87,6 +91,7 @@
         }),
       );
       syncButtons(event.data, totalPages);
+      applySpread(book, event.data, totalPages);
     });
 
     bookFlip.on('changeState', (event) => {
@@ -96,6 +101,110 @@
     book.dataset.photoTotal = String(total);
     book.dataset.photoSupplied = String(supplied);
     return bookFlip;
+  }
+
+  /* Every flip redraws the section: background hue morph, counter tick,
+     active dot. Hue grows monotonically so the @property interpolation
+     always sweeps the same direction (hsl wraps past 360 on its own). */
+  /* Closed-book states sit in half the container (engine geometry: cover
+     on the right, last page on the left). Slide the inner frame so the
+     closed book reads centered; cleared in portrait where pages fill it. */
+  function centerState(book, page, total) {
+    book.dataset.albumPage = String(page);
+    const first = book.querySelector('.album__page--cover');
+    if (!first) {
+      book.dataset.albumState = '';
+      return;
+    }
+    const bookW = book.getBoundingClientRect().width;
+    const spreadMode = first.getBoundingClientRect().width < bookW * 0.75;
+    book.dataset.albumState = !spreadMode
+      ? ''
+      : page <= 0
+        ? 'start'
+        : page >= total - 1
+          ? 'end'
+          : '';
+  }
+
+  function applySpread(book, page, total) {
+    const section = document.getElementById(SECTION_ID);
+    if (!section) return;
+    centerState(book, page, total);
+    const hue = 18 + page * 27;
+    section.style.setProperty('--album-hue', String(hue));
+    section.style.setProperty('--album-glow-hue', String(hue + 18));
+    section.dataset.albumBg = String(page);
+    const counter = section.querySelector('[data-album-counter]');
+    if (counter) {
+      counter.textContent = `${page + 1} / ${total}`;
+      counter.classList.remove('is-tick');
+      void counter.offsetWidth; /* restart the tick animation */
+      counter.classList.add('is-tick');
+    }
+    section.querySelectorAll('[data-album-dots] .album__dot').forEach((dot, i) => {
+      dot.classList.toggle('is-active', i === page);
+      dot.setAttribute('aria-current', i === page ? 'true' : 'false');
+    });
+  }
+
+  function buildDots(section, bookFlip) {
+    const wrap = section.querySelector('[data-album-dots]');
+    if (!wrap) return;
+    wrap.textContent = '';
+    const total = bookFlip.getPageCount();
+    for (let i = 0; i < total; i += 1) {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'album__dot';
+      dot.setAttribute('aria-label', `go to page ${i + 1}`);
+      dot.addEventListener('click', () => bookFlip.flip(i));
+      wrap.appendChild(dot);
+    }
+  }
+
+  /* Arrow keys flip while the album is on screen (IO-gated so the book
+     never steals keys from other sections). */
+  function bindKeyboard(section, bookFlip) {
+    document.addEventListener('keydown', (ev) => {
+      if (section.dataset.inView !== '1') return;
+      if (ev.key === 'ArrowRight') {
+        bookFlip.flipNext();
+        ev.preventDefault();
+      } else if (ev.key === 'ArrowLeft') {
+        bookFlip.flipPrev();
+        ev.preventDefault();
+      }
+    });
+  }
+
+  /* Entrance reveal: pre-hide only when IO exists, rescue timer guarantees
+     the book shows even if the observer never fires. */
+  function bindReveal(section, book) {
+    if (typeof IntersectionObserver !== 'function') return;
+    book.classList.add('is-pre');
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            book.classList.add('is-in');
+            io.disconnect();
+          }
+        });
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(book);
+    window.setTimeout(() => book.classList.add('is-in'), 2600);
+    const viewIO = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          section.dataset.inView = entry.isIntersecting ? '1' : '0';
+        });
+      },
+      { threshold: 0.4 },
+    );
+    viewIO.observe(section);
   }
 
   function syncButtons(index, total) {
@@ -113,7 +222,7 @@
     }
     notice.textContent =
       count === total
-        ? 'the photo slots are still empty — drop files into assets/photos/ and the pages fill themselves in.'
+        ? 'the photo slots are still empty — drop files into assets/baby/ and the pages fill themselves in.'
         : `${count} slot${count > 1 ? 's are' : ' is'} still waiting on a real photo — the sketch is standing in until then.`;
     notice.hidden = false;
   }
@@ -168,6 +277,18 @@
     }
     book.dataset.albumMode = bookFlip ? 'flip' : 'stacked';
     bindControls(bookFlip);
+    bindReveal(section, book);
+    if (bookFlip) {
+      buildDots(section, bookFlip);
+      bindKeyboard(section, bookFlip);
+      applySpread(book, 0, bookFlip.getPageCount()); /* starts at the cover */
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        book.dataset.albumReady = '1'; /* arm glide transitions post-layout */
+      }));
+      window.addEventListener('resize', () => {
+        centerState(book, Number(book.dataset.albumPage || 0), bookFlip.getPageCount());
+      });
+    }
   }
 
   var mounted = false;

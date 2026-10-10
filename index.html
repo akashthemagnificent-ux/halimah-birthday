@@ -604,15 +604,24 @@
   </div>
 </section>
 
-<!-- 8. album — Photo album (todo 11)
-     Pages ship as markup placeholders (clearly marked PLACEHOLDER).
-     sections/album.js probes assets/photos/ at runtime and swaps in a
-     real photo only after it loads — a missing file can never show a
-     broken-image icon. No hotlinked photos; no real photo committed. -->
-<section id="album" class="section section--album" aria-label="Photo album">
+<!-- 8. album — Her childhood album (todo 11)
+     44 pages ship as markup: a PLACEHOLDER cover, 42 real baby photos
+     from assets/baby/ (probed before swap, so a missing file can never
+     show a broken icon), and a PLACEHOLDER last page. sections/album.js
+     drives page-flip, the per-spread background palette, counter, dots,
+     and keyboard. No hotlinked photos. -->
+<section id="album" class="section section--album" aria-label="Photo album" data-album-bg="0">
+  <div class="album__bg-decor" aria-hidden="true">
+    <span class="album__deco album__deco--1" aria-hidden="true">&#10022;</span>
+    <span class="album__deco album__deco--2" aria-hidden="true">&#9825;</span>
+    <span class="album__deco album__deco--3" aria-hidden="true">&#10023;</span>
+    <span class="album__deco album__deco--4" aria-hidden="true">&#9825;</span>
+    <span class="album__deco album__deco--5" aria-hidden="true">&#10022;</span>
+    <span class="album__deco album__deco--6" aria-hidden="true">&#10023;</span>
+  </div>
   <div class="album__content">
     <p class="album__eyebrow">our little book</p>
-    <h2 class="album__headline">the us album</h2>
+    <h2 class="album__headline">the baby album</h2>
     <p class="album__lede">flip through slowly, good girl</p>
     <div class="album__book" data-album-book>
       <div class="album__book-inner">
@@ -620,7 +629,7 @@
           <div class="album__page album__page--cover" data-density="hard">
             <div class="album__placeholder">
               <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
-              <span class="album__placeholder-label">the us album — PLACEHOLDER</span>
+              <span class="album__placeholder-label">the baby album &#183; PLACEHOLDER</span>
               <span class="album__placeholder-note">cover art arrives with the first real photo</span>
             </div>
             <div class="album__caption">
@@ -629,69 +638,423 @@
             </div>
           </div>
           <div class="album__page" data-density="soft">
-            <div class="album__placeholder" data-photo="assets/baby/IMG_0658.webp" data-alt="Us at the very beginning">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-01.webp" data-alt="Halimah as a baby, photo 1 of 42">
               <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
-              <span class="album__placeholder-label">us, the beginning — PLACEHOLDER</span>
-              <span class="album__placeholder-note">slot photo-1.jpg</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 01</span>
+              <span class="album__placeholder-note">slot halimah-pic-01.webp</span>
             </div>
-            <div class="album__caption">
-              <p class="album__caption-text">where it started — one pfp and i was done for</p>
-              <span class="album__caption-date">kakegurui-pfp era</span>
-            </div>
-          </div>
-          <div class="album__page" data-density="soft">
-            <div class="album__placeholder" data-photo="assets/baby/IMG_0994.webp" data-alt="The dare that turned real">
-              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
-              <span class="album__placeholder-label">the dare that turned real — PLACEHOLDER</span>
-              <span class="album__placeholder-note">slot photo-2.jpg</span>
-            </div>
-            <div class="album__caption">
-              <p class="album__caption-text">dare me again, i dare you</p>
-              <span class="album__caption-date">04 Jul</span>
+            <div class="album__page-strip">
+              <span class="album__page-num">01 / 42</span>
             </div>
           </div>
           <div class="album__page" data-density="soft">
-            <div class="album__placeholder" data-photo="assets/baby/IMG_1077.webp" data-alt="Lullaby night">
-              <span class="album__placeholder-icon" aria-hidden="true">&#9790;</span>
-              <span class="album__placeholder-label">lullaby night — PLACEHOLDER</span>
-              <span class="album__placeholder-note">slot photo-3.jpg</span>
-            </div>
-            <div class="album__caption">
-              <p class="album__caption-text">you fell asleep first. i stayed.</p>
-              <span class="album__caption-date">18 Aug</span>
-            </div>
-          </div>
-          <div class="album__page" data-density="soft">
-            <div class="album__placeholder" data-photo="assets/baby/IMG_0658.webp" data-alt="The night we said yes">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-02.webp" data-alt="Halimah as a baby, photo 2 of 42">
               <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
-              <span class="album__placeholder-label">yes, a million times — PLACEHOLDER</span>
-              <span class="album__placeholder-note">slot photo-4.jpg</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 02</span>
+              <span class="album__placeholder-note">slot halimah-pic-02.webp</span>
             </div>
-            <div class="album__caption">
-              <p class="album__caption-text">YES A MILLION TIMES YES</p>
-              <span class="album__caption-date">26 Aug 2026</span>
-            </div>
-          </div>
-          <div class="album__page" data-density="soft">
-            <div class="album__placeholder" data-photo="assets/baby/IMG_0994.webp" data-alt="Hashbrown chaos and buddy wars">
-              <span class="album__placeholder-icon" aria-hidden="true">&#9734;</span>
-              <span class="album__placeholder-label">hashbrown chaos + buddy wars — PLACEHOLDER</span>
-              <span class="album__placeholder-note">slot photo-5.jpg</span>
-            </div>
-            <div class="album__caption">
-              <p class="album__caption-text">certified buddy. good boy (terms apply).</p>
-              <span class="album__caption-date">ongoing lore</span>
+            <div class="album__page-strip">
+              <span class="album__page-num">02 / 42</span>
             </div>
           </div>
           <div class="album__page" data-density="soft">
-            <div class="album__placeholder" data-photo="assets/baby/IMG_1077.webp" data-alt="Spider-pic amnesty">
-              <span class="album__placeholder-icon" aria-hidden="true">&#10047;</span>
-              <span class="album__placeholder-label">spider-pic amnesty — PLACEHOLDER</span>
-              <span class="album__placeholder-note">slot photo-6.jpg</span>
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-03.webp" data-alt="Halimah as a baby, photo 3 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 03</span>
+              <span class="album__placeholder-note">slot halimah-pic-03.webp</span>
             </div>
-            <div class="album__caption">
-              <p class="album__caption-text">i survived the spider pics. for you. barely.</p>
-              <span class="album__caption-date">amnesty granted</span>
+            <div class="album__page-strip">
+              <span class="album__page-num">03 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-04.webp" data-alt="Halimah as a baby, photo 4 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 04</span>
+              <span class="album__placeholder-note">slot halimah-pic-04.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">04 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-05.webp" data-alt="Halimah as a baby, photo 5 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 05</span>
+              <span class="album__placeholder-note">slot halimah-pic-05.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">05 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-06.webp" data-alt="Halimah as a baby, photo 6 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 06</span>
+              <span class="album__placeholder-note">slot halimah-pic-06.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">06 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-07.webp" data-alt="Halimah as a baby, photo 7 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 07</span>
+              <span class="album__placeholder-note">slot halimah-pic-07.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">07 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-08.webp" data-alt="Halimah as a baby, photo 8 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 08</span>
+              <span class="album__placeholder-note">slot halimah-pic-08.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">08 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-09.webp" data-alt="Halimah as a baby, photo 9 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 09</span>
+              <span class="album__placeholder-note">slot halimah-pic-09.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">09 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-10.webp" data-alt="Halimah as a baby, photo 10 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 10</span>
+              <span class="album__placeholder-note">slot halimah-pic-10.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">10 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-11.webp" data-alt="Halimah as a baby, photo 11 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 11</span>
+              <span class="album__placeholder-note">slot halimah-pic-11.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">11 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-12.webp" data-alt="Halimah as a baby, photo 12 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 12</span>
+              <span class="album__placeholder-note">slot halimah-pic-12.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">12 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-13.webp" data-alt="Halimah as a baby, photo 13 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 13</span>
+              <span class="album__placeholder-note">slot halimah-pic-13.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">13 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-14.webp" data-alt="Halimah as a baby, photo 14 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 14</span>
+              <span class="album__placeholder-note">slot halimah-pic-14.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">14 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-15.webp" data-alt="Halimah as a baby, photo 15 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 15</span>
+              <span class="album__placeholder-note">slot halimah-pic-15.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">15 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-16.webp" data-alt="Halimah as a baby, photo 16 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 16</span>
+              <span class="album__placeholder-note">slot halimah-pic-16.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">16 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-17.webp" data-alt="Halimah as a baby, photo 17 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 17</span>
+              <span class="album__placeholder-note">slot halimah-pic-17.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">17 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-18.webp" data-alt="Halimah as a baby, photo 18 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 18</span>
+              <span class="album__placeholder-note">slot halimah-pic-18.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">18 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-19.webp" data-alt="Halimah as a baby, photo 19 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 19</span>
+              <span class="album__placeholder-note">slot halimah-pic-19.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">19 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-20.webp" data-alt="Halimah as a baby, photo 20 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 20</span>
+              <span class="album__placeholder-note">slot halimah-pic-20.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">20 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-21.webp" data-alt="Halimah as a baby, photo 21 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 21</span>
+              <span class="album__placeholder-note">slot halimah-pic-21.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">21 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-22.webp" data-alt="Halimah as a baby, photo 22 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 22</span>
+              <span class="album__placeholder-note">slot halimah-pic-22.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">22 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-23.webp" data-alt="Halimah as a baby, photo 23 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 23</span>
+              <span class="album__placeholder-note">slot halimah-pic-23.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">23 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-24.webp" data-alt="Halimah as a baby, photo 24 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 24</span>
+              <span class="album__placeholder-note">slot halimah-pic-24.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">24 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-25.webp" data-alt="Halimah as a baby, photo 25 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 25</span>
+              <span class="album__placeholder-note">slot halimah-pic-25.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">25 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-26.webp" data-alt="Halimah as a baby, photo 26 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 26</span>
+              <span class="album__placeholder-note">slot halimah-pic-26.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">26 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-27.webp" data-alt="Halimah as a baby, photo 27 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 27</span>
+              <span class="album__placeholder-note">slot halimah-pic-27.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">27 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-28.webp" data-alt="Halimah as a baby, photo 28 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 28</span>
+              <span class="album__placeholder-note">slot halimah-pic-28.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">28 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-29.webp" data-alt="Halimah as a baby, photo 29 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 29</span>
+              <span class="album__placeholder-note">slot halimah-pic-29.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">29 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-30.webp" data-alt="Halimah as a baby, photo 30 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 30</span>
+              <span class="album__placeholder-note">slot halimah-pic-30.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">30 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-31.webp" data-alt="Halimah as a baby, photo 31 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 31</span>
+              <span class="album__placeholder-note">slot halimah-pic-31.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">31 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-32.webp" data-alt="Halimah as a baby, photo 32 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 32</span>
+              <span class="album__placeholder-note">slot halimah-pic-32.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">32 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-33.webp" data-alt="Halimah as a baby, photo 33 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 33</span>
+              <span class="album__placeholder-note">slot halimah-pic-33.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">33 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-34.webp" data-alt="Halimah as a baby, photo 34 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 34</span>
+              <span class="album__placeholder-note">slot halimah-pic-34.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">34 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-35.webp" data-alt="Halimah as a baby, photo 35 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 35</span>
+              <span class="album__placeholder-note">slot halimah-pic-35.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">35 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-36.webp" data-alt="Halimah as a baby, photo 36 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 36</span>
+              <span class="album__placeholder-note">slot halimah-pic-36.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">36 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-37.webp" data-alt="Halimah as a baby, photo 37 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 37</span>
+              <span class="album__placeholder-note">slot halimah-pic-37.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">37 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-38.webp" data-alt="Halimah as a baby, photo 38 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 38</span>
+              <span class="album__placeholder-note">slot halimah-pic-38.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">38 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-39.webp" data-alt="Halimah as a baby, photo 39 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 39</span>
+              <span class="album__placeholder-note">slot halimah-pic-39.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">39 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-40.webp" data-alt="Halimah as a baby, photo 40 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 40</span>
+              <span class="album__placeholder-note">slot halimah-pic-40.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">40 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-41.webp" data-alt="Halimah as a baby, photo 41 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 41</span>
+              <span class="album__placeholder-note">slot halimah-pic-41.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">41 / 42</span>
+            </div>
+          </div>
+          <div class="album__page" data-density="soft">
+            <div class="album__placeholder" data-photo="assets/baby/halimah-pic-42.webp" data-alt="Halimah as a baby, photo 42 of 42">
+              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
+              <span class="album__placeholder-label">halimah, tiny &#183; photo 42</span>
+              <span class="album__placeholder-note">slot halimah-pic-42.webp</span>
+            </div>
+            <div class="album__page-strip">
+              <span class="album__page-num">42 / 42</span>
             </div>
           </div>
           <div class="album__page album__page--cover" data-density="hard">
@@ -707,6 +1070,10 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="album__meta">
+      <p class="album__counter" data-album-counter>1 / 44</p>
+      <div class="album__dots" data-album-dots role="group" aria-label="jump to a page"></div>
     </div>
     <p class="album__swipe-hint" aria-hidden="true">swipe to flip &#8596;</p>
     <div class="album__controls">

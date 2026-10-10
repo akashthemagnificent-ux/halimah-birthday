@@ -6,33 +6,29 @@ marker, what to drop in, and what she sees if you never fill it.
 Nothing here breaks the site when left empty. Placeholders stand in,
 and every check still passes.
 
-Quick status right now: photos 0 of 6 supplied, song is a placeholder
-tone (swap it before deploy), 3 letter edits open, turning-17 declined
-by default.
+Quick status right now: album photos are SHIPPED (42 baby photos in
+assets/baby/, nothing to fill), song is a placeholder tone (swap it before
+deploy), 3 letter edits open, turning-17 declined by default.
 
-## 1. Album photos, 6 slots
+## 1. Album photos — SHIPPED, nothing to fill
 
-Drop files into `assets/photos/`. Use the exact names below, `.jpg`
-format, any reasonable size (under ~500 KB each keeps the page fast).
-No code change, no rebuild. The album probes each file at runtime and
-swaps it in only after it loads. A missing file leaves the illustrated
-placeholder in place, never a broken-image icon. Delete a file any time
-to return that page to its placeholder.
+The album was rebuilt as **the baby album**: a 44-page page-flip book made of
+42 real baby photos (committed in `assets/baby/` as `halimah-pic-01.webp` ..
+`halimah-pic-42.webp`), plus a cover and a final page that stay illustrated
+placeholders on purpose. There is no empty photo slot here anymore — the photos
+are part of the keepsake.
 
-| File | Album page | Caption already on the page |
-| ---- | ---------- | --------------------------- |
-| `photo-1.jpg` | us, the beginning | "where it started, one pfp and i was done for" (kakegurui-pfp era) |
-| `photo-2.jpg` | the dare that turned real | "dare me again, i dare you" (04 Jul) |
-| `photo-3.jpg` | lullaby night | "you fell asleep first. i stayed." (18 Aug) |
-| `photo-4.jpg` | yes, a million times | "YES A MILLION TIMES YES" (26 Aug 2026) |
-| `photo-5.jpg` | hashbrown chaos + buddy wars | "certified buddy. good boy (terms apply)." (ongoing lore) |
-| `photo-6.jpg` | spider-pic amnesty | "i survived the spider pics. for you. barely." (amnesty granted) |
+Every photo is declared as a `data-photo` slot in `index.html` and probed at
+runtime before it swaps in, so a missing or renamed file leaves the illustrated
+placeholder in place, never a broken-image icon. To swap a photo, drop a file
+with the exact same name over the old one; no rebuild.
 
-If missing: placeholder card with the page title plus its caption, all
-still flippable and swipeable. The album was acceptance-tested empty
-and full, so both states are known good.
+If missing: that page falls back to its placeholder and the book still flips,
+swipes, and turns by keyboard. The album is acceptance-tested both full and
+emptied, so both states are known good.
 
-Full swap steps live in `assets/photos/README.md`.
+Full details live in `assets/baby/README.md`. (The old 6-slot `assets/photos/`
+us-album target is retired; that folder is kept only so nothing is deleted.)
 
 ## 2. Song, 1 slot
 
@@ -110,12 +106,9 @@ node audits/task-12-acceptance.mjs
 mv /tmp/song.mp3.bak assets/music/song.mp3
 ```
 
-Filled-state proof (sample photos dropped in, album still flips):
+Filled-state proof (the 42 baby photos are already committed, album flips):
 
 ```bash
-for i in 1 2 3 4 5 6; do
-  ffmpeg -y -loglevel error -f lavfi -i "color=c=0x2a2118:s=640x480:d=1" -frames:v 1 -update 1 assets/photos/photo-$i.jpg
-done
 node audits/task-19-acceptance.mjs | tee /home/vibex/.omo/evidence/halimah-birthday-site/task-19-filled.log
-rm assets/photos/photo-[1-6].jpg
+node audits/task-20-links.mjs   # asserts all 42 baby photos resolve on disk
 ```

@@ -5,14 +5,62 @@
    Swipe enabled on mobile. Works with zero photos (placeholders).
    ============================================================ */
 
+/* Per-spread background palette: album.js writes --album-hue inline on
+   every flip, registered @property lets the gradient morph smoothly. */
+@property --album-hue {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 18;
+}
+@property --album-glow-hue {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 36;
+}
+
 .section--album {
+  --album-hue: 18;
+  --album-glow-hue: 36;
   background:
-    radial-gradient(80% 60% at 50% 20%, var(--color-surface) 0%, var(--color-bg) 55%, var(--color-bg) 100%);
+    radial-gradient(90% 55% at 50% 6%, hsl(var(--album-glow-hue) 70% 30% / 0.5) 0%, transparent 70%),
+    radial-gradient(135% 100% at 50% 112%, hsl(var(--album-hue) 52% 15%) 0%, var(--color-bg) 64%),
+    var(--color-bg);
+  transition: --album-hue 1.1s ease, --album-glow-hue 1.1s ease;
   overflow: hidden;
+}
+
+/* ---- Floating decor behind the book, tinted by the live palette ---- */
+.album__bg-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.album__deco {
+  position: absolute;
+  color: hsl(var(--album-glow-hue) 85% 68% / 0.45);
+  font-size: 1.4rem;
+  line-height: 1;
+  text-shadow: 0 0 14px hsl(var(--album-glow-hue) 90% 70% / 0.4);
+  animation: deco-drift 9s ease-in-out infinite;
+}
+
+.album__deco--1 { top: 14%; left: 7%;  font-size: 1.7rem; }
+.album__deco--2 { top: 24%; right: 9%; animation-delay: -2.2s; font-size: 1.1rem; }
+.album__deco--3 { bottom: 20%; left: 12%; animation-delay: -4.1s; }
+.album__deco--4 { top: 58%; right: 14%; animation-delay: -6.4s; font-size: 1.1rem; }
+.album__deco--5 { bottom: 32%; right: 7%; animation-delay: -1.3s; font-size: 1.6rem; }
+.album__deco--6 { top: 44%; left: 4%;  animation-delay: -7.6s; font-size: 1rem; }
+
+@keyframes deco-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-16px) rotate(10deg); }
 }
 
 .album__content {
   position: relative;
+  z-index: 1;
   width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
@@ -64,12 +112,53 @@
   max-height: 70dvh;
   perspective: 1500px;
   overflow: clip;
+  cursor: grab;
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.5s ease;
+}
+
+.album__book:active { cursor: grabbing; }
+
+/* Entrance: album.js adds .is-pre immediately, .is-in on view (plus a
+   rescue timer), so the book can never stay hidden if IO misbehaves. */
+.album__book.is-pre {
+  opacity: 0;
+  transform: translateY(42px) rotateX(12deg);
+}
+
+.album__book.is-in {
+  opacity: 1;
+  transform: none;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+}
+
+.album__book.is-in:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.8);
 }
 
 .album__book-inner {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
+}
+
+/* Closed cover + final page glide to the container center (half a page
+   = 25% of the spread frame). PageFlip re-parents the pages into its
+   own .stf__block inside the book, so the shift targets that block;
+   portrait mode never sets the state. */
+.album__book[data-album-state='start'] .stf__block {
+  transform: translateX(-25%);
+}
+
+.album__book[data-album-state='end'] .stf__block {
+  transform: translateX(25%);
+}
+
+/* Transitions arm only after mount settles (album.js sets album-ready):
+   percentage transforms transitioned during initial layout land stale. */
+.album__book[data-album-ready='1'] .stf__block {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* StPageFlip renders its own canvas/pages inside our wrapper */
@@ -134,7 +223,46 @@
   flex: 1;
   width: 100%;
   object-fit: cover;
+  object-position: center 30%;
   background: var(--color-surface-alt);
+}
+
+/* Hydrated photo page: full bleed inside the sheet, gentle pop on swap */
+.album__photo {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-alt);
+}
+
+.album__photo .album__page-img {
+  display: block;
+  height: 100%;
+  animation: photo-pop 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+}
+
+@keyframes photo-pop {
+  from { opacity: 0; transform: scale(1.05); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Quiet ordinal strip under each baby photo */
+.album__page-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0.25) 0%, rgba(10, 10, 10, 0.5) 100%);
+  border-top: 1px solid var(--color-border);
+}
+
+.album__page-num {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  color: var(--color-text-muted);
 }
 
 /* Placeholder illustration — clearly marked, no broken-image icons */
@@ -205,6 +333,69 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+}
+
+/* ---- Counter + page dots ---- */
+.album__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.album__counter {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  color: var(--color-text-muted);
+}
+
+.album__counter.is-tick {
+  animation: counter-tick 0.35s ease;
+}
+
+@keyframes counter-tick {
+  from { opacity: 0.25; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.album__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 480px;
+}
+
+.album__dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--duration-fast), border-color var(--duration-fast),
+    transform var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.album__dot:hover {
+  border-color: var(--color-accent);
+  transform: scale(1.35);
+}
+
+.album__dot.is-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent-glow);
+  transform: scale(1.3);
+}
+
+.album__dot:focus-visible {
+  outline: 2px solid var(--color-accent-glow);
+  outline-offset: 2px;
 }
 
 /* ---- Controls (desktop) ---- */

@@ -9,7 +9,7 @@ const read = (p) => fs.readFileSync(base + '/' + p, 'utf8');
 
 const html = read('index.html');
 const doc = read('OWNER-SLOTS.md');
-const photosReadme = read('assets/photos/README.md');
+const photosReadme = read('assets/baby/README.md');
 const musicReadme = read('assets/music/README.md');
 const albumJs = read('sections/album.js');
 const finaleCss = read('sections/finale.css');
@@ -20,13 +20,13 @@ const check = (label, cond, detail = '') => {
   console.log(`[${cond ? 'PASS' : 'FAIL'}] ${label}${detail ? ' — ' + detail : ''}`);
 };
 
-// --- 1. photo slots: doc lists 6, markup probes 6, README lists 6 ---
-const docPhotos = [...doc.matchAll(/`photo-(\d)\.jpg`/g)].map((m) => m[1]).sort();
-check('doc lists 6 photo slots', docPhotos.join(',') === '1,2,3,4,5,6', 'found ' + docPhotos.join(','));
-const liveProbes = [...html.matchAll(/data-photo="assets\/photos\/photo-(\d)\.jpg"/g)].map((m) => m[1]).sort();
-check('markup probes 6 photo slots', liveProbes.join(',') === '1,2,3,4,5,6', 'found ' + liveProbes.join(','));
-const readmePhotos = [...photosReadme.matchAll(/`photo-(\d)\.jpg`/g)].map((m) => m[1]).sort();
-check('photos README lists 6 slots', readmePhotos.join(',') === '1,2,3,4,5,6', 'found ' + readmePhotos.join(','));
+// --- 1. album photos: shipped as 42 baby photos (no empty slot) ---
+const liveProbes = [...html.matchAll(/data-photo="assets\/baby\/halimah-pic-(\d\d)\.webp"/g)].map((m) => m[1]);
+check('markup declares 42 baby photo slots', liveProbes.length === 42, 'found ' + liveProbes.length);
+const docShips = /SHIPPED/i.test(doc) && doc.includes('assets/baby/');
+check('doc records the album photos as shipped', docShips);
+const readmeShips = photosReadme.includes('halimah-pic-01.webp') && photosReadme.includes('halimah-pic-42.webp');
+check('baby README documents the 42-photo range', readmeShips);
 
 // --- 2. song slot ---
 check('doc names song.mp3', doc.includes('`assets/music/song.mp3`'));
@@ -51,9 +51,9 @@ check('doc records the 17 decision', /turning-17 decision/i.test(doc));
 
 // --- 5. missing-input fallbacks still wired ---
 check('album probes before swapping (no broken icons)', albumJs.includes('probePhoto') && albumJs.includes('onerror'));
-check('placeholders exist for all 6 pages', (html.match(/PLACEHOLDER/g) || []).length >= 6);
+check('cover + last page stay placeholders', (html.match(/PLACEHOLDER/g) || []).length >= 2 && /album__page--cover/.test(html));
 const beginJs = read('js/begin.js');
-check('music failure handled gracefully', html.includes('Music unavailable') || beginJs.includes('Music unavailable'));
+check('music failure handled gracefully', beginJs.includes('music file not added yet') && beginJs.includes('onplayerror'));
 check('print hides owner slots', /\.finale__slot[\s\S]{0,200}display:\s*none/.test(finaleCss.split('@media print')[1] || ''));
 
 // --- 6. defaults documented, not invented ---

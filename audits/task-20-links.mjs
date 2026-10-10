@@ -1,10 +1,10 @@
 /* Task 20 sweep: local link + media integrity scan.
  *
  * Every local src/href/url() referenced by the shipped markup, CSS, and JS
- * must resolve to a file that exists on disk. The six owner photo slots are
- * probed at runtime and 404 by design while assets/photos/ is empty, so they
- * are reported as KNOWN-OPTIONAL, never as a break. Any other unresolved local
- * reference is a red.
+ * must resolve to a file that exists on disk. The 42 baby-album photos are
+ * committed in assets/baby/, so every data-photo slot is a hard requirement:
+ * a missing one is a red, not a tolerated 404. Any unresolved local reference
+ * is a red.
  *
  * Also proves the media inventory: no remote URLs, no stray absolute paths.
  *
@@ -51,7 +51,7 @@ const sourceFiles = files.filter((f) => {
 const ATTR_RE = /(?:src|href)\s*=\s*["']([^"']+)["']/gi;
 const CSS_URL_RE = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
 const JS_PATH_RE = /["']((?:assets|vendor|content|js|sections)\/[A-Za-z0-9._\/-]+)["']/g;
-// The album's six owner photo slots are declared as data-photo, not src.
+// The album's 42 baby photos are declared as data-photo, not src.
 const PHOTO_SLOT_RE = /data-photo\s*=\s*["']([^"']+)["']/gi;
 
 const refs = new Map(); // ref -> Set(referrers)
@@ -73,13 +73,15 @@ for (const file of sourceFiles) {
 }
 
 const isExternal = (ref) => /^(https?:)?\/\//.test(ref) || /^(mailto:|tel:|data:|#|javascript:)/i.test(ref);
-const isPhotoSlot = (ref) => /^assets\/photos\/photo-\d+\.jpg$/.test(ref);
+// A CSS url(%23n) inside an inline data-URI SVG is an encoded in-page #fragment
+// (SVG filter id), not a file path. Treat it as a fragment, never a break.
+const isEncodedFragment = (ref) => /^%23/i.test(ref);
 // Google Fonts is the one sanctioned remote dependency; scripts/budget.mjs
 // already caps it at 2 families. Anything else remote is a red.
 const isAllowedRemote = (ref) => /fonts\.(googleapis|gstatic)\.com/.test(ref);
 
 let checked = 0, resolved = 0;
-const knownOptional = [];
+let babyPhotos = 0;
 const broken = [];
 const external = new Set();
 const fragments = new Set();
@@ -92,11 +94,12 @@ for (const [ref, referrers] of refs) {
     if (ref.startsWith('#')) fragments.add(ref);
     continue;
   }
-  if (isPhotoSlot(ref)) { knownOptional.push(`${ref} <- ${[...referrers].join(', ')}`); continue; }
+  if (isEncodedFragment(ref)) { fragments.add(ref); continue; }
   const clean = ref.split('#')[0].split('?')[0];
   if (!clean) { fragments.add(ref); continue; }
   checked += 1;
   const abs = join(ROOT, clean);
+  if (/^assets\/baby\/halimah-pic-\d+\.webp$/.test(ref)) babyPhotos += 1;
   if (existsSync(abs)) {
     const s = await stat(abs);
     if (s.size === 0) broken.push(`${ref} (exists but is 0 bytes)`);
@@ -111,13 +114,12 @@ say(`# root: ${ROOT}`);
 say(`# source files scanned: ${sourceFiles.length}`);
 say(`# local refs checked: ${checked}`);
 say(`# resolved: ${resolved}`);
-say(`# known-optional owner photo slots (404 by design while empty): ${knownOptional.length}`);
-for (const k of knownOptional) say(`  - optional: ${k}`);
+say(`# committed baby-album photo slots resolved: ${babyPhotos}`);
 say(`# external http(s) refs: ${[...external].join(', ') || 'none'}`);
 say(`# in-page fragments: ${fragments.size}`);
 
 assert(broken.length === 0, 'every local src/href/url() resolves on disk', broken.join(' | '));
-assert(knownOptional.length === 6, 'exactly 6 owner photo slots are the known-optional set', `found ${knownOptional.length}`);
+assert(babyPhotos === 42, 'all 42 baby-album photo slots resolve on disk', `found ${babyPhotos}`);
 assert(external.size === 0, 'no remote asset URLs besides Google Fonts', [...external].join(' | '));
 assert(checked > 0, 'scan actually checked local refs (not a vacuous pass)', `checked=${checked}`);
 
