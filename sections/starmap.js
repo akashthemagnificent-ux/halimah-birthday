@@ -1,20 +1,26 @@
-/* starmap — lazy procedural night sky for 26 Aug 2026.
-   Deferred + IntersectionObserver-gated; no external library.
+/* starmap — "two nights the sky was watching" (redesigned).
+   Full-bleed canvas starfield (decorative) + two CSS-3D nebula plates.
+   Eager boot (personal site, full motion). GSAP ScrollTrigger drives the
+   reveal + a scroll-scrubbed red-to-violet hue cross-fade + plate tilt.
    Stars are procedural: no coordinates, city, or constellation data. */
 (() => {
   'use strict';
 
   const SECTION_ID = 'starmap';
-  const STAR_COUNT = 420;
+  const STAR_COUNT = 460;
   const TWINKLE_FPS_CAP = 30;
-  /* personal site: full motion always */
 
   let frameHandle = null;
   let lastFrameAt = 0;
+  let skyMix = 0; /* 0 = born (red), 1 = together (violet); scroll-driven */
 
   function prefersReducedMotion() {
-  return false; /* personal site: full motion */
-}
+    return false; /* personal site: full motion */
+  }
+
+  function hasGsap() {
+    return (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined');
+  }
 
   function seededRandom(seed) {
     let s = seed >>> 0;
@@ -30,74 +36,61 @@
       const depth = rand();
       stars.push({
         x: rand() * width,
-        y: rand() * height * 0.92,
-        radius: 0.4 + depth * 1.5,
-        baseAlpha: 0.25 + rand() * 0.65,
+        y: rand() * height * 0.96,
+        radius: 0.4 + depth * 1.6,
+        baseAlpha: 0.22 + rand() * 0.68,
         amplitude: 0.15 + rand() * 0.5,
         phase: rand() * Math.PI * 2,
         speed: 0.4 + rand() * 1.1,
         warmth: rand(),
+        par: 0.25 + depth * 0.75, /* parallax factor */
       });
     }
     return stars;
   }
 
-  function paintHorizon(ctx, width, height, rand) {
-    const gradient = ctx.createLinearGradient(0, height * 0.55, 0, height);
-    gradient.addColorStop(0, 'rgba(212, 168, 106, 0)');
-    gradient.addColorStop(1, 'rgba(224, 124, 62, 0.16)');
-    ctx.fillStyle = gradient;
+  /* born = warm rose horizon; together = cool violet. `mix` lerps between. */
+  function paintAmbient(ctx, width, height, rand, mix) {
+    const g = ctx.createLinearGradient(0, height * 0.5, 0, height);
+    const warm = [224, 124, 62], cool = [120, 110, 210];
+    const r = Math.round(warm[0] + (cool[0] - warm[0]) * mix);
+    const gr = Math.round(warm[1] + (cool[1] - warm[1]) * mix);
+    const b = Math.round(warm[2] + (cool[2] - warm[2]) * mix);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, `rgba(${r}, ${gr}, ${b}, 0.16)`);
+    ctx.fillStyle = g;
     ctx.fillRect(0, 0, width, height);
 
-    ctx.beginPath();
-    ctx.moveTo(0, height);
-    let ridge = height * 0.88;
-    for (let x = 0; x <= width; x += Math.max(8, width / 40)) {
-      ridge += (rand() - 0.5) * height * 0.02;
-      ridge = Math.min(height * 0.94, Math.max(height * 0.82, ridge));
-      ctx.lineTo(x, ridge);
-    }
-    ctx.lineTo(width, height);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(10, 10, 20, 0.92)';
-    ctx.fill();
-  }
-
-  function paintMilkyWay(ctx, width, height, rand) {
     ctx.save();
     ctx.translate(width * 0.5, height * 0.5);
     ctx.rotate(-0.5);
     const band = ctx.createLinearGradient(0, -height * 0.5, 0, height * 0.5);
-    band.addColorStop(0, 'rgba(232, 224, 216, 0)');
-    band.addColorStop(0.5, 'rgba(232, 224, 216, 0.07)');
-    band.addColorStop(1, 'rgba(232, 224, 216, 0)');
+    band.addColorStop(0, 'rgba(232,224,216,0)');
+    band.addColorStop(0.5, `rgba(232,224,216,${0.06 + mix * 0.02})`);
+    band.addColorStop(1, 'rgba(232,224,216,0)');
     ctx.fillStyle = band;
     ctx.fillRect(-width, -height, width * 2, height * 2);
     ctx.restore();
 
-    for (let i = 0; i < 90; i += 1) {
-      const x = rand() * width;
-      const y = height * 0.1 + rand() * height * 0.8;
-      ctx.beginPath();
-      ctx.arc(x, y, 0.3 + rand() * 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(240, 236, 232, ${0.05 + rand() * 0.12})`;
-      ctx.fill();
-    }
+    void rand;
   }
 
-  function paintStars(ctx, stars, width, height, timeSeconds) {
+  function paintStars(ctx, stars, width, height, t, mix) {
+    const px = Math.sin(t * 0.12) * 14 * (0.4 + mix * 0.6);
+    const py = Math.cos(t * 0.09) * 8;
     for (const star of stars) {
-      const twinkle = 0.5 + 0.5 * Math.sin(timeSeconds * star.speed + star.phase);
-      const alpha = star.baseAlpha * (1 - star.amplitude + star.amplitude * twinkle);
+      const tw = 0.5 + 0.5 * Math.sin(t * star.speed + star.phase);
+      const alpha = star.baseAlpha * (1 - star.amplitude + star.amplitude * tw);
+      const x = star.x + px * star.par;
+      const y = star.y + py * star.par;
       const red = 255;
-      const green = Math.round(226 + star.warmth * 24);
-      const blue = Math.round(196 + star.warmth * 40);
+      const green = Math.round(226 + star.warmth * 24 - mix * 20);
+      const blue = Math.round(196 + star.warmth * 40 + mix * 40);
       ctx.beginPath();
-      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.arc(x, y, star.radius, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(3)})`;
       ctx.fill();
     }
-
     for (const star of stars.slice(0, 6)) {
       ctx.beginPath();
       ctx.arc(star.x, star.y, star.radius * 3.2, 0, Math.PI * 2);
@@ -108,35 +101,68 @@
 
   function renderStatic(ctx, width, height, stars) {
     ctx.clearRect(0, 0, width, height);
-    paintMilkyWay(ctx, width, height, seededRandom(26));
-    paintStars(ctx, stars, width, height, 0);
-    paintHorizon(ctx, width, height, seededRandom(1));
+    paintAmbient(ctx, width, height, seededRandom(26), skyMix);
+    paintStars(ctx, stars, width, height, 0, skyMix);
   }
 
-  function renderFrame(ctx, width, height, stars, rand, timeSeconds) {
+  function renderFrame(ctx, width, height, stars, t) {
     ctx.clearRect(0, 0, width, height);
-    paintMilkyWay(ctx, width, height, rand);
-    paintStars(ctx, stars, width, height, timeSeconds);
-    paintHorizon(ctx, width, height, rand);
+    paintAmbient(ctx, width, height, seededRandom(26), skyMix);
+    paintStars(ctx, stars, width, height, t, skyMix);
   }
 
-  function startSky(canvas, ctx, width, height, stars, rand) {
+  function startSky(canvas, ctx, width, height, stars) {
     const startedAt = performance.now();
     lastFrameAt = 0;
     const tick = (now) => {
-      if (document.hidden) {
-        frameHandle = requestAnimationFrame(tick);
-        return;
-      }
-      if (lastFrameAt && now - lastFrameAt < 1000 / TWINKLE_FPS_CAP) {
+      if (document.hidden || (lastFrameAt && now - lastFrameAt < 1000 / TWINKLE_FPS_CAP)) {
         frameHandle = requestAnimationFrame(tick);
         return;
       }
       lastFrameAt = now;
-      renderFrame(ctx, width, height, stars, rand, (now - startedAt) / 1000);
+      renderFrame(ctx, width, height, stars, (now - startedAt) / 1000);
       frameHandle = requestAnimationFrame(tick);
     };
     frameHandle = requestAnimationFrame(tick);
+  }
+
+  /* GSAP layer: reveal, scroll-scrubbed hue cross-fade, 3D plate tilt + pointer parallax. */
+  function armMotion(section) {
+    const g = window.gsap;
+    document.documentElement.classList.add('js-starmap');
+    g.registerPlugin(window.ScrollTrigger);
+    g.to(section.querySelector('.starmap__intro'), { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' });
+    g.to(section.querySelectorAll('.starmap__plate'), {
+      opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.12,
+      scrollTrigger: { trigger: section.querySelector('.starmap__plates'), start: 'top 82%' },
+    });
+    /* hue cross-fade + gentle 3D rotateX as the section scrolls through */
+    window.ScrollTrigger.create({
+      trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1.1,
+      onUpdate: (self) => { skyMix = self.progress; },
+    });
+    const plates = section.querySelectorAll('.starmap__plate');
+    plates.forEach((plate) => {
+      g.fromTo(plate, { rotateX: 7 }, {
+        rotateX: -4, ease: 'none',
+        scrollTrigger: { trigger: plate, start: 'top bottom', end: 'bottom top', scrub: 1 },
+      });
+    });
+    /* pointer parallax on the media cards */
+    const media = section.querySelectorAll('.starmap__plate-media');
+    const setters = [];
+    media.forEach((m) => {
+      setters.push({
+        rx: g.quickTo(m, 'rotationX', { duration: 0.5, ease: 'power3.out' }),
+        ry: g.quickTo(m, 'rotationY', { duration: 0.5, ease: 'power3.out' }),
+      });
+    });
+    section.addEventListener('pointermove', (e) => {
+      const rect = section.getBoundingClientRect();
+      const dx = (e.clientX - rect.left) / rect.width - 0.5;
+      const dy = (e.clientY - rect.top) / rect.height - 0.5;
+      setters.forEach((s) => { s.ry(dx * 10); s.rx(-dy * 8); });
+    });
   }
 
   function mount(section) {
@@ -145,11 +171,7 @@
     if (!canvas) return;
 
     let context = null;
-    try {
-      context = canvas.getContext('2d');
-    } catch (error) {
-      context = null;
-    }
+    try { context = canvas.getContext('2d'); } catch (error) { context = null; }
     if (!context) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -161,7 +183,6 @@
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
     const stars = buildStars(width, height, seededRandom(26));
-    const rand = seededRandom(26);
 
     if (prefersReducedMotion()) {
       renderStatic(context, width, height, stars);
@@ -173,13 +194,12 @@
     renderStatic(context, width, height, stars);
     canvas.classList.add('is-drawn');
     if (fallback) fallback.hidden = true;
-    startSky(canvas, context, width, height, stars, rand);
+    startSky(canvas, context, width, height, stars);
+    if (hasGsap()) armMotion(section);
   }
 
   var mounted = false;
   function boot() {
-    /* personal site: eager. Sections behind the begin-gate are detached
-       until unlock, so retry until the node is connected, then mount. */
     var section = document.getElementById(SECTION_ID);
     if (!section || !section.isConnected || mounted) {
       window.setTimeout(boot, 150);

@@ -1085,30 +1085,56 @@
 </section>
 
 <!-- 9. starmap — Star map (todo 3) -->
-<section id="starmap" class="section section--starmap" aria-label="Star map">
+<section id="starmap" class="section section--starmap" aria-label="The sky on two nights">
+  <canvas class="starmap__sky" data-starmap-canvas aria-hidden="true" role="presentation"></canvas>
+  <p class="starmap__fallback" data-starmap-fallback>
+    <span class="starmap__fallback-glyph" aria-hidden="true">&#10022;</span>
+    the sky is out there tonight, even when the canvas cannot draw
+  </p>
   <div class="starmap__content">
-    <div class="starmap__frame">
-      <canvas class="starmap__canvas" data-starmap-canvas aria-hidden="true" role="presentation"></canvas>
-      <p class="starmap__fallback" data-starmap-fallback>
-        <span class="starmap__fallback-glyph" aria-hidden="true">&#10022;</span>
-        the sky is out there tonight, even when the canvas cannot draw
-      </p>
-    </div>
-    <div class="starmap__caption">
-      <p class="starmap__eyebrow">26 Aug 2026 &#183; the night we said yes</p>
-      <h2 class="starmap__headline">the sky on 26 Aug 2026</h2>
-      <p class="starmap__verbatim">YES A MILLION TIMES YES</p>
-      <ul class="starmap__times">
-        <li>
-          <span class="starmap__time-value">26/08/2026 06:12PM</span>
-          <span class="starmap__time-label">his</span>
-        </li>
-        <li>
-          <span class="starmap__time-value">26/08/2026 01:42PM</span>
-          <span class="starmap__time-label">hers</span>
-        </li>
-      </ul>
-      <p class="starmap__source">verbatim from our chat, 26 Aug 2026, 12:42:47 GMT</p>
+    <header class="starmap__intro">
+      <p class="starmap__eyebrow">the same sky, twice</p>
+      <h2 class="starmap__headline">two nights the sky was watching</h2>
+      <p class="starmap__lede">Point a telescope at any date and the deep sky is already holding something. These are the two that belong to us: the night you were born, and the night we chose each other.</p>
+    </header>
+    <div class="starmap__plates">
+      <article class="starmap__plate" data-plate="born">
+        <div class="starmap__plate-media">
+          <img class="starmap__plate-img" src="assets/sky/night-born-rosette.webp" width="1400" height="1400" alt="the Rosette Nebula, a rose-shaped star nursery photographed by NASA">
+          <span class="starmap__plate-glow" aria-hidden="true"></span>
+        </div>
+        <div class="starmap__plate-copy">
+          <p class="starmap__plate-date">19 October 2011</p>
+          <h3 class="starmap__plate-title">the night she was born</h3>
+          <p class="starmap__plate-text">This is the Rosette Nebula, a rose-shaped cloud of hydrogen about five thousand light-years away. It is a nursery: brand-new stars are being born inside it, right now.</p>
+          <p class="starmap__plate-text starmap__plate-text--why">On the night you arrived, this is what the deep sky was quietly holding: a place where stars get made. It felt right to keep it beside your birthday.</p>
+          <p class="starmap__plate-source">photographed by NASA</p>
+        </div>
+      </article>
+      <article class="starmap__plate" data-plate="together">
+        <div class="starmap__plate-media">
+          <img class="starmap__plate-img" src="assets/sky/night-together-ring.webp" width="1400" height="1400" alt="the Ring Nebula photographed by the James Webb Space Telescope">
+          <span class="starmap__plate-glow" aria-hidden="true"></span>
+        </div>
+        <div class="starmap__plate-copy">
+          <p class="starmap__plate-date">26 August 2026</p>
+          <h3 class="starmap__plate-title">the night we got together</h3>
+          <p class="starmap__plate-text">This is the Ring Nebula through the James Webb Space Telescope: a star in its final act, letting its outer layers go in a glowing ring, with faint galaxies scattered behind it.</p>
+          <p class="starmap__plate-text starmap__plate-text--why">On the night we chose each other, the sky was already holding a ring. We did not plan that. It is simply what was there.</p>
+          <p class="starmap__verbatim">YES A MILLION TIMES YES</p>
+          <ul class="starmap__times">
+            <li>
+              <span class="starmap__time-value">26/08/2026 06:12PM</span>
+              <span class="starmap__time-label">his</span>
+            </li>
+            <li>
+              <span class="starmap__time-value">26/08/2026 01:42PM</span>
+              <span class="starmap__time-label">hers</span>
+            </li>
+          </ul>
+          <p class="starmap__source">verbatim from our chat, 26 Aug 2026, 12:42:47 GMT</p>
+        </div>
+      </article>
     </div>
   </div>
 </section>

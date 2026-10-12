@@ -1,52 +1,41 @@
 /* ============================================================
-   starmap — the sky on 26 Aug 2026 (todo 3)
-   Canvas is decorative (aria-hidden); the caption is the content
-   and is present in HTML so it survives no-JS and canvas-blocked.
+   starmap — "two nights the sky was watching" (redesigned)
+   A full-bleed canvas starfield backdrop (decorative, aria-hidden)
+   behind two NASA nebula plates that tilt in CSS 3D on scroll +
+   pointer. The fallback caption is the content and is present in
+   HTML so it survives no-JS and canvas-blocked. Provenance stays:
+   verbatim line + both chat timestamps are never reworded.
    ============================================================ */
 
 .section--starmap {
-  justify-content: flex-end;
+  position: relative;
+  isolation: isolate;
+  justify-content: center;
   background:
-    radial-gradient(120% 80% at 50% 0%, #141426 0%, var(--color-cine-bg) 55%, #05050a 100%);
+    radial-gradient(130% 90% at 50% -10%, #161022 0%, #0a0812 45%, #05050a 100%);
   overflow: hidden;
 }
 
-.starmap__content {
-  position: relative;
-  width: 100%;
-  max-width: var(--content-width);
-  margin: 0 auto;
-}
-
-/* ---- Sky frame ---- */
-.starmap__frame {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 11;
-  min-height: 220px;
-  max-height: 60dvh;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: linear-gradient(180deg, #0b0b18 0%, #070710 60%, #05050b 100%);
-  border: 1px solid var(--color-cine-border);
-  box-shadow: var(--shadow-lg), inset 0 0 60px rgba(0, 0, 0, 0.6);
-}
-
-.starmap__canvas {
-  display: block;
+/* ---- Full-bleed starfield backdrop ---- */
+.starmap__sky {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  z-index: 0;
+  display: block;
   opacity: 0;
   transition: opacity var(--duration-slow) var(--ease-out);
 }
 
-.starmap__canvas.is-drawn { opacity: 1; }
+.starmap__sky.is-drawn { opacity: 1; }
 
 /* Static fallback: visible by default, removed only once the canvas
    has genuinely drawn a frame. Never hides content on its own. */
 .starmap__fallback {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,13 +44,11 @@
   margin: 0;
   padding: var(--space-6) var(--space-5);
   text-align: center;
-  background:
-    radial-gradient(80% 60% at 50% 40%, rgba(212, 168, 106, 0.10) 0%, transparent 70%),
-    linear-gradient(180deg, #0b0b18 0%, #05050b 100%);
   font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-cine-text-muted);
+  pointer-events: none;
 }
 
 .starmap__fallback[hidden] { display: none; }
@@ -73,15 +60,25 @@
   text-indent: 0.5em;
 }
 
-/* ---- Caption block ---- */
-.starmap__caption {
-  margin-top: var(--space-6);
+/* ---- Content layer ---- */
+.starmap__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  perspective: 1400px;
+}
+
+.starmap__intro {
+  max-width: 40rem;
+  margin: 0 auto var(--space-8);
   text-align: center;
 }
 
 .starmap__eyebrow {
   font-size: var(--text-xs);
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--color-cine-text-muted);
 }
@@ -89,16 +86,127 @@
 .starmap__headline {
   margin-top: var(--space-3);
   font-family: var(--font-display);
-  font-size: var(--text-xl);
+  font-size: clamp(1.9rem, 5vw, 3.1rem);
   font-weight: 500;
-  line-height: 1.15;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
   color: var(--color-cine-text);
+  text-shadow: 0 0 40px rgba(232, 192, 136, 0.12);
+}
+
+.starmap__lede {
+  margin: var(--space-4) auto 0;
+  max-width: 34rem;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-cine-text-muted);
+}
+
+/* ---- The two nebula plates ---- */
+.starmap__plates {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+@media (min-width: 900px) {
+  .starmap__plates {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+  /* offset the second plate for an editorial, non-grid feel */
+  .starmap__plate[data-plate="together"] { margin-top: var(--space-8); }
+}
+
+.starmap__plate {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* ---- Plate media: the square NASA photo, framed as a floating card ---- */
+.starmap__plate-media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-cine-border);
+  background: #05050b;
+  box-shadow: var(--shadow-lg), 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+  transform: translateZ(0);
+}
+
+.starmap__plate-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  transition: transform 1.2s var(--ease-out);
+}
+
+.starmap__plate:hover .starmap__plate-img { transform: scale(1.09); }
+
+/* soft accent glow that bleeds off the plate edge */
+.starmap__plate-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 110%, rgba(232, 150, 130, 0.16) 0%, transparent 55%);
+  mix-blend-mode: screen;
+}
+
+.starmap__plate[data-plate="together"] .starmap__plate-glow {
+  background: radial-gradient(120% 90% at 50% 110%, rgba(150, 160, 232, 0.18) 0%, transparent 55%);
+}
+
+/* ---- Plate copy ---- */
+.starmap__plate-copy {
+  margin-top: var(--space-5);
+  max-width: 32rem;
+}
+
+.starmap__plate-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  color: var(--color-cine-accent-glow);
+}
+
+.starmap__plate-title {
+  margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+  font-weight: 500;
+  line-height: 1.12;
+  color: var(--color-cine-text);
+}
+
+.starmap__plate-text {
+  margin-top: var(--space-4);
+  font-size: var(--text-base);
+  line-height: 1.62;
+  color: var(--color-cine-text-muted);
+}
+
+.starmap__plate-text--why {
+  color: var(--color-cine-text);
+  opacity: 0.92;
+}
+
+.starmap__plate-source {
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: var(--color-cine-text-muted);
+  opacity: 0.7;
 }
 
 /* The verbatim line from dms-8.txt:2801 — never reworded. */
 .starmap__verbatim {
   display: block;
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-style: italic;
@@ -110,7 +218,6 @@
 .starmap__times {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: var(--space-2) var(--space-6);
   margin-top: var(--space-5);
   padding: 0;
@@ -144,5 +251,11 @@
   opacity: 0.75;
 }
 
-/* ---- Reduced motion: static sky, no twinkle, no fade ---- */
+/* ---- Reveal (enhancement only: content is visible without JS) ---- */
+html.js-starmap .starmap__intro,
+html.js-starmap .starmap__plate {
+  opacity: 0;
+  transform: translateY(28px);
+}
 
+/* no reduced-motion media query: full motion always (owner decree) */
