@@ -70,8 +70,8 @@ check('exact substring taken from the cited source line',
 console.log('\n--- anniversary copy ---');
 check(`his time "${HIS_TIME}" present`, index.includes(HIS_TIME));
 check(`her time "${HER_TIME}" present`, index.includes(HER_TIME));
-check('his time is labelled "his"', new RegExp(`${HIS_TIME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]{0,200}?>his<`).test(index));
-check('her time is labelled "hers"', new RegExp(`${HER_TIME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]{0,200}?>hers<`).test(index));
+check('his time is labelled "Mine"', new RegExp(`${HIS_TIME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]{0,200}?>Mine<`).test(index));
+check('her time is labelled "Yours"', new RegExp(`${HER_TIME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]{0,200}?>Yours<`).test(index));
 
 console.log('\n--- reduced motion ---');
 check('JS reads prefers-reduced-motion', /prefers-reduced-motion: reduce/.test(js));

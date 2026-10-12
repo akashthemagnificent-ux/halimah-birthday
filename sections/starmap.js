@@ -7,11 +7,7 @@
   'use strict';
 
   const SECTION_ID = 'starmap';
-  const STAR_COUNT = 460;
-  const TWINKLE_FPS_CAP = 30;
 
-  let frameHandle = null;
-  let lastFrameAt = 0;
   let skyMix = 0; /* 0 = born (red), 1 = together (violet); scroll-driven */
 
   function prefersReducedMotion() {
@@ -22,108 +18,28 @@
     return (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined');
   }
 
-  function seededRandom(seed) {
-    let s = seed >>> 0;
-    return () => {
-      s = (s * 1664525 + 1013904223) >>> 0;
-      return s / 4294967296;
-    };
-  }
-
-  function buildStars(width, height, rand) {
-    const stars = [];
-    for (let i = 0; i < STAR_COUNT; i += 1) {
-      const depth = rand();
-      stars.push({
-        x: rand() * width,
-        y: rand() * height * 0.96,
-        radius: 0.4 + depth * 1.6,
-        baseAlpha: 0.22 + rand() * 0.68,
-        amplitude: 0.15 + rand() * 0.5,
-        phase: rand() * Math.PI * 2,
-        speed: 0.4 + rand() * 1.1,
-        warmth: rand(),
-        par: 0.25 + depth * 0.75, /* parallax factor */
-      });
-    }
-    return stars;
-  }
-
-  /* born = warm rose horizon; together = cool violet. `mix` lerps between. */
-  function paintAmbient(ctx, width, height, rand, mix) {
-    const g = ctx.createLinearGradient(0, height * 0.5, 0, height);
-    const warm = [224, 124, 62], cool = [120, 110, 210];
-    const r = Math.round(warm[0] + (cool[0] - warm[0]) * mix);
-    const gr = Math.round(warm[1] + (cool[1] - warm[1]) * mix);
-    const b = Math.round(warm[2] + (cool[2] - warm[2]) * mix);
-    g.addColorStop(0, 'rgba(0,0,0,0)');
-    g.addColorStop(1, `rgba(${r}, ${gr}, ${b}, 0.16)`);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.translate(width * 0.5, height * 0.5);
-    ctx.rotate(-0.5);
-    const band = ctx.createLinearGradient(0, -height * 0.5, 0, height * 0.5);
-    band.addColorStop(0, 'rgba(232,224,216,0)');
-    band.addColorStop(0.5, `rgba(232,224,216,${0.06 + mix * 0.02})`);
-    band.addColorStop(1, 'rgba(232,224,216,0)');
-    ctx.fillStyle = band;
-    ctx.fillRect(-width, -height, width * 2, height * 2);
-    ctx.restore();
-
-    void rand;
-  }
-
-  function paintStars(ctx, stars, width, height, t, mix) {
-    const px = Math.sin(t * 0.12) * 14 * (0.4 + mix * 0.6);
-    const py = Math.cos(t * 0.09) * 8;
-    for (const star of stars) {
-      const tw = 0.5 + 0.5 * Math.sin(t * star.speed + star.phase);
-      const alpha = star.baseAlpha * (1 - star.amplitude + star.amplitude * tw);
-      const x = star.x + px * star.par;
-      const y = star.y + py * star.par;
-      const red = 255;
-      const green = Math.round(226 + star.warmth * 24 - mix * 20);
-      const blue = Math.round(196 + star.warmth * 40 + mix * 40);
-      ctx.beginPath();
-      ctx.arc(x, y, star.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(3)})`;
-      ctx.fill();
-    }
-    for (const star of stars.slice(0, 6)) {
-      ctx.beginPath();
-      ctx.arc(star.x, star.y, star.radius * 3.2, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(232, 192, 136, 0.05)`;
-      ctx.fill();
-    }
-  }
-
-  function renderStatic(ctx, width, height, stars) {
-    ctx.clearRect(0, 0, width, height);
-    paintAmbient(ctx, width, height, seededRandom(26), skyMix);
-    paintStars(ctx, stars, width, height, 0, skyMix);
-  }
-
-  function renderFrame(ctx, width, height, stars, t) {
-    ctx.clearRect(0, 0, width, height);
-    paintAmbient(ctx, width, height, seededRandom(26), skyMix);
-    paintStars(ctx, stars, width, height, t, skyMix);
-  }
-
-  function startSky(canvas, ctx, width, height, stars) {
-    const startedAt = performance.now();
-    lastFrameAt = 0;
-    const tick = (now) => {
-      if (document.hidden || (lastFrameAt && now - lastFrameAt < 1000 / TWINKLE_FPS_CAP)) {
-        frameHandle = requestAnimationFrame(tick);
-        return;
-      }
-      lastFrameAt = now;
-      renderFrame(ctx, width, height, stars, (now - startedAt) / 1000);
-      frameHandle = requestAnimationFrame(tick);
-    };
-    frameHandle = requestAnimationFrame(tick);
+  /* Two-night palette: warm rose (born) drifting to cool violet (together).
+     The Galaxy shader is procedural and texture-free, so it stays file://-safe. */
+  function initGalaxy(container) {
+    if (typeof window.GalaxyBackground !== 'function') return null;
+    return window.GalaxyBackground({
+      container: container,
+      starColors: ['#ffd9c2', '#ffb3a0', '#c9b8ff', '#8f9bff'],
+      density: 1.15,
+      speed: 0.85,
+      starSpeed: 0.6,
+      hueShift: skyMix * 60,
+      glowIntensity: 0.32,
+      twinkleIntensity: 0.42,
+      rotationSpeed: 0.08,
+      layers: 5,
+      transparent: true,
+      backgroundColor: '#05050a',
+      clickWarp: true,
+      mouseRepulsion: true,
+      repulsionStrength: 1.6,
+      intro: true
+    });
   }
 
   /* GSAP layer: reveal, scroll-scrubbed hue cross-fade, 3D plate tilt + pointer parallax. */
@@ -170,32 +86,26 @@
     const fallback = section.querySelector('[data-starmap-fallback]');
     if (!canvas) return;
 
-    let context = null;
-    try { context = canvas.getContext('2d'); } catch (error) { context = null; }
-    if (!context) return;
+    const container = section.querySelector('[data-starmap-galaxy]') || canvas.parentElement;
+    const galaxy = initGalaxy(container);
 
-    const rect = canvas.getBoundingClientRect();
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.max(1, Math.round(rect.width));
-    const height = Math.max(1, Math.round(rect.height));
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-    const stars = buildStars(width, height, seededRandom(26));
-
-    if (prefersReducedMotion()) {
-      renderStatic(context, width, height, stars);
-      canvas.classList.add('is-drawn');
-      if (fallback) fallback.hidden = true;
+    if (!galaxy) {
+      /* WebGL2 / vendor unavailable: keep the fallback visible, no draw mark. */
       return;
     }
 
-    renderStatic(context, width, height, stars);
+    /* The section can be gated (detached) at init, so the container measures 0x0
+       and the backing store was clamped to 1x1. Re-sync once we are connected. */
+    const resync = () => { if (section.isConnected) galaxy.resize(); };
+    resync();
+
+    /* Real draw path reached: mark the canvas drawn and drop the fallback. */
     canvas.classList.add('is-drawn');
     if (fallback) fallback.hidden = true;
-    startSky(canvas, context, width, height, stars);
+
     if (hasGsap()) armMotion(section);
+
+    window.addEventListener('pagehide', () => galaxy.destroy(), { once: true });
   }
 
   var mounted = false;
@@ -208,11 +118,6 @@
     mounted = true;
     mount(section);
   }
-
-  window.addEventListener('pagehide', () => {
-    if (frameHandle !== null) cancelAnimationFrame(frameHandle);
-    frameHandle = null;
-  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });

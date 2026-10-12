@@ -1086,7 +1086,9 @@
 
 <!-- 9. starmap — Star map (todo 3) -->
 <section id="starmap" class="section section--starmap" aria-label="The sky on two nights">
-  <canvas class="starmap__sky" data-starmap-canvas aria-hidden="true" role="presentation"></canvas>
+  <div class="starmap__galaxy" data-starmap-galaxy aria-hidden="true">
+    <canvas class="starmap__sky" data-starmap-canvas></canvas>
+  </div>
   <p class="starmap__fallback" data-starmap-fallback>
     <span class="starmap__fallback-glyph" aria-hidden="true">&#10022;</span>
     the sky is out there tonight, even when the canvas cannot draw
@@ -1105,7 +1107,7 @@
         </div>
         <div class="starmap__plate-copy">
           <p class="starmap__plate-date">19 October 2011</p>
-          <h3 class="starmap__plate-title">the night she was born</h3>
+          <h3 class="starmap__plate-title">the night you came into this world</h3>
           <p class="starmap__plate-text">This is the Rosette Nebula, a rose-shaped cloud of hydrogen about five thousand light-years away. It is a nursery: brand-new stars are being born inside it, right now.</p>
           <p class="starmap__plate-text starmap__plate-text--why">On the night you arrived, this is what the deep sky was quietly holding: a place where stars get made. It felt right to keep it beside your birthday.</p>
           <p class="starmap__plate-source">photographed by NASA</p>
@@ -1125,14 +1127,13 @@
           <ul class="starmap__times">
             <li>
               <span class="starmap__time-value">26/08/2026 06:12PM</span>
-              <span class="starmap__time-label">his</span>
+              <span class="starmap__time-label">Mine</span>
             </li>
             <li>
               <span class="starmap__time-value">26/08/2026 01:42PM</span>
-              <span class="starmap__time-label">hers</span>
+              <span class="starmap__time-label">Yours</span>
             </li>
           </ul>
-          <p class="starmap__source">verbatim from our chat, 26 Aug 2026, 12:42:47 GMT</p>
         </div>
       </article>
     </div>
@@ -1926,7 +1927,8 @@ button, a, input, select, textarea {
 <script src="content/physics-names.js"></script>
 <script src="sections/physics.js"></script>
 <script src="sections/scratch.js"></script>
-<script src="sections/starmap.js"></script>
+<script src="vendor/galaxy-background.js" defer></script>
+  <script src="sections/starmap.js"></script>
 <script src="sections/world.js"></script>
 <script src="sections/finale.js"></script>
 </body>

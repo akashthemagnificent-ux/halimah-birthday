@@ -16,7 +16,23 @@
   overflow: hidden;
 }
 
-/* ---- Full-bleed starfield backdrop ---- */
+/* ---- Full-bleed Galaxy backdrop (WebGL2, ported from React Bits Galaxy) ---- */
+.starmap__galaxy {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.starmap__galaxy .galaxy-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* the legacy marker canvas stays inert; the Galaxy renders into .galaxy-canvas */
 .starmap__sky {
   position: absolute;
   inset: 0;
@@ -30,8 +46,6 @@
 
 .starmap__sky.is-drawn { opacity: 1; }
 
-/* Static fallback: visible by default, removed only once the canvas
-   has genuinely drawn a frame. Never hides content on its own. */
 .starmap__fallback {
   position: absolute;
   inset: 0;
