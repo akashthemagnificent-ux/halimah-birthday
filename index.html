@@ -1140,96 +1140,233 @@
   </div>
 </section>
 
-<!-- 10. world: her world, the archive (todo 13)
+<!-- 10. world: your world, the archive (todo 13)
      Interactive archive: silk backdrop, masked heading, holo
      centerpiece (Isagi Rin), scroll-stack of eleven songs, glitch
      horror tickets, magic-bento of her other loves. Titles/names and
      verbatim DMs only. Full motion always. No-JS shows static markup;
      reveal and components are enhancement (html.js-world,
      sections/world.js). -->
-<section id="world" class="section section--world" aria-label="Her world">
-<div class="world__silk" data-world-silk aria-hidden="true"></div>
-<div class="world__content">
-  <p class="world__eyebrow">her world &#183; the archive</p>
-  <div class="world__heading" data-world-heading><h2 class="world__heading-fallback">know these, know her</h2></div>
-  <p class="world__lede">everything she loves, catalogued</p>
+<section id="world" class="section section--world" aria-label="Your world">
+  <svg class="world__glass-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="world-liquid-glass" x="-14%" y="-14%" width="128%" height="128%" color-interpolation-filters="sRGB">
+      <feImage href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='rgb(52,133,143)'/><stop offset='0.17' stop-color='rgb(128,128,126)'/><stop offset='0.83' stop-color='rgb(128,128,130)'/><stop offset='1' stop-color='rgb(204,123,113)'/></linearGradient></defs><rect width='400' height='100' fill='url(%23g)'/></svg>" result="world-glass-map" preserveAspectRatio="none"></feImage>
+      <feDisplacementMap in="SourceGraphic" in2="world-glass-map" scale="58" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+  </svg>
+  <div class="world__silk" data-world-silk aria-hidden="true"></div>
+  <div class="world__content">
+    <p class="world__eyebrow">your world &#183; the archive</p>
+    <div class="world__heading" data-world-heading><h2 class="world__heading-fallback">know these, know you</h2></div>
+    <p class="world__lede">everything you love, catalogued</p>
 
-  <div class="world__stage" data-motif="character">
-    <div class="world__holo" data-world-holo>
-      <span class="world__holo-static">isagi rin</span>
-    </div>
-    <div class="world__stage-copy">
-      <p class="world__kicker">favourite character</p>
-      <p class="world__name">Isagi Rin</p>
-      <p class="world__note">her blue lock obsession</p>
-      <p class="world__note">she picks him every time</p>
-      <div class="world__badges" aria-label="Favourite anime">
-        <span class="world__badge">Blue Lock</span>
-        <span class="world__badge">Kimi ni Todoke</span>
+    <div class="world__stage" data-motif="character">
+      <div class="world__holo" data-world-holo>
+        <img class="world__holo-photo" src="assets/world/rin/frame.jpg" alt="Isagi Rin" decoding="async">
+        <span class="world__holo-name world__holo-name--static">isagi rin</span>
+      </div>
+      <div class="world__stage-copy">
+        <p class="world__kicker">favourite character</p>
+        <p class="world__name">Isagi Rin</p>
+        <p class="world__note">your blue lock obsession</p>
+        <p class="world__note">you pick him every time</p>
+        <div class="world__badges" aria-label="Favourite anime">
+          <span class="world__badge">Blue Lock</span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="world__block" data-motif="music">
-    <p class="world__kicker world__kicker--center">on repeat &#183; eleven songs</p>
-    <div class="world__stack" data-world-stack>
-      <article class="world__song"><span class="world__song-num">01</span><span class="world__song-body"><span class="world__song-title">Save Your Tears</span><span class="world__song-artist">The Weeknd</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">02</span><span class="world__song-body"><span class="world__song-title">Long Way to Go</span><span class="world__song-artist">Cassie</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">03</span><span class="world__song-body"><span class="world__song-title">Brooklyn Baby</span><span class="world__song-artist">Lana Del Rey</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">04</span><span class="world__song-body"><span class="world__song-title">Into It</span><span class="world__song-artist">Chase Atlantic</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">05</span><span class="world__song-body"><span class="world__song-title">Heartbeat</span><span class="world__song-artist">Childish Gambino</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">06</span><span class="world__song-body"><span class="world__song-title">Fame Is a Gun</span><span class="world__song-artist">Addison Rae</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">07</span><span class="world__song-body"><span class="world__song-title">Livin' on a Prayer</span><span class="world__song-artist">Bon Jovi</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">08</span><span class="world__song-body"><span class="world__song-title">Come as You Are</span><span class="world__song-artist">Nirvana</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">09</span><span class="world__song-body"><span class="world__song-title">Without Me</span><span class="world__song-artist">Eminem</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">10</span><span class="world__song-body"><span class="world__song-title">bye</span><span class="world__song-artist">Ariana Grande</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
-      <article class="world__song"><span class="world__song-num">11</span><span class="world__song-body"><span class="world__song-title">TBH</span><span class="world__song-artist">PartyNextDoor</span></span><span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></article>
+    <div class="world__block" data-motif="music">
+      <p class="world__kicker world__kicker--center">on repeat &#183; eleven songs</p>
+      <div class="world__stack" data-world-stack>
+      <article class="world__song" data-audio="assets/world/songs/save-your-tears.mp3">
+        <img class="world__song-cover" src="assets/world/covers/save-your-tears.jpg" alt="" decoding="async">
+        <span class="world__song-num">01</span>
+        <span class="world__song-body"><span class="world__song-title">Save Your Tears</span><span class="world__song-artist">The Weeknd</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/long-way-to-go.mp3">
+        <img class="world__song-cover" src="assets/world/covers/long-way-to-go.jpg" alt="" decoding="async">
+        <span class="world__song-num">02</span>
+        <span class="world__song-body"><span class="world__song-title">Long Way to Go</span><span class="world__song-artist">Cassie</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/brooklyn-baby.mp3">
+        <img class="world__song-cover" src="assets/world/covers/brooklyn-baby.jpg" alt="" decoding="async">
+        <span class="world__song-num">03</span>
+        <span class="world__song-body"><span class="world__song-title">Brooklyn Baby</span><span class="world__song-artist">Lana Del Rey</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/into-it.mp3">
+        <img class="world__song-cover" src="assets/world/covers/into-it.jpg" alt="" decoding="async">
+        <span class="world__song-num">04</span>
+        <span class="world__song-body"><span class="world__song-title">Into It</span><span class="world__song-artist">Chase Atlantic</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/heartbeat.mp3">
+        <img class="world__song-cover" src="assets/world/covers/heartbeat.jpg" alt="" decoding="async">
+        <span class="world__song-num">05</span>
+        <span class="world__song-body"><span class="world__song-title">Heartbeat</span><span class="world__song-artist">Childish Gambino</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/fame-is-a-gun.mp3">
+        <img class="world__song-cover" src="assets/world/covers/fame-is-a-gun.jpg" alt="" decoding="async">
+        <span class="world__song-num">06</span>
+        <span class="world__song-body"><span class="world__song-title">Fame Is a Gun</span><span class="world__song-artist">Addison Rae</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/livin-on-a-prayer.mp3">
+        <img class="world__song-cover" src="assets/world/covers/livin-on-a-prayer.jpg" alt="" decoding="async">
+        <span class="world__song-num">07</span>
+        <span class="world__song-body"><span class="world__song-title">Livin&#39; on a Prayer</span><span class="world__song-artist">Bon Jovi</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/come-as-you-are.mp3">
+        <img class="world__song-cover" src="assets/world/covers/come-as-you-are.jpg" alt="" decoding="async">
+        <span class="world__song-num">08</span>
+        <span class="world__song-body"><span class="world__song-title">Come as You Are</span><span class="world__song-artist">Nirvana</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/without-me.mp3">
+        <img class="world__song-cover" src="assets/world/covers/without-me.jpg" alt="" decoding="async">
+        <span class="world__song-num">09</span>
+        <span class="world__song-body"><span class="world__song-title">Without Me</span><span class="world__song-artist">Eminem</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/bye.mp3">
+        <img class="world__song-cover" src="assets/world/covers/bye.jpg" alt="" decoding="async">
+        <span class="world__song-num">10</span>
+        <span class="world__song-body"><span class="world__song-title">bye</span><span class="world__song-artist">Ariana Grande</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      <article class="world__song" data-audio="assets/world/songs/tbh.mp3">
+        <img class="world__song-cover" src="assets/world/covers/tbh.jpg" alt="" decoding="async">
+        <span class="world__song-num">11</span>
+        <span class="world__song-body"><span class="world__song-title">TBH</span><span class="world__song-artist">PartyNextDoor</span></span>
+        <span class="world__song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </article>
+      </div>
+    </div>
+
+    <div class="world__block world__singers" data-motif="singers">
+      <p class="world__kicker">the voices you loop</p>
+      <div class="world__singer-list">
+        <span class="world__singer">Ariana Grande</span>
+        <span class="world__singer">Chase Atlantic</span>
+        <span class="world__singer">The Weeknd</span>
+        <span class="world__singer">Nirvana</span>
+      </div>
+      <blockquote class="world__dm" data-source="dm"><p>Oh my goshh Chase Atlantic</p></blockquote>
+      <p class="world__source">from our chats</p>
+    </div>
+
+    <div class="world__block world__horror" data-motif="horror">
+      <p class="world__kicker">after dark &#183; your top three</p>
+      <div class="world__tickets" aria-label="Top three horror films">
+        <div class="world__ticket">
+          <span class="world__ticket-stub" aria-hidden="true"></span>
+          <img class="world__ticket-poster" src="assets/world/posters/shining.jpg" alt="The Shining poster" decoding="async">
+          <h3 class="world__ticket-title" data-scramble>The Shining</h3>
+        </div>
+        <div class="world__ticket">
+          <span class="world__ticket-stub" aria-hidden="true"></span>
+          <img class="world__ticket-poster" src="assets/world/posters/conjuring.jpg" alt="The Conjuring poster" decoding="async">
+          <h3 class="world__ticket-title" data-scramble>The Conjuring</h3>
+        </div>
+        <div class="world__ticket">
+          <span class="world__ticket-stub" aria-hidden="true"></span>
+          <img class="world__ticket-poster" src="assets/world/posters/exorcist.jpg" alt="The Exorcist poster" decoding="async">
+          <h3 class="world__ticket-title" data-scramble>The Exorcist</h3>
+        </div>
+      </div>
+      <p class="world__note world__note--center">i watch through my fingers</p>
+      <blockquote class="world__dm" data-source="dm"><p>My top 3 are the shining, the exorcist and conjuring</p></blockquote>
+      <p class="world__source">from our chats</p>
+    </div>
+
+    <div class="world__block" data-motif="bento">
+      <p class="world__kicker">the rest of you</p>
+      <div class="world__bento" data-world-bento>
+        <div class="world__cell" data-motif="anime" data-col-span="2">
+          <p class="world__cell-kicker">favourite anime</p>
+          <div class="world__chips"><span class="world__chip">Blue Lock</span><span class="world__chip">Kimi ni Todoke</span></div>
+          <p class="world__cell-note">the two you&#8217;d rewatch</p>
+        <div class="world__flex" data-world-flex="anime" aria-hidden="true">
+          <div class="world__flex-track">
+          <img class="world__flex-card" src="assets/world/anime/blue-1.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-1.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-2.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-2.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-3.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-3.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-4.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-4.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-5.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-5.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-6.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-6.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-7.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-7.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/blue-8.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/anime/kimi-8.jpg" alt="" decoding="async">
+          </div>
+        </div>
+        </div>
+        <div class="world__cell world__cell--autumn" data-motif="autumn" data-col-span="2">
+          <p class="world__cell-kicker">your season</p>
+          <p class="world__cell-title">autumn</p>
+          <p class="world__cell-note">crunchy leaves, grey skies</p>
+          <blockquote class="world__dm" data-source="dm"><p>I LIKE AUTUMN</p></blockquote>
+        <div class="world__flex world__flex--strip" data-world-flex="autumn" aria-hidden="true">
+          <div class="world__flex-track">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-1.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-2.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-3.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-4.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-5.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-6.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-7.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-8.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/autumn/autumn-9.jpg" alt="" decoding="async">
+          </div>
+        </div>
+        </div>
+        <div class="world__cell world__cell--matcha" data-motif="matcha" data-col-span="2">
+        <div class="world__flex world__flex--fill" data-world-flex="matcha" aria-label="matcha aesthetics">
+          <div class="world__flex-track">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-1.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-2.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-3.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-4.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-5.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-6.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-7.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/matcha/matcha-8.jpg" alt="" decoding="async">
+          </div>
+        </div>
+        </div>
+        <div class="world__cell world__cell--calling" data-motif="calling" data-col-span="2">
+          <p class="world__cell-kicker">always</p>
+          <p class="world__cell-title">you love calling</p>
+          <div class="world__calling-row">
+            <div class="world__heart" data-world-heart></div>
+        <div class="world__flex world__flex--call" data-world-flex="calling" aria-hidden="true">
+          <div class="world__flex-track">
+          <img class="world__flex-card" src="assets/world/calls/call-1.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/calls/call-2.jpg" alt="" decoding="async">
+          <img class="world__flex-card" src="assets/world/calls/call-3.jpg" alt="" decoding="async">
+          </div>
+        </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="world__closer-block">
+      <p class="world__closer">loving you means loving your whole world</p>
+      <p class="world__closer world__closer--sub">this archive is the map</p>
     </div>
   </div>
-
-  <div class="world__block world__singers" data-motif="singers">
-    <p class="world__kicker">the voices she loops</p>
-    <div class="world__singer-list">
-      <span class="world__singer">Ariana Grande</span>
-      <span class="world__singer">Chase Atlantic</span>
-      <span class="world__singer">The Weeknd</span>
-      <span class="world__singer">Nirvana</span>
-    </div>
-    <blockquote class="world__dm" data-source="dm"><p>Oh my goshh Chase Atlantic</p></blockquote>
-    <p class="world__source">from our chats</p>
-  </div>
-
-  <div class="world__block world__horror" data-motif="horror">
-    <p class="world__kicker">after dark &#183; her top three</p>
-    <div class="world__tickets" aria-label="Top three horror films">
-      <div class="world__ticket"><span class="world__ticket-stub" aria-hidden="true"></span><h3 class="world__ticket-title" data-glitch>The Shining</h3></div>
-      <div class="world__ticket"><span class="world__ticket-stub" aria-hidden="true"></span><h3 class="world__ticket-title" data-glitch>The Conjuring</h3></div>
-      <div class="world__ticket"><span class="world__ticket-stub" aria-hidden="true"></span><h3 class="world__ticket-title" data-glitch>The Exorcist</h3></div>
-    </div>
-    <p class="world__note world__note--center">i watch through my fingers</p>
-    <blockquote class="world__dm" data-source="dm"><p>My top 3 are the shining, the exorcist and conjuring</p></blockquote>
-    <p class="world__source">from our chats</p>
-  </div>
-
-  <div class="world__block" data-motif="bento">
-    <p class="world__kicker">the rest of her</p>
-    <div class="world__bento" data-world-bento>
-      <div class="world__cell" data-motif="anime" data-col-span="2"><p class="world__cell-kicker">favourite anime</p><div class="world__chips"><span class="world__chip">Blue Lock</span><span class="world__chip">Kimi ni Todoke</span></div><p class="world__cell-note">the two she&#8217;d rewatch</p></div>
-      <div class="world__cell" data-motif="anime" data-col-span="1"><p class="world__cell-kicker">also watching</p><p class="world__cell-title">Tokyo Ghoul</p><blockquote class="world__dm" data-source="dm"><p>ILL CONTINUE WATCHING TOKYO GHOUL</p></blockquote></div>
-      <div class="world__cell" data-motif="autumn" data-col-span="1"><p class="world__cell-kicker">her season</p><p class="world__cell-title">autumn</p><p class="world__cell-note">crunchy leaves, grey skies</p><blockquote class="world__dm" data-source="dm"><p>I LIKE AUTUMN</p></blockquote></div>
-      <div class="world__cell" data-motif="games" data-col-span="2"><p class="world__cell-kicker">the lobby</p><div class="world__chips"><span class="world__chip">Resident Evil</span><span class="world__chip">Roblox</span><span class="world__chip">DTI</span></div><p class="world__cell-note">she carries, i respawn</p><blockquote class="world__dm" data-source="dm"><p>I LIKE RE REQUIEM AND VILLAGE</p></blockquote></div>
-      <div class="world__cell" data-motif="writing" data-col-span="2"><p class="world__cell-kicker">her ink</p><p class="world__cell-title">gothic writing</p><blockquote class="world__dm world__dm--manuscript" data-source="dm"><p>It was the most dreariest night of October to which the wind howled with such despair and horror it was as if the souls of the dead has risen within it</p></blockquote></div>
-      <div class="world__cell" data-motif="drawing" data-col-span="1"><p class="world__cell-kicker">sketchbook</p><p class="world__cell-title">drawing era</p><blockquote class="world__dm" data-source="dm"><p>Is this drawing good</p></blockquote></div>
-      <div class="world__cell" data-motif="badminton" data-col-span="1"><p class="world__cell-kicker">court era</p><p class="world__cell-title">badminton</p><blockquote class="world__dm" data-source="dm"><p>I DONT WANT TO HEAR CHAMMAK CHALLO WHILE IM PLAYING BADMINTON</p></blockquote></div>
-      <div class="world__cell" data-motif="calling" data-col-span="2"><p class="world__cell-kicker">always</p><p class="world__cell-title">she loves calling</p><div class="world__heart" data-world-heart></div></div>
-    </div>
-  </div>
-
-  <div class="world__closer-block">
-    <p class="world__closer">loving her means loving her whole world</p>
-    <p class="world__closer world__closer--sub">this archive is the map</p>
-  </div>
-</div>
 </section>
 
 <!-- 11. finale — Love letter + keepsakes (todo 12)
@@ -1935,9 +2072,9 @@ button, a, input, select, textarea {
   <script src="sections/starmap.js"></script>
 <script src="vendor/silk-background.js"></script>
 <script src="vendor/masked-heading.js"></script>
-<script src="vendor/holo-card.js"></script>
 <script src="vendor/scroll-stack.js"></script>
-<script src="vendor/glitch-text.js"></script>
+<script src="vendor/scramble-text.js"></script>
+<script src="vendor/flex-carousel.js"></script>
 <script src="vendor/pulse-heart.js"></script>
 <script src="vendor/magic-bento.js"></script>
 <script src="sections/world.js"></script>
