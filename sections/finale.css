@@ -9,13 +9,33 @@
    ============================================================ */
 
 .section--finale {
+  position: relative;
+  isolation: isolate;
   background:
     radial-gradient(90% 60% at 50% 12%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
   overflow: hidden;
 }
 
+/* ---- Ember-night galaxy backdrop (WebGL2, ported from React Bits Galaxy) ---- */
+.finale__galaxy {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.finale__galaxy .galaxy-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .finale__content {
   position: relative;
+  z-index: 2;
   width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
@@ -242,6 +262,8 @@ html.js-finale .finale__stage.is-open .finale__letter {
 
 /* ---- Keepsakes ---- */
 .finale__keepsakes {
+  position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 36rem;
   margin-top: var(--space-4);
@@ -314,6 +336,47 @@ html.js-finale .finale__stage.is-open .finale__letter {
 /* ---- Reduced motion: no fold, no flap ---- */
 
 
+/* ---- Masked heading mount (procedural gradient fill, texture-free) ---- */
+.finale__heading {
+  width: 100%;
+  margin-top: calc(-1 * var(--space-4));
+}
+
+.finale__heading .finale__headline {
+  margin-top: 0;
+}
+
+/* ---- Scramble lede chars (reactbits ScrambledText port) ---- */
+.finale__lede .world__char {
+  display: inline-block;
+  white-space: pre;
+}
+
+/* ---- Scroll reveals (JS-gated; no-JS stays fully readable) ---- */
+html.js-finale .finale__eyebrow,
+html.js-finale .finale__heading,
+html.js-finale .finale__lede,
+html.js-finale .finale__keepsakes {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+html.js-finale .finale__eyebrow.is-in,
+html.js-finale .finale__heading.is-in,
+html.js-finale .finale__lede.is-in,
+html.js-finale .finale__keepsakes.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Envelope pointer tilt (inline transform, smoothed by existing transition) ---- */
+html.js-finale .finale__envelope {
+  will-change: transform;
+}
+
 /* ---- Print: clean Save-as-PDF keepsake ----
    Only the letter prints: envelope, unseal button, keepsake
    panel and owner-slot marginalia are suppressed. Paper is
@@ -366,7 +429,8 @@ html.js-finale .finale__stage.is-open .finale__letter {
   html.js-finale .finale__open,
   .finale__slot,
   .finale__open,
-  .finale__keepsakes {
+  .finale__keepsakes,
+  .finale__galaxy {
     display: none;
   }
 }

@@ -3,6 +3,7 @@ const base = '/home/vibex/halimah-birthday';
 const html = fs.readFileSync(base + '/index.html', 'utf8');
 const css = fs.readFileSync(base + '/sections/finale.css', 'utf8');
 const js = fs.readFileSync(base + '/sections/finale.js', 'utf8');
+const smoke = fs.readFileSync(base + '/qa/task-12-finale.mjs', 'utf8');
 let fails = 0;
 const check = (label, cond, detail = '') => { if (!cond) fails++; console.log(`[${cond ? 'PASS' : 'FAIL'}] ${label}${detail ? ' — ' + detail : ''}`); };
 check('finale.css linked', html.includes('sections/finale.css'));
@@ -32,5 +33,20 @@ check('devotion: proud of you', html.toLowerCase().includes('i love you so much 
 check('devotion: vow', html.includes('IN THE END YOU'));
 check('finale credits keep the prose, no citation blobs site-wide',
   html.includes('woven from our chats') && !/dms[-\w]*\.txt:\d/.test(html));
+check('galaxy mount present', html.includes('data-finale-galaxy'));
+check('heading mount present (static h2 fallback inside)', /data-finale-heading[\s\S]{0,300}finale__headline/.test(html));
+check('lede carries data-scramble', /data-scramble[^>]*>unseal it slowly/.test(html));
+check('galaxy layer styled (absolute canvas, readable fallback bg)', css.includes('.finale__galaxy') && css.includes('.galaxy-canvas'));
+check('keepsakes styled above canvas', /\.finale__keepsakes[\s\S]{0,400}z-index:\s*2/.test(css));
+check('print suppresses galaxy', /@media print[\s\S]*\.finale__galaxy[\s\S]{0,120}display:\s*none/.test(css));
+check('reveals gated on js-finale (no-JS stays readable)', css.includes('html.js-finale .finale__heading.is-in'));
+check('js wires galaxy behind vendor guard', js.includes('window.GalaxyBackground') && js.includes('data-finale-galaxy'));
+check('js wires masked heading (gsap-guarded, restores fallback)', js.includes('window.MaskedHeading') && js.includes('window.gsap') && js.includes('static h2 stays readable'));
+check('js wires scramble lede', js.includes('window.ScrambledText') && js.includes('data-scramble'));
+check('js wires envelope tilt', js.includes('__tilt') && js.includes('pointermove'));
+check('js wires IO reveals (world pattern)', js.includes('IntersectionObserver') && js.includes('is-in'));
+check('smoke asserts draw path (backing store, not just mounted)', smoke.includes('galaxy backing store') && smoke.includes('backing store allocated'));
+check('js keeps single confetti entry (Motion.fireworks only)', js.includes('Motion.fireworks') && !/window\.confetti\s*\(/.test(js));
+check('js has no fireworks redefinition', !/function fireworks/.test(js));
 console.log(fails === 0 ? 'ACCEPTANCE: ALL PASS' : 'ACCEPTANCE: ' + fails + ' FAILURES');
 process.exit(fails ? 1 : 0);
