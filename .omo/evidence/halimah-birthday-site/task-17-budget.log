@@ -1,5 +1,5 @@
 halimah-birthday Performance Budget Report
-Date: 2026-10-15T09:23:58.181Z
+Date: 2026-10-16T11:17:46.842Z
 Bloat test: false
 
 --- JS Files ---
@@ -30,17 +30,18 @@ Bloat test: false
   vendor/flex-carousel.js: 4.5 KB raw → 1.8 KB gz
   vendor/pulse-heart.js: 8.6 KB raw → 2.9 KB gz
   vendor/magic-bento.js: 49.0 KB raw → 10.9 KB gz
-  sections/world.js: 13.6 KB raw → 4.3 KB gz
-  sections/finale.js: 5.9 KB raw → 2.2 KB gz
-  TOTAL JS GZ: 370.6 KB
+  sections/reel.js: 11.8 KB raw → 4.1 KB gz
+  sections/world.js: 14.1 KB raw → 4.5 KB gz
+  sections/finale.js: 8.3 KB raw → 2.9 KB gz
+  TOTAL JS GZ: 375.7 KB
 
 --- Images ---
-  386 raster image(s), total 9575.0 KB
+  391 raster image(s), total 9801.1 KB
 
 --- Fonts ---
   2 families: family=Fraunces, Space Grotesk
 
 --- Cold-cache estimate ---
-  3.9s at simulated mid-tier (1.5 Mbps)
+  4.0s at simulated mid-tier (1.5 Mbps)
 
 RESULT: FAIL ❌

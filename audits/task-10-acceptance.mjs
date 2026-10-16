@@ -24,6 +24,20 @@ const CSS = path.join(ROOT, 'sections/scratch.css');
 const SRC = '/mnt/c/Users/COMPUTER WORLD/Downloads/halimah dms/halimah dms-6.txt';
 const STORY_PLAN_DEFAULT = 'REASON I WAKE UP WITH A SMILE';
 
+// GSAP ScrollTrigger re-smooths <html> inline on refresh; under swiftshader
+// a smooth scroll + refresh storm can freeze the main thread for minutes
+// (documented snap13 pathology: 46s/61s freezes). Force auto scrolling for
+// QA determinism (proven in task-13-smoke).
+const injectNoSmooth = (p) => p.addInitScript(() => {
+  const apply = () => {
+    const s = document.createElement('style');
+    s.textContent = 'html { scroll-behavior: auto !important; }';
+    (document.head || document.documentElement).appendChild(s);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+});
+
 const index = fs.readFileSync(INDEX, 'utf8');
 const js = fs.readFileSync(JS, 'utf8');
 const css = fs.readFileSync(CSS, 'utf8');
@@ -205,12 +219,14 @@ try {
       }
       globalThis.Date = FakeDate;
     });
-    await page.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'load' });
+    await injectNoSmooth(page);
+  await page.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
     // scroll to #scratch so the IntersectionObserver in the lazy-loader fires
     // and scratch.js gets loaded (lazy-manifest pattern from todo 17)
     await page.evaluate(() => document.getElementById('scratch')?.scrollIntoView());
     // give the lazy-loader a moment to inject the script and for scratch.js to mount
-    await page.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 10000 });
+    await page.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 30000 });
     runtimeNote = 'ran';
 
     const initial = await page.evaluate(() => {
@@ -246,7 +262,7 @@ try {
     // threshold logic run. A synthetic band-fill would only re-test the mock.
     await page.locator('[data-scratch-cover]').scrollIntoViewIfNeeded();
     // the card now pops in from a 3D camera angle: measure at rest, not mid-flight
-    await page.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 8000 });
+    await page.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 30000 });
     await page.waitForTimeout(250);
     const box = await page.locator('[data-scratch-cover]').boundingBox();
     const vp = page.viewportSize();
@@ -341,9 +357,11 @@ try {
       }
       globalThis.Date = FakeDate;
     });
-    await rmPage.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'load' });
+    await injectNoSmooth(rmPage);
+  await rmPage.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await rmPage.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
     await rmPage.evaluate(() => document.getElementById('scratch')?.scrollIntoView());
-    await rmPage.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 10000 });
+    await rmPage.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 30000 });
     const rm = await rmPage.evaluate(() => ({
       mode: window.__scratchPanel.mode,
       btnHidden: document.querySelector('[data-scratch-tap]').hidden,
@@ -356,7 +374,7 @@ try {
       `cardHidden=${rm.cardHidden} btnHidden=${rm.btnHidden}`);
     // the card must still be really scratchable (and resumable) under reduce
     await rmPage.locator('[data-scratch-cover]').scrollIntoViewIfNeeded();
-    await rmPage.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 8000 });
+    await rmPage.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 30000 });
     await rmPage.waitForTimeout(250);
     const rmBox = await rmPage.locator('[data-scratch-cover]').boundingBox();
     const rmY = rmBox.y + rmBox.height * 0.3;
@@ -395,7 +413,9 @@ try {
       }
       globalThis.Date = FakeDate;
     });
-    await ssPage.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'load' });
+    await injectNoSmooth(ssPage);
+  await ssPage.goto('file:///home/vibex/halimah-birthday/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await ssPage.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
     await ssPage.waitForTimeout(700);
     const lockedState = await ssPage.evaluate(() => ({
       gateUnlocked: window.__beginGate?.unlocked === true,
@@ -424,11 +444,14 @@ try {
     // The gate restored the section, but scratch.js is lazy-loaded on first
     // scroll into view (index.html LAZY_SECTIONS). Scroll it in, the way a
     // reader does, so the loader fetches and mounts the panel.
-    await ssPage.locator('#scratch').scrollIntoViewIfNeeded();
+    // unlock -> content-region re-insert is slow on this box (~45s under
+    // swiftshader frame starvation); wait for attach BEFORE actionability.
+    await ssPage.waitForFunction(() => !!document.getElementById('scratch'), null, { timeout: 180000 });
+    await ssPage.locator('#scratch').scrollIntoViewIfNeeded({ timeout: 60000 });
     await ssPage.waitForFunction(
       () => typeof window.__scratchPanel !== 'undefined' && !!document.getElementById('scratch'),
       null,
-      { timeout: 8000 },
+      { timeout: 60000 },
     );
     const liveState = await ssPage.evaluate(() => ({
       gateUnlocked: window.__beginGate?.unlocked === true,
@@ -440,7 +463,7 @@ try {
       JSON.stringify(liveState));
 
     await ssPage.locator('[data-scratch-cover]').scrollIntoViewIfNeeded();
-    await ssPage.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 8000 });
+    await ssPage.waitForFunction(() => window.__scratchPanel.anim === 'idle', null, { timeout: 60000 });
     await ssPage.waitForTimeout(250);
     const ssBox = await ssPage.locator('[data-scratch-cover]').boundingBox();
     for (let row = 0; row < 14; row += 1) {

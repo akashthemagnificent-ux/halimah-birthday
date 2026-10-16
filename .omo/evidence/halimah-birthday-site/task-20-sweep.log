@@ -2,11 +2,11 @@
 ════════════════════════════════════════
 TASK 20 — PRE-HANDOFF HARDENING SWEEP
 ════════════════════════════════════════
-started : 2026-09-29T14:53:22+00:00
+started : 2026-10-16T11:14:43+00:00
 site    : /home/vibex/halimah-birthday
 bun     : 1.4.2
-build   : index.html sha256=470bf53585dfb429
-build   : sections+js sha256=61f693166ef61ca8
+build   : index.html sha256=5e60dbca06ab9789
+build   : sections+js sha256=4b4a1fcfe2c3ae7f
 
 ════════════════════════════════════════
 1. COPY + BUDGET
@@ -33,42 +33,42 @@ $ bun audits/quote-audit.mjs
   [PASS] commercial lyrics (>40 chars in prose) — 0 hits
 
 ========================================
-VERBATIM SUMMARY: 175/175 lines matched, 0 failed
+VERBATIM SUMMARY: 103/103 lines matched, 0 failed
 FORBIDDEN HITS: 0 categories
-RESULT: PASS — 175/175 verbatim, 0 forbidden
+RESULT: PASS — 103/103 verbatim, 0 forbidden
 Per-line counts above prove real diff, not just exit 0.
 ========================================
 EXIT[quote-audit] = 0
   ✓ GREEN: quote-audit
 --- budget
 $ bun run scripts/budget.mjs
-  📦 sections/quotes.js (lazy): 1.4 KB raw → 0.7 KB gz
-  📦 sections/gags.js (lazy): 1.7 KB raw → 0.8 KB gz
-  📦 sections/physics.js (lazy): 9.4 KB raw → 3.1 KB gz
-  📦 sections/scratch.js (lazy): 12.6 KB raw → 4.3 KB gz
-  📦 sections/starmap.js (lazy): 6.4 KB raw → 2.1 KB gz
-  📦 sections/world.js (lazy): 1.8 KB raw → 0.8 KB gz
-  📦 sections/finale.js (lazy): 1.4 KB raw → 0.6 KB gz
-  📦 inline <script>: 1.4 KB gz
-  📦 inline <script>: 0.6 KB gz
-  ✅ Total JS gzipped: 93.0 KB ≤ 100.0 KB budget
-  ℹ️  No raster images found (SVGs not counted in budget)
-  ✅ Total image size: 0.0 KB ≤ 2048.0 KB budget
-  ℹ️  0 raster image(s) found
+  🖼️  assets/chats/chat-04.webp: 79.2 KB ✓
+  🖼️  assets/chats/chat-05.webp: 87.3 KB ✓
+  🖼️  assets/chats/ss 2 goodboy.webp: 57.2 KB ✓
+  🖼️  assets/chats/chat-06.webp: 73.5 KB ✓
+  🖼️  assets/chats/chat-16.webp: 21.8 KB ✓
+  🖼️  assets/chats/chat-01.webp: 52.6 KB ✓
+  🖼️  assets/chats/chat-03.webp: 50.4 KB ✓
+  🖼️  assets/chats/chat-14.webp: 44.5 KB ✓
+  🖼️  assets/chats/chat-12.webp: 82.9 KB ✓
+  🖼️  assets/chats/chat-09.webp: 87.4 KB ✓
+  🖼️  assets/chats/chat-13.webp: 57.7 KB ✓
+  ❌ FAIL: Total image size: 9801.1 KB ≤ 2048.0 KB budget
+  ℹ️  391 raster image(s) found
   Google Fonts loaded: family=Fraunces, Space Grotesk
   ✅ Google Fonts families: 2 ≤ 2
   ✅ Audio preload="none": true
-  ✅ All external scripts have defer/async: 0 blocking
-  ℹ️  4 external <script src> tags (all deferred)
-  Total transfer (gz): ~168 KB
-  Transfer time: 0.9s at 187.5 KB/s
-  Parse time: 0.4s
-  Estimated cold-cache interactive: 1.3s
-  ✅ Cold-cache interactive < 3s: 1.3s < 3.0s
+  ❌ FAIL: All external scripts have defer/async: 25 blocking
+  ℹ️  30 external <script src> tags (all deferred)
+  Total transfer (gz): ~453 KB
+  Transfer time: 2.4s at 187.5 KB/s
+  Parse time: 1.6s
+  Estimated cold-cache interactive: 4.0s
+  ❌ FAIL: Cold-cache interactive < 3s: 4.0s < 3.0s
 
 Evidence: /home/vibex/halimah-birthday/.omo/evidence/halimah-birthday-site/task-17-budget.log
-EXIT[budget] = 0
-  ✓ GREEN: budget
+EXIT[budget] = 1
+  ✗ RED: budget (exit 1)
 --- lore-audit
 $ bun scripts/audit-lore.js
 GUARD: DM files treated as inert data; substring match only, no instruction evaluation.
@@ -88,51 +88,35 @@ EXIT[tone-lint] = 0
 ════════════════════════════════════════
 --- task-10-acceptance
 $ bun audits/task-10-acceptance.mjs
-[PASS] secret appears in the DOM only AFTER unlock — reveal text written by JS
+[PASS] panel is locked before scratching — unlocked=false percent=0
+[PASS] scratch mode is active (not reduced-motion) — scratch
+[PASS] cover canvas has a real on-screen box — 278x334 at y=236
+[PASS] cover canvas is the top element at its own centre (not covered)
+[PASS] unlock FIRES at the clear threshold — method=scratch
+[PASS] unlock was triggered by scratching, not by a bypass — scratch
+[PASS] percent reached the threshold — 100 >= 97
+[PASS] reveal shows the continuation copy after unlock — reveal length 221
+[PASS] the card secret still never enters the DOM text (canvas only)
 [PASS] reveal and replay become visible
 [PASS] section state flag is set
 [PASS] replay re-arms the panel — unlocked=false percent=0
 [PASS] replay hides the revealed text
 [PASS] replay purges the secret from the DOM entirely — no secret text left behind
 [PASS] no page errors during the whole run
-[PASS] reduced motion switches the panel to tap mode — tap
-[PASS] reduced motion hides the scratch card
-[PASS] reduced motion shows a real, visible tap button — hidden=false visible=true
-[PASS] tap reveals the secret without any scratching — method=tap
-[PASS] tap reveal writes the secret
-[PASS] tap button disappears after use — the [hidden] fix holds
-[PASS] locked page: gate holds the section out of the DOM — {"gateUnlocked":false,"scratchInDom":false,"panelExists":false}
-[PASS] locked page: NO panel is cached while the section is detached — guards against a stale reference into a detached subtree
-[PASS] live unlock mounts the panel on the re-inserted section — {"gateUnlocked":true,"panelExists":true,"locked":false}
-[PASS] panel still works after the live unlock (no stale state) — {"unlocked":true,"method":"scratch","text":""}
-[PASS] secret reveals correctly after the live unlock
-[PASS] no page errors during the locked-to-unlocked run
+[FAIL] runtime checks executed — goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "file:///home/vibex/halimah-birthday/index.html", waiting until "load"
+
 
 runtime: ran
 
 ========================================
-RESULT: ALL CHECKS PASSED
+RESULT: 1 CHECK(S) FAILED
 ========================================
-EXIT[task-10-acceptance] = 0
-  ✓ GREEN: task-10-acceptance
+EXIT[task-10-acceptance] = 1
+  ✗ RED: task-10-acceptance (exit 1)
 --- task-12-acceptance
 $ bun audits/task-12-acceptance.mjs
-[PASS] finale anchor present
-[PASS] print CSS exists
-[PASS] print isolates letter
-[PASS] owner slots >= 3 — found 3
-[PASS] slot spider-line
-[PASS] slot signature
-[PASS] slot ps
-[PASS] signoff carries its slot
-[PASS] star-map download wired
-[PASS] gallery link wired
-[PASS] story link wired
-[PASS] letter in plain HTML
-[PASS] sealed state is JS-only
-[PASS] letter never display:none outside print
-[PASS] unfold uses motion tokens
-[PASS] no hardcoded hex outside print
 [PASS] star-map card file exists
 [PASS] devotion: journey line
 [PASS] devotion: gets better
@@ -140,33 +124,49 @@ $ bun audits/task-12-acceptance.mjs
 [PASS] devotion: if-everyone-leaves
 [PASS] devotion: proud of you
 [PASS] devotion: vow
-[PASS] sources cited
+[PASS] finale credits keep the prose, no citation blobs site-wide
+[PASS] galaxy mount present
+[PASS] heading mount present (static h2 fallback inside)
+[PASS] lede carries data-scramble
+[PASS] galaxy layer styled (absolute canvas, readable fallback bg)
+[PASS] keepsakes styled above canvas
+[PASS] print suppresses galaxy
+[PASS] reveals gated on js-finale (no-JS stays readable)
+[PASS] js wires galaxy behind vendor guard
+[PASS] js wires masked heading (gsap-guarded, restores fallback)
+[PASS] js wires scramble lede
+[PASS] js wires envelope tilt
+[PASS] js wires IO reveals (world pattern)
+[PASS] smoke asserts draw path (backing store, not just mounted)
+[PASS] smoke asserts paper letter reveal (salutation + signature wipe)
+[PASS] js keeps single confetti entry (Motion.fireworks only)
+[PASS] js has no fireworks redefinition
 ACCEPTANCE: ALL PASS
 EXIT[task-12-acceptance] = 0
   ✓ GREEN: task-12-acceptance
 --- task-13-acceptance
 $ bun audits/task-13-acceptance.mjs
-[PASS] every non-DM span > 40 chars is registered original copy (no lyric blob fits)
-[PASS] no <audio>/<video>/<img> blobs in world section
-[PASS] no background-image artwork in world.css
-[PASS] no base64 blobs in world files
-[PASS] world.css uses design tokens (zero hardcoded hex)
+[PASS] reveal armed only under html.js-world
+[PASS] JS uses IntersectionObserver
+[PASS] reveal targets visible without JS (opacity:0 gated by html.js-world)
+[PASS] reveal restores via .is-in
 
 --- DM fidelity (Room 10) ---
-[PASS] DM quote traces to Room 10: "Oh my goshh Chase Atlantic…"
-[PASS] DM quote traces to Room 10: "My top 3 are the shining, the …"
-[PASS] DM quote traces to Room 10: "I LIKE RE REQUIEM AND VILLAGE…"
-[PASS] DM quote traces to Room 10: "ILL CONTINUE WATCHING TOKYO GH…"
-[PASS] DM quote traces to Room 10: "It was the most dreariest nigh…"
-[PASS] DM quote traces to Room 10: "Is this drawing good…"
-[PASS] DM quote traces to Room 10: "I DONT WANT TO HEAR CHAMMAK CH…"
-[PASS] DM quote traces to Room 10: "I LIKE AUTUMN…"
+[PASS] exactly 3 DM quotes (kept cards) - found=3
+[PASS] removed-card DM absent: ILL CONTINUE WATCHING TOKYO GH…
+[PASS] removed-card DM absent: I LIKE RE REQUIEM AND VILLAGE…
+[PASS] removed-card DM absent: It was the most dreariest nigh…
+[PASS] removed-card DM absent: Is this drawing good…
+[PASS] removed-card DM absent: CHAMMAK CHALLO…
+[PASS] DM traces to Room 10: "Oh my goshh Chase Atlantic…"
+[PASS] DM traces to Room 10: "My top 3 are the shining, the …"
+[PASS] DM traces to Room 10: "I LIKE AUTUMN…"
 
---- reveal degrades gracefully ---
-[PASS] JS uses IntersectionObserver (lazy, starmap pattern)
-[PASS] reveal gated on prefers-reduced-motion
-[PASS] CSS keeps cards visible without js-world class
-[PASS] CSS honors prefers-reduced-motion
+--- em-dash ban ---
+[PASS] world section: no U+2014
+[PASS] world section: no &mdash;
+[PASS] world.css: no em-dash
+[PASS] world.js: no em-dash
 
 ========================================
 RESULT: ALL CHECKS PASSED
@@ -175,18 +175,6 @@ EXIT[task-13-acceptance] = 0
   ✓ GREEN: task-13-acceptance
 --- task-15-acceptance
 $ bun audits/task-15-acceptance.mjs
-[PASS] physics.js reads names from content/physics-names.json
-[PASS] physics-names.json holds exactly the canonical name set — ["Zai","Halimah","princess","Ash","hubby"]
-[PASS] attested name "Zai" found in a cited local source — content/chapters.md,content/quotes
-[PASS] attested name "Halimah" found in a cited local source — content/lore.md
-[PASS] attested name "princess" found in a cited local source — index.html
-[PASS] attested name "Ash" found in a cited local source — content/lore.md
-[PASS] plan-sourced name "hubby" cites the plan and does not claim local attestation
-[PASS] name "Zai" is NOT hardcoded in physics.js
-[PASS] name "Zai" is NOT hardcoded in physics.html
-[PASS] name "Zai" is NOT hardcoded in the index physics region
-[PASS] name "Halimah" is NOT hardcoded in physics.js
-[PASS] name "Halimah" is NOT hardcoded in physics.html
 [PASS] name "Halimah" is NOT hardcoded in the index physics region
 [PASS] name "princess" is NOT hardcoded in physics.js
 [PASS] name "princess" is NOT hardcoded in physics.html
@@ -197,11 +185,52 @@ $ bun audits/task-15-acceptance.mjs
 [PASS] name "hubby" is NOT hardcoded in physics.js
 [PASS] name "hubby" is NOT hardcoded in physics.html
 [PASS] name "hubby" is NOT hardcoded in the index physics region
+[PASS] name "Cutiepie" is NOT hardcoded in physics.js
+[PASS] name "Cutiepie" is NOT hardcoded in physics.html
+[PASS] name "Cutiepie" is NOT hardcoded in the index physics region
+[PASS] name "sweetheart" is NOT hardcoded in physics.js
+[PASS] name "sweetheart" is NOT hardcoded in physics.html
+[PASS] name "sweetheart" is NOT hardcoded in the index physics region
+[PASS] name "baby" is NOT hardcoded in physics.js
+[PASS] name "baby" is NOT hardcoded in physics.html
+[PASS] name "baby" is NOT hardcoded in the index physics region
+[PASS] name "wifey" is NOT hardcoded in physics.js
+[PASS] name "wifey" is NOT hardcoded in physics.html
+[PASS] name "wifey" is NOT hardcoded in the index physics region
 [PASS] no canonical name hardcoded in physics.css
 
 RESULT: PASS (0 failures)
 EXIT[task-15-acceptance] = 0
   ✓ GREEN: task-15-acceptance
+--- task-21-reel-acceptance
+$ bun audits/task-21-reel-acceptance.mjs
+[PASS] markup hook data-reel-rail
+[PASS] markup hook data-reel-sound
+[PASS] foreground video is playsinline + muted + poster
+[PASS] no-JS fallback links present
+[PASS] sticky stage
+[PASS] echo is blurred poster layer
+[PASS] flash beam styled
+[PASS] white veil styled
+[PASS] track hidden without JS
+[PASS] fallback hidden with JS
+[PASS] reduced-motion drops the flash
+[PASS] no hex outside print
+[PASS] no em-dashes in css/js authored copy
+[PASS] js opts in with html.js-reel
+[PASS] single decoder (one fg element swapped by src)
+[PASS] active-only play policy
+[PASS] metadata preload for next gift only
+[PASS] reduced-motion gate
+[PASS] no wheel/touch hijack
+[PASS] rAF-throttled scroll
+[PASS] pauses when tab hidden
+[PASS] sound toggle present
+[PASS] five gifts in data model
+[PASS] echo uses poster (no second video decoder)
+ACCEPTANCE: ALL PASS
+EXIT[task-21-reel-acceptance] = 0
+  ✓ GREEN: task-21-reel-acceptance
 --- task-3-acceptance
 $ bun audits/task-3-acceptance.mjs
 [PASS] index.html line is exactly the verbatim phrase (no rewording)
@@ -210,46 +239,107 @@ $ bun audits/task-3-acceptance.mjs
 --- anniversary copy ---
 [PASS] his time "26/08/2026 06:12PM" present
 [PASS] her time "26/08/2026 01:42PM" present
-[PASS] his time is labelled "his"
-[PASS] her time is labelled "hers"
+[PASS] his time is labelled "Mine"
+[PASS] her time is labelled "Yours"
 
 --- reduced motion ---
-[PASS] JS reads prefers-reduced-motion
-[PASS] reduced motion takes the static render path
-[PASS] reduced motion stops the twinkle loop (startSky unreachable after early return) — early return precedes startSky
-[PASS] CSS honors prefers-reduced-motion
+[FAIL] JS reads prefers-reduced-motion
+[FAIL] reduced motion takes the static render path
+[FAIL] reduced motion stops the twinkle loop (startSky unreachable after early return) — early return precedes startSky
+[FAIL] CSS honors prefers-reduced-motion
 
 --- forbidden: no invented coordinates/city, no heavy lib ---
 [PASS] no invented coordinates or city in starmap.js code
 [PASS] no external script in the page (nothing heavy in critical path)
-[PASS] starmap.js is in the page (deferred or lazy-manifest) — vendor/confetti.browser.min.js, vendor/howler.min.js, js/motion.js, js/begin.js
+[PASS] starmap.js is in the page (deferred or lazy-manifest) — vendor/confetti.browser.min.js, vendor/howler.min.js, js/motion.js, js/begin.js, vendor/three.min.js, vendor/gsap.min.js, vendor/ScrollTrigger.min.js, vendor/page-flip.browser.min.js, vendor/matter.min.js, sections/birthday.js, sections/story.js, sections/album.js, content/quotes-manifest.js, sections/quotes.js, sections/gags.js, content/physics-names.js, sections/physics.js, sections/scratch.js, vendor/galaxy-background.js, sections/starmap.js, vendor/silk-background.js, vendor/masked-heading.js, vendor/scroll-stack.js, vendor/scramble-text.js, vendor/flex-carousel.js, vendor/pulse-heart.js, vendor/magic-bento.js, sections/reel.js, sections/world.js, sections/finale.js
 [PASS] no d3 / three / celestial import anywhere in the section
-[PASS] hand-rolled canvas is roughly ~100 lines of drawing logic — 208 total lines
+[PASS] hand-rolled canvas is roughly ~100 lines of drawing logic — 128 total lines
 
 ========================================
-RESULT: ALL CHECKS PASSED
+RESULT: 9 CHECK(S) FAILED
 ========================================
-EXIT[task-3-acceptance] = 0
-  ✓ GREEN: task-3-acceptance
+EXIT[task-3-acceptance] = 1
+  ✗ RED: task-3-acceptance (exit 1)
 --- task-7-acceptance
 $ bun audits/task-7-acceptance.mjs
-PASS task-7: 14/14 chapters, each with <time> + <blockquote> + voiceover
-EXIT[task-7-acceptance] = 0
-  ✓ GREEN: task-7-acceptance
+11 |   .filter((p) => !p.trimStart().toLowerCase().startsWith('notes')).length;
+12 | 
+13 | const chapters = [...idx.matchAll(/<article class="story__chapter"[\s\S]*?<\/article>/g)].map((m) => m[0]);
+14 | 
+15 | assert.strictEqual(deckCount, 14, `deck must hold 14 chapters, got ${deckCount}`);
+16 | assert.strictEqual(chapters.length, deckCount, `rendered ${chapters.length} != deck ${deckCount}`);
+            ^
+AssertionError: rendered 0 != deck 14
+
+0 !== 14
+
+ generatedMessage: false,
+     actual: 0,
+   expected: 14,
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /home/vibex/halimah-birthday/audits/task-7-acceptance.mjs:16:8
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-7-acceptance] = 1
+  ✗ RED: task-7-acceptance (exit 1)
 --- task-8-acceptance
 $ bun audits/task-8-acceptance.mjs
-PASS task-8: threat verbatim + 34/34 cards dated + verbatim + wired
-EXIT[task-8-acceptance] = 0
-  ✓ GREEN: task-8-acceptance
+ 8 | const idx = readFileSync(`${base}/index.html`, 'utf8');
+ 9 | const DM = '/mnt/c/Users/COMPUTER WORLD/Downloads/halimah dms';
+10 | 
+11 | const THREAT = "IF YOU STAY UP ANYMORE I'LL MAKE A FRICKING WEBSITE WITH ALL YOUR QUOTES";
+12 | // index.html HTML-escapes the apostrophe
+13 | assert.ok(
+            ^
+AssertionError: threat line not verbatim in index.html quotes headline
+ generatedMessage: false,
+     actual: false,
+   expected: true,
+   operator: "==",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /home/vibex/halimah-birthday/audits/task-8-acceptance.mjs:13:8
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-8-acceptance] = 1
+  ✗ RED: task-8-acceptance (exit 1)
 --- task-9-acceptance
 $ bun audits/task-9-acceptance.mjs
-PASS task-9: 4 cards each with gag lines + affection closer; SVG-only spider; tokens clean
-EXIT[task-9-acceptance] = 0
-  ✓ GREEN: task-9-acceptance
+12 | assert.strictEqual(cards.length, 4, `expected 4 gag cards, got ${cards.length}`);
+13 | 
+14 | for (const key of ['buddy', 'goodboy', 'hashbrown', 'spider']) {
+15 |   const card = cards.find((c) => c.includes(`data-gags-card="${key}"`));
+16 |   assert.ok(card, `missing card ${key}`);
+17 |   assert.match(card, /<blockquote[^>]*>[\s\S]+?<\/blockquote>/, `${key}: missing gag <blockquote>`);
+              ^
+AssertionError: buddy: missing gag <blockquote>
+ generatedMessage: false,
+     actual: "<article class=\"gags__card\" data-gags-card=\"buddy\" data-gi=\"0\" data-testid=\"gag-card-buddy\" tabindex=\"0\">\n      <p class=\"gags__card-num\">exhibit 01</p>\n      <h3 class=\"gags__card-title\">the buddy war</h3>\n      <p class=\"gags__card-setup\">She knows I cannot stand being called buddy. Saying it anyway became her favourite sport.</p>\n      <figure class=\"gags__shot\" data-gags-shot>\n        <span class=\"gags__tape gags__tape--l\" aria-hidden=\"true\"></span>\n        <span class=\"gags__tape gags__tape--r\" aria-hidden=\"true\"></span>\n        <img class=\"gags__shot-img\" src=\"assets/chats/ss 1 buddy.webp\" alt=\"Chat screenshot: the buddy war, from our chats\" loading=\"lazy\" decoding=\"async\" data-testid=\"gag-shot-buddy\">\n        <span class=\"gags__shot-glare\" aria-hidden=\"true\"></span>\n        <figcaption class=\"gags__stamp\">screenshot &#183; tap to zoom</figcaption>\n      </figure>\n      <p class=\"gags__source\" data-testid=\"gag-lines-buddy\"><cite>from our chats</cite></p>\n      <p class=\"gags__closer\" data-testid=\"gag-closer-buddy\"><span class=\"gags__closer-label\">affection closer</span>I am not her buddy, I am her person, and her teasing only works because we both know it.</p>\n    </article>",
+   expected: /<blockquote[^>]*>[\s\S]+?<\/blockquote>/,
+   operator: "match",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /home/vibex/halimah-birthday/audits/task-9-acceptance.mjs:17:10
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-9-acceptance] = 1
+  ✗ RED: task-9-acceptance (exit 1)
 --- task-2-gate
 $ bun audits/task-2-gate.mjs
 [PASS] countdown target string Europe/London present in begin.js
-[PASS] locked copy in index.html is spoiler-free and names no one
+[FAIL] locked copy in index.html is spoiler-free and names no one :: locked head leaks: Ash
++ actual - expected
+
++ [
++   'Ash'
++ ]
+- []
+
 [PASS] title and OG tags carry no names or story
 [PASS] Howler is constructed only inside the Begin click handler path
 [PASS] every dom.* reference is a declared key of the dom literal
@@ -261,36 +351,37 @@ $ bun audits/task-2-gate.mjs
 [PASS] no duplicate element ids in index.html
 [PASS] vendored libraries are referenced locally
 
-12/12 checks passed
-EXIT[task-2-gate] = 0
-  ✓ GREEN: task-2-gate
+11/12 checks passed
+EXIT[task-2-gate] = 1
+  ✗ RED: task-2-gate (exit 1)
 --- task-14-assert
 $ bun audits/task-14-assert.mjs
 PASS single confetti module: window.confetti( only in js/motion.js :: callers=[js/motion.js]
 PASS exactly one fireworks entry :: defs=[js/motion.js x1]
 PASS begin gate: confetti only via Motion inside the click path
-PASS story: GSAP only via Motion.hasGsap() with reduced-motion bail
+FAIL story: GSAP only via Motion.hasGsap() with reduced-motion bail
 PASS sections/starmap.js: reduced-motion gate present
-PASS sections/scratch.js: reduced-motion gate present
+FAIL sections/scratch.js: reduced-motion gate present
 PASS sections/physics.js: reduced-motion gate present
-PASS lazy arming: IntersectionObserver gates section + vendor loads
-PASS global kill-switch present (motionAllowed + hasGsap + reduced query)
+FAIL lazy arming: IntersectionObserver gates section + vendor loads
+FAIL global kill-switch present (motionAllowed + hasGsap + reduced query)
 PASS no motion before gesture: boot() only wires the opt-in replay
 PASS no timers or rAF loops anywhere in motion.js
-PASS no infinite loops in motion.js :: setTimeout calls=2
+FAIL no infinite loops in motion.js :: setTimeout calls=0
 PASS confetti replay button exists in finale keepsakes
 PASS dedupe: one id="begin-overlay" :: count=1
 PASS dedupe: one id="begin-button" :: count=1
 PASS gesture wiring intact: Howl constructed and played in the click path
-RESULT: PASS
-EXIT[task-14-assert] = 0
-  ✓ GREEN: task-14-assert
+RESULT: FAIL (5)
+EXIT[task-14-assert] = 1
+  ✗ RED: task-14-assert (exit 1)
 
 ════════════════════════════════════════
 2b. COPY AUDITS (quote-source and lore re-verification)
 ════════════════════════════════════════
 --- task-4-audit
 $ bun audits/task-4-audit.mjs
+--- cosplay bet 05-Sep (halimah dms-11.txt:32) ---
   [PASS] halimah dms-11.txt:32 "[2026-09-05T08:15:34.687000+00:00] me: IF YOU SCORE MORE THAN 40 MARKS IN BIO, PHY, CHEM A"... [len=161] 
 --- her love paragraph (halimah dms-11.txt:2281) ---
   [PASS] halimah dms-11.txt:2281 "[2026-09-08T21:39:41.034000+00:00] 𖥻 ׁ ׅ  zαιηαв ! ﹒  ◡◡: MYY AKASH I LOVE YOU SOOOSOSOSO"... [len=579] 
@@ -298,7 +389,7 @@ $ bun audits/task-4-audit.mjs
   [PASS] halimah dms-12.txt:2639 "[2026-09-13T18:15:25.388000+00:00] me: IN THE END YOU'RE MY HALIMAH AND I AM YOUR AKASH. I"... [len=171] 
 
 ----------------------------------------
-VERBATIM MATCH SUMMARY: 100/100 lines matched, 0 failed
+VERBATIM MATCH SUMMARY: 30/100 lines matched, 70 failed
 
 FORBIDDEN-STRING SCAN (must be zero hits in deck prose outside verbatim quotes):
   Note: verbatim quotes are excluded from this scan by checking only non-blockquote text.
@@ -313,11 +404,10 @@ FORBIDDEN-STRING SCAN (must be zero hits in deck prose outside verbatim quotes):
   [PASS] cake motif — 0 hits
 
 ========================================
-RESULT: PASS — 100/100 verbatim lines matched, 0 forbidden hits
-Per-line match counts above prove real diff, not just exit 0.
+RESULT: FAIL — 70 verbatim mismatches, 0 forbidden categories hit
 ========================================
-EXIT[task-4-audit] = 0
-  ✓ GREEN: task-4-audit
+EXIT[task-4-audit] = 1
+  ✗ RED: task-4-audit (exit 1)
 
 ════════════════════════════════════════
 3. BROKEN LINKS + MEDIA
@@ -326,22 +416,16 @@ EXIT[task-4-audit] = 0
 $ bun audits/task-20-links.mjs
 # task-20 local link + media scan
 # root: /home/vibex/halimah-birthday
-# source files scanned: 27
-# local refs checked: 18
-# resolved: 18
-# known-optional owner photo slots (404 by design while empty): 6
-  - optional: assets/photos/photo-1.jpg <- index.html
-  - optional: assets/photos/photo-2.jpg <- index.html
-  - optional: assets/photos/photo-3.jpg <- index.html
-  - optional: assets/photos/photo-4.jpg <- index.html
-  - optional: assets/photos/photo-5.jpg <- index.html
-  - optional: assets/photos/photo-6.jpg <- index.html
+# source files scanned: 31
+# local refs checked: 186
+# resolved: 186
+# committed baby-album photo slots resolved: 42
 # external http(s) refs: none
-# in-page fragments: 2
+# in-page fragments: 19
 [PASS] every local src/href/url() resolves on disk
-[PASS] exactly 6 owner photo slots are the known-optional set :: found 6
+[PASS] all 42 baby-album photo slots resolve on disk :: found 42
 [PASS] no remote asset URLs besides Google Fonts
-[PASS] scan actually checked local refs (not a vacuous pass) :: checked=18
+[PASS] scan actually checked local refs (not a vacuous pass) :: checked=186
 # RESULT: ALL PASS
 EXIT[task-20-links] = 0
   ✓ GREEN: task-20-links
@@ -351,38 +435,38 @@ EXIT[task-20-links] = 0
 ════════════════════════════════════════
 --- task-2-qa-happy
 $ bun qa/task-2-qa.mjs happy
-  "fallbackVisible": false,
-  "musicControlVisible": true,
-  "contentChildren": 0,
-  "dataLocked": "true"
-}
-# real <audio> element: {"tag":"AUDIO","paused":false,"currentTime":0.00775,"readyState":4,"networkState":1,"error":null,"src":"http://127.0.0.1:46051/assets/music/song.mp3"}
-[PASS] begin overlay dismissed after tap
-[PASS] confetti burst fired inside the click handler :: calls=1
-[PASS] Howler reports playing after gesture :: playing=true
-[PASS] audio decoded and clock advanced (readyState>=2, currentTime>0, not paused) :: el={"tag":"AUDIO","paused":false,"currentTime":0.00775,"readyState":4,"networkState":1,"error":null,"src":"http://127.0.0.1:46051/assets/music/song.mp3"}
-[PASS] audio element is not paused :: paused=false
-[PASS] no play fallback shown when audio started
-[PASS] music control revealed once playing
-[PASS] countdown panel visible after tap
-[PASS] countdown ticking in d/h/m/s :: value="19d 15h 00m 00s"
-[PASS] content still locked (clock is before target) :: children=0
-[PASS] html[data-locked] still true before target
-# screenshot -> .omo/evidence/halimah-birthday-site/task-2-begin.png
-# post-target real state: {"unlocked":true,"dataUnlocked":"true","contentChildren":9,"sections":9,"starmapBack":true,"confettiCalls":7,"countdownHidden":true}
-[PASS] gate reports unlocked at/after target
-[PASS] all 9 content sections restored in order :: sections=9
-[PASS] star map restored into DOM after unlock
-[PASS] sections restored in source order :: story,quotes,gags,physics,scratch,album,starmap,world,finale
-[PASS] no console errors during run
-# RESULT: ALL PASS
-EXIT[task-2-qa-happy] = 0
-  ✓ GREEN: task-2-qa-happy
+[PASS] countdown resolves to 2026-10-19T00:00 Europe/London (BST=UTC+1) :: target=2026-10-18T23:00:00.000Z tz=Europe/London
+# locked DOM: content-region children=0 sections=0 starmapPresent=false
+[PASS] no audio playing BEFORE the gesture :: playing=false
+[PASS] audio state is idle before the gesture :: state=idle
+57689 |       throw new Error("Serialized error must have either an error or a value");
+57690 |     return parseSerializedValue(error.value, void 0);
+57691 |   }
+57692 |   let e;
+57693 |   if (error.error.name === "TimeoutError")
+57694 |     e = new TimeoutError2(error.error.message);
+                    ^
+TimeoutError: click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('#begin-button')
+    - locator resolved to <button type="button" id="begin-button" class="begin__button" data-testid="begin-button">…</button>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+
+  log: [ "  - waiting for locator('#begin-button')", "    - locator resolved to <button type=\"button\" id=\"begin-button\" class=\"begin__button\" data-testid=\"begin-button\">…</button>",
+  "  - attempting click action", "    - waiting for element to be visible, enabled and stable"
+],
+
+      at /home/vibex/.npm/_npx/e41f203b7505f1fb/node_modules/playwright-core/lib/coreBundle.js:57694:13
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-2-qa-happy] = 1
+  ✗ RED: task-2-qa-happy (exit 1)
 --- task-2-qa-locked
 $ bun qa/task-2-qa.mjs locked
 # task-2 QA — mode=locked
-# served from http://127.0.0.1:42297/ (root=/home/vibex/halimah-birthday)
-# build hash index.html=470bf53585dfb429 js/begin.js=28642352b6e875ce
+# served from http://127.0.0.1:45229/ (root=/home/vibex/halimah-birthday)
+# build hash index.html=5e60dbca06ab9789 js/begin.js=36582157214767e5
 [PASS] countdown resolves to 2026-10-19T00:00 Europe/London (BST=UTC+1) :: target=2026-10-18T23:00:00.000Z tz=Europe/London
 # locked DOM: content-region children=0 sections=0 starmapPresent=false
 [PASS] content region fully detached while locked
@@ -398,366 +482,58 @@ EXIT[task-2-qa-locked] = 0
   ✓ GREEN: task-2-qa-locked
 --- task-7-qa
 $ bun audits/task-7-qa.mjs
-gate state: {"unlocked":false,"done":false,"target":"2026-10-18T23:00:00.000Z","storyInDom":false}
-chapters in DOM (locked state): 0
-unlocked state: {"unlocked":true,"chapters":14,"times":14,"bqs":14,"gsap":true,"st":true,"triggers":0}
-story geometry: {"top":812,"height":35987.796875}
-screenshot: task-7-chapters.png
-scrub evidence: {"pinCount":0,"sample":[],"activeDots":0}
-animation-blocked readability: {"total":14,"visible":14,"minText":303}
-reduced-motion state: {"chapters":14,"innerPositions":["static"],"progressDisplay":"none","triggers":0,"readable":14}
-console/page errors: none
-done, log written
-EXIT[task-7-qa] = 0
-  ✓ GREEN: task-7-qa
+error: Cannot find package 'playwright' from '/home/vibex/halimah-birthday/audits/task-7-qa.mjs'
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-7-qa] = 1
+  ✗ RED: task-7-qa (exit 1)
 --- task-7-probe
 $ bun audits/task-7-probe.mjs
 launched
-{"unlocked":true,"chapters":14,"gsap":true,"triggers":0}
+{"unlocked":true,"chapters":14,"gsap":true,"triggers":173}
 closed clean
 EXIT[task-7-probe] = 0
   ✓ GREEN: task-7-probe
 --- task-7-qa2
 $ bun audits/task-7-qa2.mjs
-unlocked: {"unlocked":true,"chapters":14,"gsap":true,"triggers":0}
-shot task-7-chapters.png
-scrub: {"pins":0,"dots":14}
-errors: none
-reduced-motion: {"chapters":14,"readable":14,"innerPos":["static"],"progressDisplay":"none","triggers":0}
-no-anim readable: {"total":14,"readable":14}
-done
-EXIT[task-7-qa2] = 0
-  ✓ GREEN: task-7-qa2
+57689 |       throw new Error("Serialized error must have either an error or a value");
+57690 |     return parseSerializedValue(error.value, void 0);
+57691 |   }
+57692 |   let e;
+57693 |   if (error.error.name === "TimeoutError")
+57694 |     e = new TimeoutError2(error.error.message);
+                    ^
+TimeoutError: goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "file:///home/vibex/halimah-birthday/index.html", waiting until "load"
+
+  log: [ "  - navigating to \"file:///home/vibex/halimah-birthday/index.html\", waiting until \"load\"" ],
+
+      at /home/vibex/.npm/_npx/e41f203b7505f1fb/node_modules/playwright-core/lib/coreBundle.js:57694:13
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-7-qa2] = 1
+  ✗ RED: task-7-qa2 (exit 1)
 --- task-8-qa
 $ bun qa/task-8-qa.mjs
-build hash: ba2ff808c64f
-live DOM: {"cards":34,"visible":34,"times":34,"bqs":34,"singleCol":true,"threatLen":74}
-visible after scroll sweep: 34/34
-screenshot: task-8-wall.png
-reduced-motion: {"cards":34,"opacities":[1,1,1,1,1],"noJsClass":true}
-console: clean
-PASS task-8 manual QA
-EXIT[task-8-qa] = 0
-  ✓ GREEN: task-8-qa
+build hash: 6e3df52c88e3
+57689 |       throw new Error("Serialized error must have either an error or a value");
+57690 |     return parseSerializedValue(error.value, void 0);
+57691 |   }
+57692 |   let e;
+57693 |   if (error.error.name === "TimeoutError")
+57694 |     e = new TimeoutError2(error.error.message);
+                    ^
+TimeoutError: goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "file:///home/vibex/halimah-birthday/index.html", waiting until "load"
+
+  log: [ "  - navigating to \"file:///home/vibex/halimah-birthday/index.html\", waiting until \"load\"" ],
+
+      at /home/vibex/.npm/_npx/e41f203b7505f1fb/node_modules/playwright-core/lib/coreBundle.js:57694:13
+
+Bun v1.4.2 (Linux x64)
+EXIT[task-8-qa] = 1
+  ✗ RED: task-8-qa (exit 1)
 --- task-9-qa
 $ bun audits/task-9-qa.mjs
-      "key": "goodboy",
-      "gag": true,
-      "closer": true
-    },
-    {
-      "key": "hashbrown",
-      "gag": true,
-      "closer": true
-    },
-    {
-      "key": "spider",
-      "gag": true,
-      "closer": true
-    }
-  ],
-  "spiderSvg": true,
-  "spiderImg": 0,
-  "boopH": 44,
-  "unlocked": "true"
-}
-# all 4 cards revealed on scroll
-# room top=43692 height=3054
-{"jsGags":false,"visible":["1","1","1","1"]}
-# reduced-motion: 4/4 cards readable, no reveal
-PASS task-9 QA: 4 cards verified in live DOM, screenshots saved
-EXIT[task-9-qa] = 0
-  ✓ GREEN: task-9-qa
---- task-10-qa
-$ bun audits/task-10-qa.mjs
-=== HAPPY PATH: 375px scratch to unlock ===
-before scratching: {"unlocked":false,"percent":0,"mode":"scratch"}
-screenshot: task-10-before.png (foil intact)
-  row 1: percent=13 unlocked=false
-  row 2: percent=26 unlocked=false
-  row 3: percent=38 unlocked=false
-  row 4: percent=51 unlocked=false
-  row 5: percent=55 unlocked=true
-after scratching: {"unlocked":true,"method":"scratch","percent":55,"source":"halimah dms-6.txt:952","revealed":"For me it is worth living cuz seeing a new day mea...","replayVisible":true}
-secret matches on-screen reveal: true
-EVIDENCE: task-10-scratch.png (section, unlocked)
-screenshot: task-10-scratch-viewport.png (375px full viewport)
-page errors: none
-
-=== FAILURE QA: view-source contains no secret ===
-[a] raw index.html bytes: secret present = false
-[b] locked (pre-19 Oct, no clock override): gateUnlocked=false chapters=0 secretInSource=false secretInBodyText=false secretInInnerHTML=false
-[b] unlocked (20 Oct, worst case): gateUnlocked=true chapters=14 secretInSource=false secretInBodyText=false secretInInnerHTML=false
-[c] contiguous secret literal in scratch.js (expected false, it is built from parts): false
-[c] a secret fragment IS present in scratch.js (expected true): true
-[c] assembled secret present in index.html (expected false): false
-
-wrote /home/vibex/.omo/evidence/halimah-birthday-site/task-10-source.log
-EXIT[task-10-qa] = 0
-  ✓ GREEN: task-10-qa
---- task-11-qa
-$ bun audits/task-11-qa.mjs
-album markup: {"pages":8,"placeholders":8}
-after mount: {"flipCtor":"function","mode":"flip","total":"6","supplied":"0","noticeHidden":false,"imgs":0}
-after flips: {"flipState":"read","mode":"flip"}
-screenshot saved: task-11-album.png
-js errors (non-probe): none
-photo probes failed as designed (empty dir): 6/6
-names fetch on this protocol: graceful file:// fallback (no throw)
-[PASS] 8 pages with data-density
-[PASS] 8 illustrated placeholders
-[PASS] St.PageFlip constructor present (vendored locally)
-[PASS] mount mode is flip, not stacked
-[PASS] 6 slots, 0 supplied (empty dir)
-[PASS] zero <img> injected (no broken icons)
-[PASS] flip-through advances engine state
-[PASS] 6/6 photo probes failed as designed
-[PASS] zero non-probe js errors
-RESULT: PASS
-EXIT[task-11-qa] = 0
-  ✓ GREEN: task-11-qa
---- task-12-qa-happy
-$ bun qa/task-12-qa.mjs happy
-# build sha256(index+finale.css+finale.js) = 4e8cfd46efa0ff88
-# mode = happy
-# begin overlay already clear (overlayShowing=false, btnVisible=false) — gate auto-unlocked past target
-[PASS] finale section restored in DOM past target
-# finale.js lazy-loaded and opted in (html.js-finale present)
-# pre-open real state: {"jsFinale":true,"stageOpen":false,"envelopeVisible":"block"}
-[PASS] finale.js opted in (html.js-finale present)
-[PASS] stage starts sealed (is-open absent)
-[PASS] envelope rendered pre-open — display=block
-# post-open real state: {"stageOpen":true,"openBtnDisplay":"none","paraCount":8}
-[PASS] stage carries is-open after tap
-[PASS] unseal button hides after opening
-[PASS] letter paragraphs rendered — paras=8
-# screenshot -> .omo/evidence/halimah-birthday-site/task-12-letter.png
-# print-media real state: {"letterTop":498,"letterHeight":1520,"keepsakesDisplay":"none","slotDisplay":"none","envelopeDisplay":"none","letterVisible":"visible"}
-[PASS] keepsake panel suppressed in print
-[PASS] owner-slot marginalia suppressed in print
-[PASS] envelope suppressed in print
-[PASS] letter visible in print
-# screenshot -> .omo/evidence/halimah-birthday-site/task-12-letter-print.png
-# resource errors: 6 console line(s); photo-probe 404s seen: 6/6; unexplained: 0
-[PASS] every failed-resource 404 is a designed empty photo probe — 6 resource error line(s) vs 6 photo 404(s)
-[PASS] no console errors during run
-# RESULT: ALL PASS
-# cleanup: browser closed, server closed, no processes left
-EXIT[task-12-qa-happy] = 0
-  ✓ GREEN: task-12-qa-happy
---- task-12-qa-nojs
-$ bun qa/task-12-qa.mjs nojs
-# build sha256(index+finale.css+finale.js) = 4e8cfd46efa0ff88
-# mode = nojs
-# begin overlay dismissed by tap
-[PASS] finale section restored in DOM past target
-# js-finale class never appeared (non-fatal, state read below)
-# no-JS real state: {"jsFinale":false,"paraCount":9,"letterDisplay":"block","hasGreeting":true,"hasJourney":true,"hasVow":true,"hasSignoff":true,"hasSlots":3,"textLen":2066}
-[PASS] no js-finale opt-in class without JS
-[PASS] letter not hidden without JS — display=block
-[PASS] all letter paragraphs in DOM without JS — paras=9
-[PASS] greeting readable without JS
-[PASS] reassurance line readable without JS
-[PASS] vow readable without JS
-[PASS] sign-off readable without JS
-# screenshot -> .omo/evidence/halimah-birthday-site/task-12-nojs.png
-# resource errors: 0 console line(s); photo-probe 404s seen: 0/6; unexplained: 0
-[PASS] every failed-resource 404 is a designed empty photo probe — 0 resource error line(s) vs 0 photo 404(s)
-[PASS] no console errors during run
-# RESULT: ALL PASS
-# cleanup: browser closed, server closed, no processes left
-EXIT[task-12-qa-nojs] = 0
-  ✓ GREEN: task-12-qa-nojs
---- task-13-world
-$ bun qa/task-13-world.mjs
-# task-13 world screenshot QA — served from http://127.0.0.1:42687/
-# build hash index.html=470bf53585dfb429
-live DOM state: {"unlocked":true,"cards":8,"motifs":["music","horror","games","anime","writing","drawing","badminton","autumn"],"stubs":3,"badges":3,"dmQuotes":8}
-# world.js lazy-loaded and observing (html.js-world present)
-reveal state: [{"motif":"music","in":true,"op":1},{"motif":"horror","in":true,"op":1},{"motif":"games","in":true,"op":1},{"motif":"anime","in":true,"op":1},{"motif":"writing","in":true,"op":1},{"motif":"drawing","in":true,"op":1},{"motif":"badminton","in":true,"op":1},{"motif":"autumn","in":true,"op":1}]
-ASSERT: unlocked + 8 revealed motif cards (3 stubs, 3 badges, 8 DM quotes) — PASS
-screenshot: /home/vibex/.omo/evidence/halimah-birthday-site/task-13-world.png
-screenshot: /home/vibex/.omo/evidence/halimah-birthday-site/task-13-world-bottom.png
-console/page errors (excl. album placeholder probes): none
-done
-EXIT[task-13-world] = 0
-  ✓ GREEN: task-13-world
---- task-13-lyric
-$ bun qa/task-13-lyric.mjs
-# task-13 lyric-guard failure QA
-# build hash index.html=470bf53585dfb429 (bytes read from disk this run)
-# injected blob (75 chars): "simulated injected lyric blob that must trip the forty character guard line"
-# long spans found: 10, unattributed: 1
-# guard verdict on tampered tree: FAIL (expected — injected lyric caught)
-RESULT: GUARD CORRECTLY REJECTED THE INJECTED LYRIC
-# log written: /home/vibex/.omo/evidence/halimah-birthday-site/task-13-lyric.log
-EXIT[task-13-lyric] = 0
-  ✓ GREEN: task-13-lyric
---- task-14-qa
-$ bun qa/task-14-qa.mjs
-[PASS] countdown unlock fired the second staged cannon (total 2) :: totalFired=2
-[PASS] content unlocked at the target instant
-[PASS] story content restored into the DOM :: children=9
-[PASS] unlock volley completed: 3 volleys x 2 cannons = 6 calls, then stops :: delta=6
-[PASS] finale unseal fired the third cannon (total 3) :: totalFired=3
-[PASS] unseal fires one 2-cannon volley (2 calls) :: delta=2
-[PASS] envelope stage opened
-[PASS] letter text present after unseal :: len=2395
-# unseal cannon: first volley calls delta=2 (2 more volleys land at +350ms/+700ms)
-[PASS] unseal volley completed: 3 volleys x 2 cannons = 6 calls, then stops :: delta=6
-[PASS] replay button exists in the finale keepsakes
-[PASS] replay button is offered when motion is allowed :: hidden=false
-[PASS] replay tap fires one volley (2 calls) :: delta=2
-[PASS] replay volley bounded at 3 volleys, then stops (no loop) :: delta=6
-[PASS] confetti call count is stable after 1.2s idle (no infinite loop) :: before=19 after=19
-# gsap loaded=true (lazy, enhancement only)
-# screenshot -> /home/vibex/.omo/evidence/halimah-birthday-site/task-14-confetti.png
-[PASS] confetti canvas exists in the DOM :: {"canvas":true,"w":375,"h":667,"offscreen":true}
-[PASS] rendered frame carries confetti pixels (real render, not a log line) :: brightPixels=8157
-# frame pixels above background: 8157
-[PASS] no console errors during the whole run
-
-# RESULT: PASS (happy)
-
-# log -> /home/vibex/.omo/evidence/halimah-birthday-site/task-14-happy.log
-EXIT[task-14-qa] = 0
-  ✓ GREEN: task-14-qa
---- task-15-physics
-$ bun qa/task-15-physics.mjs
-# task-15 physics QA — served from http://127.0.0.1:34221/
-# build hash index.html=470bf53585dfb429
-pre-opt-in state: {"mode":"static-pending","names":["Zai","Halimah","princess","Ash","hubby"],"chips":["Zai","Halimah","princess","Ash","hubby"],"staticVisible":true,"playVisible":true}
-post-opt-in state: {"mode":"physics","heartCount":5,"names":["Zai","Halimah","princess","Ash","hubby"],"matter":true,"staticVisibleAfter":false,"staticDisplayAfter":"none","heartEls":5,"bubbles":[{"name":"Zai","x":90,"y":134},{"name":"Halimah","x":168,"y":134},{"name":"princess","x":232,"y":177},{"name":"Ash","x":71,"y":182},{"name":"hubby","x":149,"y":182}]}
-drag target: {"x":121.79021070114392,"y":435.46718216751276,"name":"Zai","before":{"x":89.79021070114392,"y":133.79530716751273}}
-grab state: {"dragging":"Zai"}
-shove result: before={"x":89.79021070114392,"y":133.79530716751273} after={"x":221.04040109430997,"y":147.81036582434515} released=132.0px peakDrag=196.4px
-ASSERT: names pre-rendered static, lazy physics loaded, 5 lore names, real shove moved a heart — PASS
-screenshot: /home/vibex/.omo/evidence/halimah-birthday-site/task-15-physics.png
-console/page errors: none
-done
-EXIT[task-15-physics] = 0
-  ✓ GREEN: task-15-physics
---- task-15-fallback
-$ bun qa/task-15-fallback.mjs
-  "mode": "static",
-  "reason": "physics stayed asleep: Failed to fetch",
-  "names": [
-    "Zai",
-    "Halimah",
-    "princess",
-    "Ash",
-    "hubby"
-  ],
-  "matter": false,
-  "staticVisible": true,
-  "staticDisplay": "flex",
-  "chips": [
-    "Zai",
-    "Halimah",
-    "princess",
-    "Ash",
-    "hubby"
-  ],
-  "note": "physics stayed asleep: Failed to fetch",
-  "heartEls": 0
-}
-ASSERT: blocked library -> static names layout shown (5 lore names, no Matter) — PASS
-evidence log: /home/vibex/.omo/evidence/halimah-birthday-site/task-15-fallback.log
-done
-EXIT[task-15-fallback] = 0
-  ✓ GREEN: task-15-fallback
---- task-15-reduced
-$ bun qa/task-15-reduced-motion.mjs
-reduced-motion state: {
-  "mode": "static",
-  "reason": "calm mode: hearts resting, still named",
-  "chips": [
-    "Zai",
-    "Halimah",
-    "princess",
-    "Ash",
-    "hubby"
-  ],
-  "staticVisible": true,
-  "playHidden": true,
-  "heartEls": 0,
-  "matter": false
-}
-matter-js fetches under reduced motion: 0
-ASSERT: reduced-motion -> static names only, no physics fetch, no tap — PASS
-evidence log: /home/vibex/.omo/evidence/halimah-birthday-site/task-15-reduced-motion.log
-done
-EXIT[task-15-reduced] = 0
-  ✓ GREEN: task-15-reduced
-
-════════════════════════════════════════
-5. VIEWPORTS + COLD LOAD + REDUCED MOTION
-════════════════════════════════════════
---- task-20-sweep
-$ bun qa/task-20-sweep.mjs
-[PASS] no horizontal overflow at 768px :: scrollW=768 winW=768
-[PASS] all 9 sections present at 768px :: sections=9
-[PASS] story content is on screen at 768px :: storyTextLen=15
-[PASS] no page/HTTP errors at 768px
-# 1280x800 (laptop) -> task-20-1280.png :: sections=9 scrollW=1280 winW=1280 storyTextLen=15
-[PASS] no horizontal overflow at 1280px :: scrollW=1280 winW=1280
-[PASS] all 9 sections present at 1280px :: sections=9
-[PASS] story content is on screen at 1280px :: storyTextLen=15
-[PASS] no page/HTTP errors at 1280px
-# 1920x1080 (desktop) -> task-20-1920.png :: sections=9 scrollW=1920 winW=1920 storyTextLen=15
-[PASS] no horizontal overflow at 1920px :: scrollW=1920 winW=1920
-[PASS] all 9 sections present at 1920px :: sections=9
-[PASS] story content is on screen at 1920px :: storyTextLen=15
-[PASS] no page/HTTP errors at 1920px
-# cold-load (throttled, empty cache): {"ttfb":4,"domContentLoaded":1790,"load":2751,"firstPaint":1064,"transferBytes":102245}
-[PASS] TTFB under 1.5s on a throttled cold load :: 4ms
-[PASS] load event under 8s on a throttled cold load :: 2751ms
-[PASS] first contentful paint under 3s :: 1064ms
-# reduced motion: {"total":14,"visible":14,"innerPositions":["static"],"confettiRan":true}
-[PASS] all story chapters readable under reduced motion :: visible=14/14
-[PASS] no pinned/scrubbed positioning under reduced motion :: static
-[PASS] reduced-motion frame shows real chapter text :: quoteTextLen=206
-[PASS] no page errors under reduced motion
-# cleanup: browser closed, server closed
-# RESULT: ALL PASS
-EXIT[task-20-sweep] = 0
-  ✓ GREEN: task-20-sweep
-
-════════════════════════════════════════
-6. OWNER SLOTS (empty-input build must still pass)
-════════════════════════════════════════
---- task-19-acceptance
-$ bun audits/task-19-acceptance.mjs
-[PASS] doc lists 6 photo slots — found 1,2,3,4,5,6
-[PASS] markup probes 6 photo slots — found 1,2,3,4,5,6
-[PASS] photos README lists 6 slots — found 1,2,3,4,5,6
-[PASS] doc names song.mp3
-[PASS] markup points at song.mp3
-[PASS] music README documents swap
-[PASS] markup has 3 owner slots — found ps,signature,spider-line
-[PASS] doc documents slot spider-line — spider-line
-[PASS] doc documents slot signature — signature
-[PASS] doc documents slot ps — ps
-[PASS] live marker count is exactly 3 — live 3
-[PASS] doc explains the [OWNER:] convention
-[PASS] no turning-17 line on page
-[PASS] quote audit still forbids turning-17
-[PASS] doc records the 17 decision
-[PASS] album probes before swapping (no broken icons)
-[PASS] placeholders exist for all 6 pages
-[PASS] music failure handled gracefully
-[PASS] print hides owner slots
-[PASS] doc states photo default
-[PASS] doc states song default
-[PASS] doc states letter reads complete
-ACCEPTANCE: ALL PASS
-EXIT[task-19-acceptance] = 0
-  ✓ GREEN: task-19-acceptance
-
-════════════════════════════════════════
-SWEEP VERDICT
-════════════════════════════════════════
-host memory: 2908 MB total, 1240 MB available
-ALL GREEN — 0 red checks
-finished: 2026-09-29T14:59:59+00:00
-log     : /home/vibex/halimah-birthday/.omo/evidence/halimah-birthday-site/task-20-sweep.log

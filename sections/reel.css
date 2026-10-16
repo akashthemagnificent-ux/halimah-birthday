@@ -5,10 +5,12 @@
    No-JS: track hidden, plain file links shown.
    ============================================================ */
 
-.section--reel {
+.section.section--reel {
   position: relative;
   /* base .section is a column flex with align-items:center; the track must
-     span full width or the stage (all-absolute children) collapses to 0px */
+     span full width or the stage (all-absolute children) collapses to 0px.
+     Doubled class outspecifies the inline base .section rule (later in
+     index.html at equal specificity), same as .section.section--world. */
   display: block;
   background: rgb(8 8 10);
   color: rgb(232 224 216);

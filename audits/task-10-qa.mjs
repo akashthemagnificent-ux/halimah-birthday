@@ -3,7 +3,7 @@
           past the threshold, screenshot of the revealed panel.
    FAILURE (Evidence task-10-source.log): view-source of the page shows no
           secret, in both the locked and the unlocked (worst-case) state. */
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const ROOT = '/home/vibex/halimah-birthday';
@@ -12,6 +12,23 @@ mkdirSync(OUT, { recursive: true });
 const URL = `file://${ROOT}/index.html`;
 const log = [];
 const note = (m) => { log.push(m); console.log(m); };
+// Evidence screenshots are non-fatal: swiftshader sometimes stalls the
+// compositor past playwright's screenshot timeout (known pathology).
+const shot = async (fn) => {
+  try { await fn(); }
+  catch (e) { note('screenshot SKIPPED: ' + String(e).split('\n')[0].slice(0, 100)); }
+};
+// GSAP ScrollTrigger re-smooths <html> inline; smooth scroll + refresh storm
+// under swiftshader can freeze the main thread for minutes (snap13 pathology).
+const injectNoSmooth = (p) => p.addInitScript(() => {
+  const apply = () => {
+    const s = document.createElement('style');
+    s.textContent = 'html { scroll-behavior: auto !important; }';
+    (document.head || document.documentElement).appendChild(s);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+});
 
 const secret = (() => {
   const js = readFileSync(`${ROOT}/sections/scratch.js`, 'utf8');
@@ -37,7 +54,7 @@ const fakeClock = () => {
   globalThis.Date = FakeDate;
 };
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 try {
   // ============ HAPPY PATH ============
   note('=== HAPPY PATH: 375px scratch to unlock ===');
@@ -50,12 +67,14 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.addInitScript(fakeClock);
-  await page.goto(URL, { waitUntil: 'load' });
+  await injectNoSmooth(page);
+  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
   // scratch.js is lazy-loaded on first scroll into view (index.html
   // LAZY_SECTIONS), so bring the section into view before waiting for the
   // panel, otherwise the wait races a script that has not been fetched yet.
   await page.evaluate(() => document.getElementById('scratch')?.scrollIntoView());
-  await page.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 10000 });
+  await page.waitForFunction(() => window.__scratchPanel?.ready === true, null, { timeout: 30000 });
 
   await page.locator('#scratch').scrollIntoViewIfNeeded();
   await page.waitForTimeout(400);
@@ -67,7 +86,7 @@ try {
   }));
   note(`before scratching: ${JSON.stringify(pre)}`);
 
-  await page.screenshot({ path: `${OUT}/task-10-before.png` });
+  await shot(() => page.screenshot({ path: `${OUT}/task-10-before.png` }));
   note('screenshot: task-10-before.png (foil intact)');
 
   // Real thumb scratching: sweep rows until the threshold trips.
@@ -102,9 +121,9 @@ try {
   note(`secret matches on-screen reveal: ${post.revealed === secret}`);
 
   // Frame the whole section for the evidence shot.
-  await page.locator('.scratch__content').screenshot({ path: `${OUT}/task-10-scratch.png` });
+  await shot(() => page.locator('.scratch__content').screenshot({ path: `${OUT}/task-10-scratch.png` }));
   note('EVIDENCE: task-10-scratch.png (section, unlocked)');
-  await page.screenshot({ path: `${OUT}/task-10-scratch-viewport.png` });
+  await shot(() => page.screenshot({ path: `${OUT}/task-10-scratch-viewport.png` }));
   note('screenshot: task-10-scratch-viewport.png (375px full viewport)');
   note(`page errors: ${errors.length === 0 ? 'none' : errors.join(' | ')}`);
   await page.close();
@@ -124,7 +143,9 @@ try {
   ]) {
     const p = await browser.newPage({ viewport: { width: 375, height: 812 } });
     if (clock) await p.addInitScript(clock);
-    await p.goto(URL, { waitUntil: 'load' });
+    await injectNoSmooth(p);
+  await p.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await p.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
     await p.waitForTimeout(1200);
     const res = await p.evaluate((s) => {
       const src = new XMLSerializer().serializeToString(document.documentElement);

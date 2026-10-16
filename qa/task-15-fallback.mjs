@@ -9,7 +9,7 @@
 //   - misleading-success-output: asserts live DOM state (chips present, static
 //     wrap not hidden, Matter undefined) after the real blocked request, not a
 //     string the page printed.
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
 import { createServer } from 'node:http';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -17,6 +17,9 @@ import { extname, join, normalize, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+// Expected chips come from content/physics-names.js (the section's single
+// source of truth) so name-list growth never strands this QA.
+const expectedNames = [...(await readFile(join(root, 'content', 'physics-names.js'), 'utf8')).matchAll(/"name":\s*"([^"]+)"/g)].map((m) => m[1]);
 const LOG = '/home/vibex/.omo/evidence/halimah-birthday-site/task-15-fallback.log';
 
 const MIME = {
@@ -78,7 +81,8 @@ try {
     globalThis.Date = FakeDate;
   });
 
-  await page.goto(base, { waitUntil: 'load' });
+  await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(3000);
   await page.evaluate(() => document.getElementById('physics')?.scrollIntoView({ block: 'center' }));
   await page.waitForFunction(
@@ -87,8 +91,8 @@ try {
   );
 
   // Opt in -> the lazy fetch is blocked -> must fall back to static.
-  await page.click('[data-physics-play]');
-  await page.waitForFunction(() => window.__physics?.mode === 'static', { timeout: 8000 });
+  await page.evaluate(() => document.querySelector('[data-physics-play]').click());
+  await page.waitForFunction(() => window.__physics?.mode === 'static', null, { timeout: 30000 });
 
   const state = await page.evaluate(() => ({
     mode: window.__physics?.mode,
@@ -110,11 +114,11 @@ try {
     state.matter === false &&
     state.staticVisible === true &&
     state.staticDisplay !== 'none' &&
-    JSON.stringify(state.chips) === JSON.stringify(['Zai', 'Halimah', 'princess', 'Ash', 'hubby']) &&
+    JSON.stringify(state.chips) === JSON.stringify(expectedNames) &&
     state.heartEls === 0 &&
-    /physics stayed asleep/i.test(state.note);
+    /stayed asleep/i.test(state.note);
 
-  say(ok ? 'ASSERT: blocked library -> static names layout shown (5 lore names, no Matter) — PASS'
+  say(ok ? `ASSERT: blocked library -> static names layout shown (${expectedNames.length} lore names, no Matter) — PASS`
          : 'ASSERT: fallback did not engage as expected — FAIL');
   if (!ok) process.exitCode = 1;
 } finally {

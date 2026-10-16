@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
 import { writeFileSync, mkdirSync } from 'node:fs';
 
 const OUT = '/home/vibex/.omo/evidence/halimah-birthday-site';
@@ -6,6 +6,12 @@ mkdirSync(OUT, { recursive: true });
 const URL = 'file:///home/vibex/halimah-birthday/index.html';
 const log = [];
 const note = (m) => { log.push(m); console.log(m); };
+// Evidence screenshots are non-fatal: swiftshader sometimes stalls the
+// compositor past playwright's 30s screenshot timeout (known pathology).
+const shot = async (pg, path) => {
+  try { await pg.screenshot({ path }); }
+  catch (e) { note('screenshot SKIPPED (compositor stall): ' + path.split('/').pop()); }
+};
 
 const browser = await chromium.launch();
 try {
@@ -15,7 +21,9 @@ try {
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 
-  await page.goto(URL, { waitUntil: 'load' });
+  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+  await page.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(800);
 
   const gate = await page.evaluate(() => ({
@@ -52,7 +60,8 @@ try {
     }
     globalThis.Date = FakeDate;
   });
-  await page2.goto(URL, { waitUntil: 'load' });
+  await page2.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page2.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
   await page2.waitForTimeout(1200);
 
   const s2 = await page2.evaluate(() => ({
@@ -76,12 +85,12 @@ try {
 
   await page2.evaluate(({ top }) => window.scrollTo(0, top + 200), storyBox);
   await page2.waitForTimeout(900);
-  await page2.screenshot({ path: `${OUT}/task-7-chapters.png` });
+  await shot(page2, `${OUT}/task-7-chapters.png`);
   note('screenshot: task-7-chapters.png');
 
   await page2.evaluate(({ top, height }) => window.scrollTo(0, top + height * 0.6), storyBox);
   await page2.waitForTimeout(900);
-  await page2.screenshot({ path: `${OUT}/task-7-chapters-mid2.png` });
+  await shot(page2, `${OUT}/task-7-chapters-mid2.png`);
 
   const scrubEvidence = await page2.evaluate(() => {
     const pins = window.ScrollTrigger
@@ -105,7 +114,8 @@ try {
     }
     globalThis.Date = FakeDate;
   });
-  await page3.goto(URL, { waitUntil: 'load' });
+  await page3.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page3.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
   await page3.waitForTimeout(800);
   const noAnim = await page3.evaluate(() => {
     const chs = [...document.querySelectorAll('#story [data-chapter]')];
@@ -118,7 +128,7 @@ try {
     return { total: chs.length, visible, minText: Math.min(...texts) };
   });
   note(`animation-blocked readability: ${JSON.stringify(noAnim)}`);
-  await page3.screenshot({ path: `${OUT}/task-7-noanim.png` });
+  await shot(page3, `${OUT}/task-7-noanim.png`);
   await page3.close();
   await page2.close();
 
@@ -136,7 +146,8 @@ try {
     }
     globalThis.Date = FakeDate;
   });
-  await page4.goto(URL, { waitUntil: 'load' });
+  await page4.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page4.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
   await page4.waitForTimeout(800);
   const motion = await page4.evaluate(() => {
     const chs = [...document.querySelectorAll('#story [data-chapter]')];
@@ -150,7 +161,7 @@ try {
     return { chapters: chs.length, innerPositions: [...new Set(inners)], progressDisplay, triggers, readable };
   });
   note(`reduced-motion state: ${JSON.stringify(motion)}`);
-  await page4.screenshot({ path: `${OUT}/task-7-motion.png` });
+  await shot(page4, `${OUT}/task-7-motion.png`);
   await page4.close();
 
   note(`console/page errors: ${errors.length ? JSON.stringify(errors.slice(0, 5)) : 'none'}`);
