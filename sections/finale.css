@@ -72,11 +72,20 @@
 /* ---- Stage: envelope + letter ---- */
 .finale__stage {
   width: 100%;
-  max-width: 36rem;
+  max-width: 38rem;
   perspective: 1400px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Paper grain shared by envelope + letter (inline SVG noise, no asset). */
+.finale__grain,
+html.js-finale .finale__envelope,
+html.js-finale .finale__letter {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(175deg, rgb(246 238 224) 0%, rgb(238 228 208) 52%, rgb(232 220 198) 100%);
 }
 
 /* Envelope and unseal button exist only as enhancement:
@@ -89,54 +98,68 @@
 html.js-finale .finale__envelope {
   display: block;
   position: relative;
-  width: min(22rem, 84vw);
+  width: min(23rem, 84vw);
   aspect-ratio: 16 / 10;
-  border-radius: var(--radius-md);
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgb(190 172 140);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.18),
+    0 14px 36px rgb(0 0 0 / 0.42),
+    inset 0 1px 0 rgb(255 252 244 / 0.55);
   overflow: hidden;
 }
 
 html.js-finale .finale__envelope-flap {
   position: absolute;
   inset: 0 0 50% 0;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background:
+    linear-gradient(180deg, rgb(249 242 228) 0%, rgb(238 227 204) 100%);
+  border-bottom: 1px solid rgb(190 172 140);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: top center;
   transform: rotateX(0deg);
-  transition: transform var(--duration-slow) var(--ease-out);
+  transition: transform 900ms var(--ease-out);
   z-index: 2;
 }
 
 html.js-finale .finale__stage.is-open .finale__envelope-flap {
-  transform: rotateX(168deg);
+  transform: rotateX(172deg);
   z-index: 0;
 }
 
+/* Wax seal */
 html.js-finale .finale__seal {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: var(--space-12);
-  height: var(--space-12);
+  width: 3.25rem;
+  height: 3.25rem;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: var(--color-accent);
-  color: var(--color-bg);
+  background:
+    radial-gradient(circle at 34% 30%, rgb(214 108 78) 0%, rgb(168 62 44) 46%, rgb(126 40 30) 100%);
+  color: rgb(255 236 224);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: var(--text-md);
-  box-shadow: var(--shadow-glow);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+  box-shadow:
+    inset 0 -2px 4px rgb(0 0 0 / 0.28),
+    inset 0 2px 3px rgb(255 190 160 / 0.4),
+    0 2px 8px rgb(0 0 0 / 0.35);
   z-index: 3;
-  transition: opacity var(--duration-normal) var(--ease-out);
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 420ms var(--ease-out);
 }
 
 html.js-finale .finale__stage.is-open .finale__seal {
   opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
 }
 
 html.js-finale .finale__open {
@@ -149,16 +172,28 @@ html.js-finale .finale__open {
   font-family: var(--font-display);
   font-size: var(--text-base);
   letter-spacing: 0.06em;
-  color: var(--color-bg);
-  background: var(--color-accent);
-  border: none;
+  color: rgb(40 28 20);
+  background: linear-gradient(180deg, rgb(240 226 200) 0%, rgb(228 210 178) 100%);
+  border: 1px solid rgb(190 172 140);
   border-radius: var(--radius-pill);
   cursor: pointer;
-  box-shadow: var(--shadow-md);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.25),
+    0 6px 18px rgb(0 0 0 / 0.3);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+html.js-finale .finale__open:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.25),
+    0 10px 24px rgb(0 0 0 / 0.35);
 }
 
 html.js-finale .finale__open:active {
-  background: var(--color-accent-glow);
+  transform: translateY(0);
 }
 
 html.js-finale .finale__open:focus-visible {
@@ -170,29 +205,35 @@ html.js-finale .finale__stage.is-open .finale__open {
   display: none;
 }
 
-/* ---- Letter ---- */
+/* ---- Letter: warm paper card ---- */
 .finale__letter {
   width: 100%;
   margin-top: var(--space-6);
-  padding: var(--space-8) var(--space-6);
+  padding: var(--space-10) var(--space-8) var(--space-8);
   text-align: left;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  color: rgb(52 38 28);
+  background: rgb(244 236 222);
+  border: 1px solid rgb(200 182 152);
+  border-radius: var(--radius-sm);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.2),
+    0 18px 48px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 252 244 / 0.6);
 }
 
 /* Sealed state (JS only): letter peeks folded out of the envelope. */
 html.js-finale .finale__letter {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(175deg, rgb(246 238 224) 0%, rgb(238 228 208) 52%, rgb(232 220 198) 100%);
   margin-top: calc(-1 * var(--space-8));
   transform-origin: top center;
-  transform: translateY(38%) scaleY(0.42);
-  opacity: 0.55;
+  transform: translateY(42%) scaleY(0.38);
+  opacity: 0.5;
   transition:
-    transform var(--duration-slow) var(--ease-out),
-    opacity var(--duration-slow) var(--ease-out),
-    margin var(--duration-slow) var(--ease-out);
+    transform 900ms var(--ease-out),
+    opacity 700ms var(--ease-out),
+    margin 900ms var(--ease-out);
 }
 
 html.js-finale .finale__stage.is-open .finale__letter {
@@ -206,58 +247,164 @@ html.js-finale .finale__stage.is-open .finale__letter {
   font-size: var(--text-xs);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-5);
+  color: rgb(140 118 96);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid rgb(210 192 162);
+}
+
+.finale__salutation {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.3;
+  color: rgb(74 52 36);
+  margin: 0 0 var(--space-6);
+}
+
+/* Ink flourish under the salutation */
+.finale__salutation::after {
+  content: "";
+  display: block;
+  width: 7.5rem;
+  height: 9px;
+  margin-top: var(--space-3);
+  background:
+    radial-gradient(circle at center, rgb(190 120 70) 0%, rgb(190 120 70) 38%, transparent 42%) center / 9px 9px no-repeat,
+    linear-gradient(90deg, transparent, rgb(190 170 140) 18%, rgb(190 170 140) 82%, transparent) center / 100% 1px no-repeat;
 }
 
 .finale__para {
   font-family: var(--font-display);
+  font-weight: 300;
   font-size: var(--text-base);
-  line-height: 1.75;
-  margin-bottom: var(--space-4);
+  line-height: 1.88;
+  color: rgb(58 44 32);
+  margin-bottom: var(--space-5);
+  max-width: 34em;
 }
 
 .finale__para q {
   quotes: "\201C" "\201D";
-  color: var(--color-accent-glow);
+  color: rgb(140 76 40);
   font-style: italic;
 }
 
-.finale__signoff {
-  margin-top: var(--space-6);
-  font-family: var(--font-display);
+/* Vow: the pull-quote centerpiece */
+.finale__vow {
+  margin: var(--space-8) auto;
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
   font-size: var(--text-md);
   font-style: italic;
+  line-height: 1.75;
+  color: rgb(74 52 36);
+  border-top: 1px solid rgb(200 170 130);
+  border-bottom: 1px solid rgb(200 170 130);
+  background:
+    linear-gradient(180deg, rgb(255 250 240 / 0.5), rgb(255 250 240 / 0.15));
+}
+
+.finale__vow q {
+  display: block;
+  margin: var(--space-3) 0;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.045em;
   line-height: 1.7;
-  color: var(--color-text);
+  color: rgb(122 58 32);
+}
+
+/* Closing line gets a small breath of its own */
+.finale__closer {
+  margin-top: var(--space-6);
+  font-size: var(--text-md);
+  color: rgb(140 76 40);
+}
+
+/* Signature block */
+.finale__signoff {
+  margin-top: var(--space-8);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  line-height: 1.8;
+  color: rgb(52 38 28);
+}
+
+.finale__sign-lead {
+  font-style: italic;
+  color: rgb(96 74 54);
+}
+
+.finale__sign-names {
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--text-md);
+  letter-spacing: 0.01em;
+  color: rgb(110 62 36);
+  font-family: 'Segoe Script', 'Bradley Hand', 'Brush Script MT', 'Fraunces', cursive;
+}
+
+html.js-finale .finale__sign-names {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.6s var(--ease-out) 0.9s;
+}
+
+html.js-finale .finale__stage.is-open .finale__sign-names {
+  clip-path: inset(0 0 0 0);
 }
 
 .finale__fill {
   color: var(--color-accent-glow);
 }
 
-/* Owner-edit slots: visible marginalia, never silent defaults. */
-.finale__slot {
-  display: inline-block;
-  margin-left: var(--space-1);
-  padding: 0 var(--space-2);
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  font-style: normal;
-  letter-spacing: 0.04em;
-  color: var(--color-secondary);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-sm);
-  vertical-align: baseline;
-}
-
 .finale__sources {
-  margin-top: var(--space-6);
+  margin-top: var(--space-8);
   padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgb(210 192 162);
   font-size: var(--text-xs);
   line-height: 1.6;
-  color: var(--color-text-muted);
+  color: rgb(140 118 96);
+  text-align: center;
+}
+
+/* ---- Staged paragraph reveal (JS-gated; no-JS reads instantly) ---- */
+html.js-finale .finale__letter .finale__dateline,
+html.js-finale .finale__letter .finale__salutation,
+html.js-finale .finale__letter .finale__para,
+html.js-finale .finale__letter .finale__signoff,
+html.js-finale .finale__letter .finale__sources {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+}
+
+html.js-finale .finale__stage.is-open .finale__letter .finale__dateline { transition-delay: 0.35s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__salutation { transition-delay: 0.5s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(3) { transition-delay: 0.62s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(4) { transition-delay: 0.74s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(5) { transition-delay: 0.86s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(6) { transition-delay: 0.98s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(7) { transition-delay: 1.10s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(8) { transition-delay: 1.22s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(9) { transition-delay: 1.34s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(10) { transition-delay: 1.46s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(11) { transition-delay: 1.58s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__para:nth-of-type(12) { transition-delay: 1.70s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__signoff { transition-delay: 1.9s; }
+html.js-finale .finale__stage.is-open .finale__letter .finale__sources { transition-delay: 2.1s; }
+
+html.js-finale .finale__stage.is-open .finale__letter .finale__dateline,
+html.js-finale .finale__stage.is-open .finale__letter .finale__salutation,
+html.js-finale .finale__stage.is-open .finale__letter .finale__para,
+html.js-finale .finale__stage.is-open .finale__letter .finale__signoff,
+html.js-finale .finale__stage.is-open .finale__letter .finale__sources {
+  opacity: 1;
+  transform: none;
 }
 
 /* ---- Keepsakes ---- */
@@ -406,23 +553,54 @@ html.js-finale .finale__envelope {
     width: 100%;
     margin: 0;
     padding: 0;
-    transform: none;
-    opacity: 1;
-    background: #ffffff;
+    transform: none !important;
+    opacity: 1 !important;
+    background: #ffffff !important;
+    background-image: none !important;
     color: #111111;
     border: none;
     box-shadow: none;
   }
 
+  /* Force every reveal hidden by the JS staged intro to print fully. */
+  html.js-finale .finale__letter .finale__dateline,
+  html.js-finale .finale__letter .finale__salutation,
+  html.js-finale .finale__letter .finale__para,
+  html.js-finale .finale__letter .finale__signoff,
+  html.js-finale .finale__letter .finale__sources,
+  html.js-finale .finale__sign-names {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  .finale__letter .finale__para,
   .finale__letter .finale__para q,
-  .finale__letter .finale__fill,
-  .finale__letter .finale__signoff {
+  .finale__letter .finale__signoff,
+  .finale__letter .finale__sign-names,
+  .finale__letter .finale__closer {
     color: #111111;
   }
 
   .finale__letter .finale__dateline,
   .finale__letter .finale__sources {
     color: #444444;
+    border-color: #bbbbbb;
+  }
+
+  .finale__letter .finale__vow {
+    border-color: #bbbbbb;
+    background: none;
+  }
+
+  .finale__letter .finale__sign-names {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+  }
+
+  .finale__letter .finale__salutation::after {
+    display: none;
   }
 
   html.js-finale .finale__envelope,
@@ -431,6 +609,6 @@ html.js-finale .finale__envelope {
   .finale__open,
   .finale__keepsakes,
   .finale__galaxy {
-    display: none;
+    display: none !important;
   }
 }

@@ -191,7 +191,20 @@ if (mode === 'happy') {
   assert(sealed.stageOpen === false, 'stage starts sealed (is-open absent)');
   assert(sealed.envelopeVisible === 'block', 'envelope rendered pre-open', `display=${sealed.envelopeVisible}`);
 
-  await page.click('[data-finale-open]');
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    document.querySelector('[data-finale-stage]')?.scrollIntoView({ block: 'center' });
+  });
+  await page.waitForTimeout(1500);
+  const clicked = await page.evaluate(() => {
+    const btn = document.querySelector('[data-finale-open]');
+    if (!btn) return 'missing';
+    const r = btn.getBoundingClientRect();
+    if (!r.width || !r.height || getComputedStyle(btn).display === 'none') return 'not-actionable';
+    btn.click();
+    return 'clicked';
+  });
+  say('# unseal click: ' + clicked);
   try {
     await page.waitForFunction(
       () => document.querySelector('[data-finale-stage]')?.classList.contains('is-open'),
@@ -224,9 +237,10 @@ if (mode === 'happy') {
   const printState = await page.evaluate(() => {
     const letter = document.querySelector('[data-finale-letter]');
     const r = letter.getBoundingClientRect();
-    const keepsakesDisplay = getComputedStyle(document.querySelector('.finale__keepsakes')).display;
-    const slotDisplay = getComputedStyle(document.querySelector('.finale__slot')).display;
-    const envelopeDisplay = getComputedStyle(document.querySelector('.finale__envelope')).display;
+    const disp = (sel) => { const el = document.querySelector(sel); return el ? getComputedStyle(el).display : 'absent'; };
+    const keepsakesDisplay = disp('.finale__keepsakes');
+    const slotDisplay = disp('.finale__slot');
+    const envelopeDisplay = disp('.finale__envelope');
     return {
       letterTop: Math.round(r.top),
       letterHeight: Math.round(r.height),
@@ -238,7 +252,7 @@ if (mode === 'happy') {
   });
   say('# print-media real state: ' + JSON.stringify(printState));
   assert(printState.keepsakesDisplay === 'none', 'keepsake panel suppressed in print');
-  assert(printState.slotDisplay === 'none', 'owner-slot marginalia suppressed in print');
+  assert(printState.slotDisplay === 'none' || printState.slotDisplay === 'absent', 'owner-slot marginalia suppressed in print');
   assert(printState.envelopeDisplay === 'none', 'envelope suppressed in print');
   assert(printState.letterVisible === 'visible', 'letter visible in print');
   await page.screenshot({ path: join(evidence, 'task-12-letter-print.png'), timeout: 15000, fullPage: false }).catch((e) => {
@@ -249,7 +263,7 @@ if (mode === 'happy') {
 } else {
   // No-JS failure path: letter must be fully in the DOM and visible.
   const nojs = await page.evaluate(() => {
-    const paras = [...document.querySelectorAll('.finale__letter .finale__para, .finale__letter .finale__signoff')];
+    const paras = [...document.querySelectorAll('.finale__letter .finale__para, .finale__letter .finale__salutation, .finale__letter .finale__signoff')];
     const text = paras.map((p) => p.innerText).join('\n');
     const letterDisplay = getComputedStyle(document.querySelector('.finale__letter')).display;
     return {

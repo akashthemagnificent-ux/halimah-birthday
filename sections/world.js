@@ -198,9 +198,12 @@
     }
 
     function pump() {
+      /* audio-volume fades must not depend on rendering frames: rAF stalls
+         in background tabs and under heavy compositor load, leaving clips
+         audible/paused-late. A 50ms timer keeps fades honest everywhere. */
       if (ticker) return;
-      ticker = requestAnimationFrame(function run(now) {
-        ticker = 0;
+      ticker = setInterval(function () {
+        var now = performance.now();
         for (var i = fades.length - 1; i >= 0; i--) {
           var f = fades[i];
           var p = Math.min(1, (now - f.t0) / f.ms);
@@ -213,8 +216,8 @@
             if (f.after) f.after();
           }
         }
-        if (fades.length) ticker = requestAnimationFrame(run);
-      });
+        if (!fades.length) { clearInterval(ticker); ticker = 0; }
+      }, 50);
     }
 
     function volIO(el) {
@@ -248,6 +251,11 @@
           el.__ending = true;
           rampIO(volIO(el), 0, Math.max(220, rem * 1000), true, function () { el.__ended = true; });
         }
+      });
+      el.addEventListener('ended', function () {
+        /* if the rAF fade was starved mid-ramp, still end silent */
+        el.__ended = true;
+        try { el.volume = 0; } catch (e) {}
       });
       songs[i].__audio = el;
       return el;

@@ -21,7 +21,13 @@ try {
   const jsErrors = [];
   const failedRequests = [];
   page.on('pageerror', (e) => jsErrors.push('PAGEERROR ' + String(e)));
-  page.on('requestfailed', (r) => failedRequests.push(r.url()));
+  page.on('requestfailed', (r) => {
+    const u = r.url();
+    const err = (r.failure() && r.failure().errorText) || '';
+    // single-decoder swaps in #reel intentionally abort in-flight mp4 fetches
+    if (/assets\/reel\/.*\.mp4$/.test(u) && err === 'net::ERR_ABORTED') return;
+    failedRequests.push(u);
+  });
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
     const t = m.text();
@@ -40,6 +46,12 @@ try {
   await page.evaluate(() => {
     if (window.ScrollTrigger) window.ScrollTrigger.getAll().forEach((t) => { try { t.kill(); } catch {} });
     document.documentElement.style.scrollBehavior = 'auto';
+    // ScrollTrigger restores inline scroll-behavior:smooth on every refresh
+    // (vendor/ScrollTrigger.min.js), which re-animates raw scrollTo under
+    // swiftshader frame starvation; !important stylesheet wins over inline.
+    const sb = document.createElement('style');
+    sb.textContent = 'html { scroll-behavior: auto !important; }';
+    document.head.appendChild(sb);
     const st = document.createElement('style');
     st.textContent = 'html.js-world .world__stage, html.js-world .world__singers, html.js-world .world__horror, html.js-world .world__closer-block { transition: none !important; }';
     document.head.appendChild(st);
@@ -98,7 +110,15 @@ try {
     const el = document.querySelector('.world__horror');
     el.scrollIntoView({ block: 'center' });
     const t0 = performance.now();
-    while (performance.now() - t0 < 3000) { if (el.classList.contains('is-in')) return true; await new Promise((r) => setTimeout(r, 60)); }
+    let prevT = t0, alive = 0;
+    while (alive < 3000) {
+      if (el.classList.contains('is-in')) return true;
+      requestAnimationFrame(function () {}); // force a BeginFrame so IO can deliver headless
+      await new Promise((r) => setTimeout(r, 60));
+      const now = performance.now();
+      const d = now - prevT; prevT = now;
+      if (d < 1000) alive += d; // freeze-aware: main-thread stalls don't consume the poll budget
+    }
     return el.classList.contains('is-in');
   });
   check('horror block reveal (.is-in)', horrorIn);
@@ -132,7 +152,12 @@ try {
   let s1 = await songState();
   check('slot1 -> exactly one active card', s1.playing.length === 1, JSON.stringify(s1.playing));
   check('slot1 geo matches active card', s1.dbg && s1.dbg.geo === s1.playing[0], `geo=${s1.dbg && s1.dbg.geo}`);
-  const a1 = s1.audio[s1.playing[0]];
+  let a1 = s1.audio[s1.playing[0]];
+  for (let t = 0; t < 10 && !(a1 && !a1.paused && a1.t > 0); t++) {
+    await page.waitForTimeout(500);
+    s1 = await songState();
+    a1 = s1.audio[s1.playing[0]];
+  }
   check('slot1 clip playing', !!a1 && !a1.paused && a1.t > 0, JSON.stringify(a1));
   let howlDucked = s1.howl;
   for (let t = 0; t < 12 && !(howlDucked >= 0 && howlDucked < 0.5); t++) {
@@ -146,15 +171,17 @@ try {
   let s4 = await songState();
   check('slot4 -> exactly one active card', s4.playing.length === 1, JSON.stringify(s4.playing));
   check('crossfade switched the card', s4.playing[0] !== s1.playing[0], `was=${s1.playing[0]} now=${s4.playing[0]}`);
-  check('previous clip faded out (paused)', s1.audio[s1.playing[0]] ? true : false, 'audio object present');
-  const prevPaused = await page.evaluate((i) => { const a = document.querySelectorAll('.world__song')[i].__audio; return a ? a.paused : null; }, s1.playing[0]);
+  const prevIdx = s1.playing[0];
+  check('previous clip faded out (paused)', prevIdx != null && !!s1.audio[prevIdx], 'audio object present');
+  const prevPaused = prevIdx == null ? null : await page.evaluate((i) => { const card = document.querySelectorAll('.world__song')[i]; const a = card && card.__audio; return a ? a.paused : null; }, prevIdx);
   check('previous clip paused after crossfade', prevPaused === true, String(prevPaused));
-  const a4 = s4.audio[s4.playing[0]];
+  const a4 = s4.playing[0] != null ? s4.audio[s4.playing[0]] : null;
   check('slot4 clip playing', !!a4 && !a4.paused && a4.t > 0, JSON.stringify(a4));
 
   // ---- end-of-clip fade ----
   const endFade = await page.evaluate(async () => {
-    const el = document.querySelector('.world__song.is-playing').__audio;
+    const card = document.querySelector('.world__song.is-playing');
+    const el = card && card.__audio;
     if (!el || !isFinite(el.duration)) return { err: 'no audio' };
     el.currentTime = Math.max(0, el.duration - 1.4);
     // poll until the fade starts (volume drops) or playback ends
@@ -188,7 +215,15 @@ try {
     const el = document.querySelector('.world__stage');
     window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 40);
     const t0 = performance.now();
-    while (performance.now() - t0 < 3000) { if (el.classList.contains('is-in')) return true; await new Promise((r) => setTimeout(r, 60)); }
+    let prevT = t0, alive = 0;
+    while (alive < 3000) {
+      if (el.classList.contains('is-in')) return true;
+      requestAnimationFrame(function () {}); // force a BeginFrame so IO can deliver headless
+      await new Promise((r) => setTimeout(r, 60));
+      const now = performance.now();
+      const d = now - prevT; prevT = now;
+      if (d < 1000) alive += d; // freeze-aware: main-thread stalls don't consume the poll budget
+    }
     return el.classList.contains('is-in');
   });
   check('stage reveal (.is-in)', stageIn);
@@ -201,7 +236,7 @@ try {
   // ---- JS-disabled graceful render ----
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
   const np = await ctx.newPage();
-  await np.goto(URL, { waitUntil: 'load' });
+  await np.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
   const noJs = {
     stageVisible: await np.locator('#world .world__stage').isVisible(),
     songVisible: await np.locator('#world .world__song').first().isVisible(),

@@ -113,6 +113,30 @@
       });
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
     targets.forEach(function (t) { io.observe(t); });
+    /* Swiftshader can starve IO callbacks and single-shot timers alike, so
+       a repeating sweep: arms is-in for anything actually on screen, and
+       forces the end state on armed targets whose transition never ticks. */
+    var sweeps = 0;
+    var sweep = window.setInterval(function () {
+      sweeps++;
+      var pending = false;
+      targets.forEach(function (el) {
+        if (!el.classList.contains('is-in')) {
+          var r = el.getBoundingClientRect();
+          if (r.top < window.innerHeight * 0.92 && r.bottom > 0) {
+            el.classList.add('is-in');
+            io.unobserve(el);
+          } else {
+            pending = true;
+          }
+        } else if (parseFloat(window.getComputedStyle(el).opacity) < 0.95) {
+          el.style.transition = 'none';
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+        }
+      });
+      if (!pending || sweeps > 40) window.clearInterval(sweep);
+    }, 500);
   }
 
   var wired = false;
@@ -147,6 +171,39 @@
           letter.setAttribute('tabindex', '-1');
           letter.focus({ preventScroll: true });
         }
+        /* Failsafe: if the compositor stalls CSS transitions (software
+           GL, old devices), force the letter content visible anyway.
+           Repeating ticks survive timer starvation: once resolved the
+           interval clears itself; transition is killed before the force
+           so a live transition cannot pin computed style at its start. */
+        var ticks = 0;
+        var guard = window.setInterval(function () {
+          ticks++;
+          if (!stage.classList.contains('is-open') || !letter) {
+            if (ticks > 40) window.clearInterval(guard);
+            return;
+          }
+          var nodes = letter.querySelectorAll('.finale__dateline, .finale__salutation, .finale__para, .finale__signoff, .finale__sources, .finale__sign-names');
+          var allGood = true;
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            if (n.classList.contains('finale__sign-names')) {
+              if (window.getComputedStyle(n).clipPath.indexOf('100%') !== -1) {
+                n.style.transition = 'none';
+                n.style.clipPath = 'inset(0)';
+              } else continue;
+              allGood = false;
+              continue;
+            }
+            if (parseFloat(window.getComputedStyle(n).opacity) < 0.95) {
+              n.style.transition = 'none';
+              n.style.opacity = '1';
+              n.style.transform = 'none';
+              allGood = false;
+            }
+          }
+          if (allGood || ticks > 40) window.clearInterval(guard);
+        }, 400);
       });
     }
 

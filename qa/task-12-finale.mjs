@@ -274,6 +274,30 @@ if (mode === 'happy') {
   assert(opened.stageOpen === true, 'stage carries is-open after tap');
   assert(opened.openBtnDisplay === 'none', 'unseal button hides after opening');
   assert(opened.paraCount >= 7, 'letter paragraphs rendered', `paras=${opened.paraCount}`);
+  // letter redesign: staged paper reveal + signature wipe must resolve
+  const paper = await page.evaluate(async () => {
+    const sal = document.querySelector('.finale__salutation');
+    const names = document.querySelector('.finale__sign-names');
+    const vow = document.querySelector('.finale__vow');
+    const t0 = performance.now();
+    while (performance.now() - t0 < 9000) {
+      const so = sal ? parseFloat(getComputedStyle(sal).opacity) : -1;
+      const nc = names ? getComputedStyle(names).clipPath : 'none';
+      if (so > 0.9 && (!nc || nc === 'none' || !/100%/.test(nc))) break;
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    return {
+      salutationOpacity: sal ? parseFloat(getComputedStyle(sal).opacity) : -1,
+      namesClip: names ? getComputedStyle(names).clipPath : 'missing',
+      vowVisible: vow ? parseFloat(getComputedStyle(vow).opacity) : -1,
+      paperBg: document.querySelector('.finale__letter') ? getComputedStyle(document.querySelector('.finale__letter')).backgroundImage.includes('linear-gradient') : false
+    };
+  });
+  say('# paper letter: ' + JSON.stringify(paper));
+  assert(paper.salutationOpacity > 0.9, 'salutation reveal resolves', `opacity=${paper.salutationOpacity}`);
+  assert(paper.vowVisible > 0.9, 'vow pull-quote reveal resolves', `opacity=${paper.vowVisible}`);
+  assert(paper.namesClip !== 'missing' && !/100%/.test(paper.namesClip), 'signature wipe completes', paper.namesClip);
+  assert(paper.paperBg === true, 'letter carries paper gradient');
 
   await page.evaluate(() => document.getElementById('finale').scrollIntoView({ block: 'start' }));
   await page.waitForTimeout(1200);
@@ -286,24 +310,25 @@ if (mode === 'happy') {
   await page.waitForTimeout(600);
   const printState = await page.evaluate(() => {
     const letter = document.querySelector('[data-finale-letter]');
+    const disp = (sel) => { const el = document.querySelector(sel); return el ? getComputedStyle(el).display : 'absent'; };
     return {
-      keepsakesDisplay: getComputedStyle(document.querySelector('.finale__keepsakes')).display,
-      slotDisplay: getComputedStyle(document.querySelector('.finale__slot')).display,
-      envelopeDisplay: getComputedStyle(document.querySelector('.finale__envelope')).display,
-      galaxyDisplay: getComputedStyle(document.querySelector('.finale__galaxy')).display,
+      keepsakesDisplay: disp('.finale__keepsakes'),
+      slotDisplay: disp('.finale__slot'),
+      envelopeDisplay: disp('.finale__envelope'),
+      galaxyDisplay: disp('.finale__galaxy'),
       letterVisible: getComputedStyle(letter).visibility,
     };
   });
   say('# print-media: ' + JSON.stringify(printState));
   assert(printState.keepsakesDisplay === 'none', 'keepsake panel suppressed in print');
-  assert(printState.slotDisplay === 'none', 'owner-slot marginalia suppressed in print');
+  assert(printState.slotDisplay === 'none' || printState.slotDisplay === 'absent', 'owner-slot marginalia suppressed in print', printState.slotDisplay);
   assert(printState.envelopeDisplay === 'none', 'envelope suppressed in print');
   assert(printState.galaxyDisplay === 'none', 'galaxy suppressed in print');
   assert(printState.letterVisible === 'visible', 'letter visible in print');
   await page.emulateMedia({ media: 'screen' });
 } else {
   const nojs = await page.evaluate(() => {
-    const paras = [...document.querySelectorAll('.finale__letter .finale__para, .finale__letter .finale__signoff')];
+    const paras = [...document.querySelectorAll('.finale__letter .finale__para, .finale__letter .finale__salutation, .finale__letter .finale__signoff')];
     const text = paras.map((p) => p.innerText).join('\n');
     return {
       jsFinale: document.documentElement.classList.contains('js-finale'),

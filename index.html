@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="sections/gags.css" />
 <link rel="stylesheet" href="sections/physics.css" />
 <link rel="stylesheet" href="sections/scratch.css" />
+<link rel="stylesheet" href="sections/reel.css" />
 <link rel="stylesheet" href="sections/world.css" />
 <link rel="stylesheet" href="sections/finale.css" />
 </head>
@@ -1140,6 +1141,46 @@
   </div>
 </section>
 
+<!-- 10b. reel: birthday video gifts (scroll-pinned, one at a time)
+     Cinematic stage: blurred poster echo, accent wash, sharp
+     foreground video, white flash + veil handoff between gifts.
+     Only the active gift plays; neighbours stay paused.
+     No-JS fallback: plain links to the five files. -->
+<section id="reel" class="section section--reel" aria-label="Birthday video gifts">
+  <div class="reel__intro">
+    <p class="reel__eyebrow">for you &#183; a reel</p>
+    <h2 class="reel__heading">a few things i made for you</h2>
+    <p class="reel__note">scroll slowly. one at a time.</p>
+  </div>
+  <div class="reel__fallback">
+    <ul class="reel__fallback-list">
+      <li><a href="assets/reel/gift-1.mp4">play gift 01</a></li>
+      <li><a href="assets/reel/gift-2.mp4">play gift 02</a></li>
+      <li><a href="assets/reel/gift-3.mp4">play gift 03</a></li>
+      <li><a href="assets/reel/gift-4.mp4">play gift 04</a></li>
+      <li><a href="assets/reel/gift-5.mp4">play gift 05</a></li>
+    </ul>
+  </div>
+  <div class="reel__track" data-reel-track>
+    <div class="reel__stage" data-reel-stage>
+      <img class="reel__echo" data-reel-echo src="assets/reel/gift-1-poster.jpg" alt="" aria-hidden="true" />
+      <div class="reel__wash" data-reel-wash aria-hidden="true"></div>
+      <video class="reel__fg" data-reel-fg src="assets/reel/gift-1.mp4" poster="assets/reel/gift-1-poster.jpg" playsinline muted preload="none" aria-label="Birthday gift video"></video>
+      <div class="reel__caption" data-reel-caption>
+        <span class="reel__index" data-reel-index>01</span>
+        <p class="reel__title" data-reel-title>for the first smile</p>
+      </div>
+      <div class="reel__rail" data-reel-rail aria-hidden="true"></div>
+      <div class="reel__flash" data-reel-flash aria-hidden="true"></div>
+      <div class="reel__veil" data-reel-veil aria-hidden="true"></div>
+      <button class="reel__sound" type="button" data-reel-sound aria-pressed="false">sound on</button>
+    </div>
+  </div>
+  <div class="reel__outro">
+    <p class="reel__outro-line">happy birthday. one more year of you, and i get to keep making things like this for you.</p>
+  </div>
+</section>
+
 <!-- 10. world: your world, the archive (todo 13)
      Interactive archive: silk backdrop, masked heading, holo
      centerpiece (Isagi Rin), scroll-stack of eleven songs, glitch
@@ -1387,16 +1428,18 @@
       <button class="finale__open" type="button" data-finale-open>open the letter</button>
       <article class="finale__letter" data-finale-letter aria-label="A love letter for Halimah">
         <p class="finale__dateline">19 October 2026 &#183; for halimah</p>
-        <p class="finale__para">My Halimah,</p>
-        <p class="finale__para">Happy birthday, good girl. Before anything else, hear this the way I have always meant it: <q>Throughout your journey, I&#x27;ll be with you. I am always here for you.</q> That was never a line for one bad night. It is the whole shape of us.</p>
-        <p class="finale__para">You are not a burden, not on the heavy days, not ever. <q>It gets better, a lot better trust me</q> — and I will sit beside you until it does, for as many nights as it takes. You can tell me everything, even the tired 2am things, and I will still be here in the morning, waiting for your text when you wake up.</p>
-        <p class="finale__para">I think about that August night a lot. You could not sleep, you told me you were passing out from exhaustion, and all I wanted was to be soft with you and take care of you. So here it is again, plain: <q>Yes I am here for you now and I love you so much more than words can ever describe.</q> <q>If everyone leaves, I am here for you and I will always be here for you.</q> Everybody else can go. I stay.</p>
-        <p class="finale__para">And I am so proud of you. <q>I love you so much and I am proud of you</q> — of how you keep going through school and everything else at the same time, of your gothic stories and your drawings, of every random zone-out thought you send my way. Loving you means loving your whole world, and I do: all of it, happily.</p>
-        <p class="finale__para">You once told me I make spiders beautiful for you. <span class="finale__fill">You make everything beautiful for me — even eight-legged nightmares, even Mondays.</span><span class="finale__slot" data-owner-slot="spider-line">[OWNER: rewrite this line in your own words]</span> Keep spamming me with them. I will open every single one smiling.</p>
-        <p class="finale__para">So here is my vow, the same one from September, kept and re-kept: <q>IN THE END YOU&#x27;RE MY HALIMAH AND I AM YOUR AKASH. I WILL ALWAYS LOVE YOU SO MUCH AND I WILL ALWAYS BE HERE FOR YOU.</q> As long as you want me to be.</p>
-        <p class="finale__para">One more year of you — your laugh, your teasing, your 4-hours-of-sleep stubbornness, your goodnight paragraphs. Take care of yourself for me: sleep early, eat your meals, drink your water. Not because I said so, but because you are my priority. Nothing else.</p>
-        <p class="finale__signoff">Yours, always,<br /><span class="finale__fill">your Akash, your hashbrown, your good boy</span><span class="finale__slot" data-owner-slot="signature">[OWNER: sign it your way — edit the name line above]</span></p>
-        <p class="finale__slot" data-owner-slot="ps">[OWNER: optional P.S. — add one private line here before you send her the link]</p>
+        <p class="finale__salutation">My Halimah,</p>
+        <p class="finale__para">Happy birthday. Before anything else, hear this the way I have always meant it: <q>Throughout your journey, I&#x27;ll always be with you. I am always here for you.</q> That was never a line for one bad night but that is the whole shape of us.</p>
+        <p class="finale__para">You are not a burden, not on the heavy days, never. <q>It gets better, a lot better trust me</q> and I will sit beside you until it does, for as many nights as it takes. You can tell me everything, even the tired 2am things, and I will still be here in the morning, waiting for your text when you wake up.</p>
+        <p class="finale__para">I think about that August night. You could not sleep, you told me you were passing out from exhaustion, and all I wanted was to be soft with you and take care of you. So here it is again, Yes I am here for you now and I love you so much more than words can ever describe. <q>If everyone leaves, I am here for you and I will always be here for you.</q> Everybody else can go. I will be the only one who stays.</p>
+        <p class="finale__para">And I am so proud of you. <q>I love you so much and I am proud of you</q> of how you keep going through school and everything else at the same time, It&#x27;s not something easy. Loving you means loving your whole world, and I do all of it, happily.</p>
+        <p class="finale__para">You can make even spiders beautiful for me. You make everything beautiful for me even those eight-legged nightmares, even Mondays, even those heavy days where i feel useless and hopeless. Please Keep spamming me, Even spiders. I will open every single one smiling.</p>
+        <p class="finale__para finale__vow">So here is my vow, the same one from September, Said in a proper way: <q>IN THE END YOU&#x27;RE MY HALIMAH AND I AM YOUR AKASH. I WILL ALWAYS LOVE YOU SO MUCH AND I WILL ALWAYS BE HERE FOR YOU.</q> As long as you want me to be.</p>
+        <p class="finale__para">One more year of you. your laugh, your teasing, your 4-hours-of-sleep stubbornness, your goodnight paragraphs. Take care of yourself for me: sleep early, eat your meals, drink your water. Not because I told you to, Do it because you are my priority.</p>
+        <p class="finale__para">Happy 15th Birthday My Love, This was the only thing I am good at, So instead of Just a simple text with an edit as a gift, I wanted to do something better, The best i could for you so that I can be the first one to make you smile on your birthday.</p>
+        <p class="finale__para">So, I made this, It took me a whole month to design, Test, Code and Bulletproof this, All done by myself. As the only thing i can afford and give at this moment to you is time, I will happily spend every bit of it left with you and on you. I know this is not perfect and Like this I am not perfect too but I promise you, This website and I will both get better with time.</p>
+        <p class="finale__para finale__closer">I love you so much my cutiepie &#10084;&#65039;.</p>
+        <p class="finale__signoff"><span class="finale__sign-lead">Yours, always,</span><br /><span class="finale__sign-names">your Akash, your hashbrown, your good boy, Your princess.</span></p>
         <div class="finale__sources">
           <p>woven from our chats</p>
         </div>
@@ -2078,6 +2121,7 @@ button, a, input, select, textarea {
 <script src="vendor/flex-carousel.js"></script>
 <script src="vendor/pulse-heart.js"></script>
 <script src="vendor/magic-bento.js"></script>
+<script src="sections/reel.js"></script>
 <script src="sections/world.js"></script>
 <script src="sections/finale.js"></script>
 </body>

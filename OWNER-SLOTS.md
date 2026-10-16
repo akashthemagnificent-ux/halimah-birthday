@@ -8,7 +8,7 @@ and every check still passes.
 
 Quick status right now: album photos are SHIPPED (42 baby photos in
 assets/baby/, nothing to fill), song is a placeholder tone (swap it before
-deploy), 3 letter edits open, turning-17 declined by default.
+deploy), letter slots FILLED (final copy shipped), turning-17 declined by default.
 
 ## 1. Album photos — SHIPPED, nothing to fill
 
@@ -46,23 +46,19 @@ Right now the file in place is a short synthesized placeholder tone,
 audibly not a real song. Replace it before you send her the link. Full
 swap steps live in `assets/music/README.md`.
 
-## 3. Letter slots, 3 inline edits in `index.html`
+## 3. Letter slots, FILLED, nothing to fill
 
-The finale letter reads complete as shipped, so these are refinements,
-not gaps. Each slot sits right after its default line in the markup,
-tagged with a `data-owner-slot` attribute. On screen the markers show
-as small dashed marginalia. They never print: the print stylesheet
-hides them, so the Save-as-PDF keepsake comes out clean whether or not
-you fill them.
+The finale letter reads complete as shipped: the final owner copy is
+in the page (the spider paragraph, the "Happy 15th Birthday My Love"
+passage, the month-of-work lines, the cutiepie closer, and the full
+signature including "Your princess."). The old inline edit slots
+(`spider-line`, `signature`, `ps`) are retired; there are no `[OWNER:]`
+markers left in the markup. The print stylesheet still hides any
+stray `.finale__slot` node just in case, so the Save-as-PDF keepsake
+comes out clean.
 
-| Slot id | Where | Default line she reads today | What to do |
-| ------- | ----- | ---------------------------- | ---------- |
-| `spider-line` | finale letter, spider paragraph | "You make everything beautiful for me, even eight-legged nightmares, even Mondays." | Rewrite it in your own words, or leave it. The marker asks for your version. |
-| `signature` | finale signoff | "your Akash, your hashbrown, your good boy" | Sign it your way by editing the name line above the marker. |
-| `ps` | after the signoff | (nothing, the paragraph is empty) | Optional. Add one private line here before you send her the link, or leave it out entirely. |
-
-If missing: she reads the defaults (or no P.S.), and the markers stay
-as quiet hints only you would notice on screen. Nothing looks broken.
+To edit the words themselves: they live in the finale letter block in
+`index.html` between `data-finale-letter` and `</article>`.
 
 ## 4. Turning-17 decision, confirm or decline
 

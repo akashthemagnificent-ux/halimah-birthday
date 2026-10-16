@@ -33,14 +33,16 @@ check('doc names song.mp3', doc.includes('`assets/music/song.mp3`'));
 check('markup points at song.mp3', html.includes('assets/music/song.mp3'));
 check('music README documents swap', musicReadme.includes('song.mp3'));
 
-// --- 3. letter slots: 3 [OWNER:] markers, ids match between doc and markup ---
+// --- 3. letter slots: FILLED with final owner copy, zero [OWNER:] markers ---
 const liveMarkers = [...html.matchAll(/data-owner-slot="([a-z-]+)">\[OWNER:/g)].map((m) => m[1]).sort();
-check('markup has 3 owner slots', liveMarkers.join(',') === 'ps,signature,spider-line', 'found ' + liveMarkers.join(','));
+check('letter slots retired (no live markers)', liveMarkers.length === 0, 'found ' + liveMarkers.join(','));
+const letterSeg = html.slice(html.indexOf('finale__letter'), html.indexOf('</article>', html.indexOf('finale__letter')));
+check('final letter copy shipped (cutiepie + princess)', letterSeg.includes('cutiepie') && letterSeg.includes('Your princess'));
 for (const id of ['spider-line', 'signature', 'ps']) {
-  check(`doc documents slot ${id}`, doc.includes('`' + id + '`'), id);
+  check(`doc still names retired slot ${id}`, doc.includes('`' + id + '`'), id);
 }
 const liveMarkerCount = (html.match(/\[OWNER:/g) || []).length;
-check('live marker count is exactly 3', liveMarkerCount === 3, 'live ' + liveMarkerCount);
+check('no [OWNER:] markers anywhere in markup', liveMarkerCount === 0, 'live ' + liveMarkerCount);
 check('doc explains the [OWNER:] convention', doc.includes('[OWNER:]'));
 
 // --- 4. turning-17 decision: declined by default, guardrail intact ---

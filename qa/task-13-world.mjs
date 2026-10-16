@@ -10,7 +10,7 @@
 // read live DOM counts, computed styles, and real reveal state — card
 // count, motif attributes, .is-in + opacity per card — never a string
 // the page printed).
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -87,6 +87,13 @@ try {
     globalThis.Date = FakeDate;
   });
   await page.goto(base, { waitUntil: 'load' });
+  // html{scroll-behavior:smooth} makes every scrollIntoView animate (and
+  // starve/interrupt under swiftshader); force instant scrolls for the walk.
+  await page.evaluate(() => {
+    const sb = document.createElement('style');
+    sb.textContent = 'html { scroll-behavior: auto !important; }';
+    document.head.appendChild(sb);
+  });
   // Let the unlock confetti cannon (real gate behavior) settle first.
   await page.waitForTimeout(3500);
 
@@ -123,33 +130,67 @@ try {
   // Walk each card through the viewport so the real IO reveal fires,
   // then let the last stagger (90ms) + transition (600ms) fully settle.
   await page.evaluate(async () => {
-    const cards = [...document.querySelectorAll('#world [data-reveal]')];
+    const cards = [...document.querySelectorAll(
+      '#world .world__stage, #world .world__singers, #world .world__horror, #world .world__closer-block',
+    )];
+    // Freeze-aware poll (swiftshader main-thread freezes): count only alive
+    // time, nudge rAF each tick so IntersectionObserver gets a rendering step
+    // to deliver on, and stay on the block until is-in actually lands.
+    const until = async (ms, test) => {
+      let alive = 0;
+      let last = performance.now();
+      const t0 = last;
+      while (alive < ms && performance.now() - t0 < ms * 4) {
+        if (test()) return true;
+        requestAnimationFrame(() => {});
+        await new Promise((r) => setTimeout(r, 60));
+        const now = performance.now();
+        const gap = now - last;
+        if (gap < 1000) alive += gap;
+        last = now;
+      }
+      return test();
+    };
     for (const card of cards) {
       card.scrollIntoView({ block: 'center' });
-      await new Promise((r) => setTimeout(r, 450));
+      await until(3000, () => card.classList.contains('is-in'));
     }
+    await until(4000, () => cards.every(
+      (c) => parseFloat(getComputedStyle(c).opacity) > 0.5,
+    ));
   });
-  await page.waitForTimeout(1500);
 
   const revealed = await page.evaluate(() => {
-    const cards = [...document.querySelectorAll('#world [data-reveal]')];
+    const cards = [...document.querySelectorAll(
+      '#world .world__stage, #world .world__singers, #world .world__horror, #world .world__closer-block',
+    )];
     return cards.map((c) => ({
-      motif: c.getAttribute('data-motif'),
+      block: c.className.split(' ').filter((k) => k.startsWith('world__') && k !== 'world__block')[0] || c.className,
       in: c.classList.contains('is-in'),
       op: Math.round(parseFloat(getComputedStyle(c).opacity) * 100) / 100,
     }));
   });
   say(`reveal state: ${JSON.stringify(revealed)}`);
 
+  // Current world contract (post-rebuild): 5 blocks (character, music,
+  // singers, horror, bento); the 4 bento cells are upgraded into
+  // .magic-bento__content by upgradeBento; 0 stubs, 1 badge, 3 DM quotes;
+  // reveal is the four .world__* blocks above.
+  const bento = await page.evaluate(() => ({
+    cells: document.querySelectorAll('#world .magic-bento__content').length,
+  }));
+  say(`magic-bento cells: ${JSON.stringify(bento)}`);
   const ok =
     dom.unlocked === true &&
-    dom.cards === 8 &&
-    dom.stubs === 3 &&
-    dom.badges === 3 &&
-    dom.dmQuotes === 8 &&
+    dom.cards === 5 &&
+    dom.stubs === 0 &&
+    dom.badges === 1 &&
+    dom.dmQuotes === 3 &&
+    bento.cells === 4 &&
+    revealed.length === 4 &&
     revealed.every((r) => r.in && r.op > 0.5);
-  say(ok ? 'ASSERT: unlocked + 8 revealed motif cards (3 stubs, 3 badges, 8 DM quotes) — PASS'
-         : 'ASSERT: world state mismatch — FAIL');
+  say(ok ? 'ASSERT: unlocked + 5 blocks + 4 magic-bento cells, 4 revealed (0 stubs, 1 badge, 3 DM quotes) — PASS'
+         : `ASSERT: world state mismatch — FAIL (${JSON.stringify({dom, bento, revealed})})`);
 
   // Frame 1: section header + first cards.
   await page.evaluate(() => document.getElementById('world')?.scrollIntoView({ block: 'start' }));
@@ -159,7 +200,7 @@ try {
 
   // Frame 2: shelf bottom (last cards + closer).
   await page.evaluate(() => {
-    document.querySelector('#world [data-motif="autumn"]')?.scrollIntoView({ block: 'center' });
+    document.querySelector('#world .world__closer-block')?.scrollIntoView({ block: 'center' });
   });
   await page.waitForTimeout(900);
   await page.screenshot({ path: OUT.replace('.png', '-bottom.png') });

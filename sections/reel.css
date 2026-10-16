@@ -1,0 +1,339 @@
+/* ============================================================
+   reel - cinematic birthday video gifts (scroll-pinned stage)
+   One active video at a time. Layered stage:
+   echo (blurred poster) > wash > foreground > flash > veil.
+   No-JS: track hidden, plain file links shown.
+   ============================================================ */
+
+.section--reel {
+  position: relative;
+  background: rgb(8 8 10);
+  color: rgb(232 224 216);
+  padding: 0;
+}
+
+/* ---- Intro + outro (always readable) ---- */
+.reel__intro {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--section-padding) var(--gutter) var(--space-10);
+  text-align: center;
+}
+
+.reel__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(160 148 156);
+}
+
+.reel__heading {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: 1.15;
+  color: rgb(240 232 224);
+}
+
+.reel__note {
+  margin-top: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-style: italic;
+  color: rgb(212 168 106);
+}
+
+.reel__outro {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: var(--space-20) var(--gutter) var(--section-padding);
+  text-align: center;
+}
+
+.reel__outro-line {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-style: italic;
+  line-height: 1.8;
+  color: rgb(226 216 208);
+}
+
+/* ---- No-JS fallback (default visible) ---- */
+.reel__fallback {
+  padding: 0 var(--gutter) var(--space-12);
+}
+
+.reel__fallback-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+.reel__fallback-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: rgb(232 224 216);
+  text-decoration: none;
+  border: 1px solid rgb(74 74 90);
+  border-radius: var(--radius-pill);
+}
+
+html.js-reel .reel__fallback {
+  display: none;
+}
+
+/* ---- Pinned track (JS only) ---- */
+.reel__track {
+  display: none;
+  --reel-count: 5;
+  --reel-chapter: 190vh;
+  height: calc(var(--reel-count) * var(--reel-chapter));
+  position: relative;
+}
+
+html.js-reel .reel__track {
+  display: block;
+}
+
+.reel__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgb(8 8 10);
+}
+
+/* Blurred poster echo (static image: one decoder only) */
+.reel__echo {
+  position: absolute;
+  inset: -8%;
+  z-index: 0;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  filter: blur(34px) saturate(1.2) brightness(0.48);
+  transform: scale(1.12);
+  opacity: 0.78;
+  will-change: filter, opacity;
+}
+
+/* Accent wash tinted per gift via --reel-accent (rgb triplet) */
+.reel__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 45%, rgb(var(--reel-accent, 239 106 64) / 0.18), transparent 44%),
+    linear-gradient(180deg, rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.62));
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Foreground video: the sharp gift */
+.reel__fg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: min(56vw, 620px);
+  height: min(78vh, 760px);
+  object-fit: contain;
+  object-position: 50% 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  opacity: 0;
+  background: rgb(0 0 0 / 0.2);
+  will-change: transform, opacity;
+}
+
+.reel__stage.is-playing .reel__fg {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Fullscreen promote: pure transform, no layout jump */
+.reel__fg.is-full {
+  z-index: 9;
+}
+
+/* Caption */
+.reel__caption {
+  position: absolute;
+  left: 50%;
+  bottom: max(var(--space-8), 6vh);
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  background: rgb(10 10 14 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+  pointer-events: none;
+  max-width: min(90vw, 30rem);
+}
+
+.reel__stage.has-caption .reel__caption {
+  opacity: 1;
+}
+
+.reel__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  color: rgb(var(--reel-accent, 239 106 64));
+}
+
+.reel__title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: rgb(240 232 224);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Progress rail */
+.reel__rail {
+  position: absolute;
+  right: max(var(--space-5), 2.5vw);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgb(255 255 255 / 0.25);
+  cursor: pointer;
+  transition:
+    background 300ms var(--ease-out),
+    transform 300ms var(--ease-out);
+}
+
+.reel__dot.is-active {
+  background: rgb(var(--reel-accent, 239 106 64));
+  transform: scale(1.35);
+}
+
+.reel__dot:focus-visible {
+  outline: 2px solid rgb(240 152 74);
+  outline-offset: 3px;
+}
+
+/* White flash beam */
+.reel__flash {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.98) 44%, rgb(255 255 255 / 0.98) 56%, transparent 100%);
+  filter: blur(18px);
+  transform: scaleX(0.05);
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+/* White veil */
+.reel__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+  background: rgb(255 255 255);
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* Sound toggle */
+.reel__sound {
+  position: absolute;
+  top: max(var(--space-5), 3vh);
+  right: max(var(--space-5), 2.5vw);
+  z-index: 12;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(240 232 224);
+  background: rgb(10 10 14 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.reel__sound[aria-pressed="true"] {
+  border-color: rgb(var(--reel-accent, 239 106 64) / 0.7);
+}
+
+.reel__sound:focus-visible {
+  outline: 2px solid rgb(240 152 74);
+  outline-offset: 3px;
+}
+
+/* ---- Reduced motion: crossfade, no beam, no zoom ---- */
+@media (prefers-reduced-motion: reduce) {
+  .reel__flash {
+    display: none;
+  }
+
+  .reel__fg,
+  .reel__stage.is-playing .reel__fg {
+    transition: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .reel__caption {
+    transition: none;
+  }
+}
+
+/* ---- Print: text only ---- */
+@media print {
+  .reel__track,
+  .reel__fallback,
+  .reel__sound {
+    display: none !important;
+  }
+
+  .section--reel {
+    background: #ffffff;
+    color: #111111;
+  }
+
+  .reel__heading,
+  .reel__note,
+  .reel__eyebrow,
+  .reel__outro-line {
+    color: #111111;
+  }
+}
