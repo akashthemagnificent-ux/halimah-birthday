@@ -121,11 +121,24 @@ try {
     const geo = await page.evaluate(() => {
       const track = document.querySelector('[data-reel-track]');
       const r = track.getBoundingClientRect();
-      return { top: r.top + window.scrollY, h: track.offsetHeight, vh: window.innerHeight };
+      return { top: r.top + window.scrollY, h: track.offsetHeight, vw: window.innerWidth, w: Math.round(r.width), vh: window.innerHeight };
     });
     const chapterH = geo.h / 5;
     say('# track: ' + JSON.stringify({ ...geo, chapterH: Math.round(chapterH) }));
     assert(Math.abs(geo.h - 5 * chapterH) < 4, 'track sized for five chapters');
+    /* regression: base .section is a column flex with align-items:center, so a
+       section that never sets display:block shrinks the track to fit-content —
+       the stage holds only absolutely-positioned children, collapsing to 0px
+       wide and rendering a blank black canvas. */
+    assert(geo.w > geo.vw * 0.9, 'track spans the viewport (not collapsed by flex)', `w=${geo.w} vw=${geo.vw}`);
+    const stageBox = await page.evaluate(() => {
+      const s = document.querySelector('[data-reel-stage]');
+      const r = s.getBoundingClientRect();
+      return { w: Math.round(r.width), h: Math.round(r.height), display: getComputedStyle(document.querySelector('#reel')).display };
+    });
+    say('# stage: ' + JSON.stringify(stageBox));
+    assert(stageBox.w > 1000 && stageBox.h > 400, 'stage paints a full-size box', JSON.stringify(stageBox));
+    assert(stageBox.display === 'block', '#reel overrides the base flex layout', `display=${stageBox.display}`);
 
     // one real click = user activation (she will have tapped begin first)
     await page.mouse.click(20, 20);

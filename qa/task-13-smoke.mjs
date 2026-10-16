@@ -234,6 +234,10 @@ try {
   check('0 new resource errors (pre-existing baby assets excluded)', badRes.length === 0, badRes.slice(0, 3).join(' | ').slice(0, 160));
 
   // ---- JS-disabled graceful render ----
+  // Free the main page's memory (audio elements, carousels) before opening a
+  // second context; on low-RAM hosts a second live page gets the browser
+  // OOM-killed mid-locator (TargetClosedError), not a site defect.
+  await page.close().catch(() => {});
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
   const np = await ctx.newPage();
   await np.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });

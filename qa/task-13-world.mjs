@@ -86,7 +86,7 @@ try {
     }
     globalThis.Date = FakeDate;
   });
-  await page.goto(base, { waitUntil: 'load' });
+  await page.goto(base, { waitUntil: 'load', timeout: 60000 });
   // html{scroll-behavior:smooth} makes every scrollIntoView animate (and
   // starve/interrupt under swiftshader); force instant scrolls for the walk.
   await page.evaluate(() => {

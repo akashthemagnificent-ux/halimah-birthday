@@ -7,6 +7,9 @@
 
 .section--reel {
   position: relative;
+  /* base .section is a column flex with align-items:center; the track must
+     span full width or the stage (all-absolute children) collapses to 0px */
+  display: block;
   background: rgb(8 8 10);
   color: rgb(232 224 216);
   padding: 0;
