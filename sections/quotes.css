@@ -661,3 +661,21 @@ html.js-quotes .quote-exhibit.is-in { opacity: 1; }
 .quote-exhibit.pet-here .quote-pet {
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
+
+/* ============================================================
+   DarkVeil layer (sections/bg-darkveil.js): warm silk veils that
+   drift behind the orbit void. Stacks under #quotes-orbit (both
+   z-index 0; veil is earlier in the DOM, so orbit paints above)
+   and under .quotes__content (z 2). Additive: the section's
+   radial gradient stays as the underlayer/fallback.
+   ============================================================ */
+.quotes-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
