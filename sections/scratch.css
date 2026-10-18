@@ -4,7 +4,7 @@
    ============================================================ */
 
 .section--scratch {
-  background: var(--color-bg);
+  background: linear-gradient(180deg, #1a1410 0, transparent 42vh), var(--color-bg);
   overflow: hidden;
 }
 

@@ -16,7 +16,7 @@
   isolation: isolate;
   overflow-x: clip;
   overflow-y: visible;
-  background: var(--color-cine-bg);
+  background: linear-gradient(180deg, #1a1410 0, transparent 42vh), var(--color-cine-bg);
   --story-layer-ambient: 0;
   --story-layer-content: 2;
   --story-layer-rail: 50;
@@ -53,7 +53,7 @@ canvas.story__ambient,
     radial-gradient(68% 46% at 50% -4%, rgba(224, 124, 62, 0.26) 0%, rgba(224, 124, 62, 0) 62%),
     radial-gradient(48% 36% at 88% 34%, rgba(212, 168, 106, 0.2) 0%, rgba(212, 168, 106, 0) 68%),
     radial-gradient(56% 40% at 6% 76%, rgba(124, 88, 190, 0.18) 0%, rgba(124, 88, 190, 0) 70%),
-    linear-gradient(180deg, #14101c 0%, #0a0a0f 38%, #0a0a0f 68%, #170f0b 100%);
+    linear-gradient(180deg, #14101c 0%, #0a0a0f 38%, #0a0a0f 68%, #170f0b 86%, rgb(28 22 26) 100%);
   background-repeat: no-repeat;
   background-size: 100% 100%;
   animation: story-atmosphere-drift 26s var(--ease-in-out) infinite;

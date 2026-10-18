@@ -556,3 +556,18 @@ html.js-world .world__closer-block.is-in {
   .section--world .world__bento { grid-template-columns: 1fr; }
   .section--world .world__cell[data-col-span="2"] { grid-column: span 1; }
 }
+
+/* ---- Seam scrim: the reel's black melts into the silk on entry and
+       the ink bottom settles into the finale's warm dark, so the
+       section joins never draw a hard line. Sits above the sticky
+       silk (z0) and below the content (z1, later in DOM order). ---- */
+.section--world::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(8 8 10) 0, transparent 45vh),
+    linear-gradient(0deg, rgb(26 20 16) 0, transparent 38vh);
+}

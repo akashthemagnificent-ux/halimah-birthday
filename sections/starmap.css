@@ -273,3 +273,17 @@ html.js-starmap .starmap__plate {
 }
 
 /* no reduced-motion media query: full motion always (owner decree) */
+
+/* ---- Seam scrim: the album's warm dark edge melts into the starfield
+       on entry, and the field settles into the reel black on exit, so
+       scrolling across the boundary never draws a hard line. ---- */
+.section--starmap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(26 20 16) 0, transparent 42vh),
+    linear-gradient(0deg, rgb(8 8 10) 0, transparent 30vh);
+}

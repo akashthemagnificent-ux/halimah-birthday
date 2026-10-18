@@ -10,6 +10,7 @@
 .section--gags {
   position: relative;
   background:
+    linear-gradient(180deg, #1a1410 0, transparent 42vh),
     radial-gradient(90% 50% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
   overflow: hidden;
 }

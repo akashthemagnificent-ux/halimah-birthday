@@ -22,6 +22,7 @@
   --album-hue: 18;
   --album-glow-hue: 36;
   background:
+    linear-gradient(180deg, #1a1410 0, transparent 42vh),
     radial-gradient(90% 55% at 50% 6%, hsl(var(--album-glow-hue) 70% 30% / 0.5) 0%, transparent 70%),
     radial-gradient(135% 100% at 50% 112%, hsl(var(--album-hue) 52% 15%) 0%, var(--color-bg) 64%),
     var(--color-bg);

@@ -7,9 +7,7 @@
    masked-reveal headline.
 
    Scene graph (one renderer, one rAF):
-     - ember lattice globe (shader points: dense luminous core +
-       thin orbital ring, globe-particles treatment)
-     - hero CAKE: 3 gold tiers + frosting + 5 lit candles (instanced
+      - hero CAKE: 3 gold tiers + frosting + 5 lit candles (instanced
        flames with per-flame flicker) + cherry glow topper
      - 3 framed baby photos orbiting as keepsakes (CanvasTexture
        planes with gold frames + caption plates)
@@ -81,89 +79,6 @@
   }
 
 
-  /* ================================================================
-     Globe shader (globe-particles treatment): dense luminous sphere
-     core + thin orbital ring, circular crisp points, additive glow.
-     ================================================================ */
-  var GLOBE_VERT = [
-    'attribute float a_size;',
-    'attribute float a_layer;',
-    'uniform float u_time;',
-    'uniform float u_pointSize;',
-    'varying float v_layer;',
-    'varying float v_depth;',
-    'varying float v_falloff;',
-    'void main() {',
-    '  vec3 pos = position;',
-    '  float breathe = 1.0 + sin(u_time * 0.65 + a_layer * 4.0) * 0.012;',
-    '  pos *= breathe;',
-    '  vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);',
-    '  gl_PointSize = u_pointSize * a_size * (1.0 / max(0.18, -mvPosition.z));',
-    '  gl_Position = projectionMatrix * mvPosition;',
-    '  v_layer = a_layer;',
-    '  v_depth = smoothstep(-1.8, 1.8, pos.z);',
-    '  v_falloff = smoothstep(2.45, 0.25, length(pos));',
-    '}'
-  ].join('\n');
-
-  var GLOBE_FRAG = [
-    'precision highp float;',
-    'uniform vec3 u_coreColor;',
-    'uniform vec3 u_accentColor;',
-    'varying float v_layer;',
-    'varying float v_depth;',
-    'varying float v_falloff;',
-    'void main() {',
-    '  vec2 uv = gl_PointCoord - 0.5;',
-    '  float d = length(uv);',
-    '  float alpha = smoothstep(0.5, 0.0, d);',
-    '  alpha *= alpha;',
-    '  vec3 color = mix(u_coreColor, u_accentColor, smoothstep(0.35, 1.0, v_layer));',
-    '  color += vec3(1.0) * v_depth * 0.08;',
-    '  color = mix(color * 0.42, color, clamp(v_falloff + v_layer * 0.28, 0.0, 1.0));',
-    '  alpha *= mix(0.52, 1.0, clamp(v_falloff + v_layer * 0.24, 0.0, 1.0));',
-    '  gl_FragColor = vec4(color, alpha);',
-    '}'
-  ].join('\n');
-
-  function buildGlobeGeometry(THREE, rand, sphereCount, ringCount, radius, ringRadius) {
-    var total = sphereCount + ringCount;
-    var positions = new Float32Array(total * 3);
-    var sizes = new Float32Array(total);
-    var layers = new Float32Array(total);
-    var i, idx, z, theta, r, root, angle, rr;
-
-    for (i = 0; i < sphereCount; i += 1) {
-      z = rand() * 2 - 1;
-      theta = rand() * Math.PI * 2;
-      r = radius * (0.58 + Math.pow(rand(), 0.42) * 0.42);
-      root = Math.sqrt(Math.max(0, 1 - z * z));
-      idx = i * 3;
-      positions[idx] = Math.cos(theta) * root * r;
-      positions[idx + 1] = Math.sin(theta) * root * r;
-      positions[idx + 2] = z * r;
-      sizes[i] = 0.72 + rand() * 0.72;
-      layers[i] = rand() * 0.28;
-    }
-    for (i = 0; i < ringCount; i += 1) {
-      var pi = sphereCount + i;
-      angle = rand() * Math.PI * 2;
-      rr = ringRadius + (rand() - 0.5) * 0.12;
-      idx = pi * 3;
-      positions[idx] = Math.cos(angle) * rr;
-      positions[idx + 1] = (rand() - 0.5) * 0.07;
-      positions[idx + 2] = Math.sin(angle) * rr;
-      sizes[pi] = 0.62 + rand() * 0.58;
-      layers[pi] = 0.72 + rand() * 0.28;
-    }
-
-    var geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('a_size', new THREE.BufferAttribute(sizes, 1));
-    geometry.setAttribute('a_layer', new THREE.BufferAttribute(layers, 1));
-    return geometry;
-  }
-
   /* Soft radial glow sprite texture (shared by flames, balloon
      highlights, ground glow, trail handled separately in 2D). */
   function makeGlowTexture(THREE) {
@@ -215,7 +130,7 @@
       emissive: 0x7d1f36, emissiveIntensity: 0.9
     });
 
-    // stand + glow disc
+    // stand
     var discGeo = new THREE.CylinderGeometry(1.55, 1.7, 0.12, 48);
     var discMat = new THREE.MeshStandardMaterial({
       color: 0x2a1c10, metalness: 0.7, roughness: 0.35,
@@ -225,16 +140,6 @@
     disc.position.y = -1.62;
     disc.receiveShadow = true;
     cake.add(disc);
-
-    var glowMat = new THREE.SpriteMaterial({
-      map: glowTex, color: 0xe07c3e, transparent: true,
-      opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending
-    });
-    var glow = new THREE.Sprite(glowMat);
-    glow.scale.set(6.4, 6.4, 1);
-    glow.position.y = -1.5;
-    cake.add(glow);
-    disposables.push(glowMat);
 
     // three tiers + frosting rims
     var tiers = [
@@ -547,7 +452,7 @@
   /* ================================================================
      STAGE — one renderer, one rAF, layered scene + camera flight.
      The flight is a pure function of scroll progress: radius,
-     height, swing, globe spin and keepsake orbit all derive from
+     height, swing, cake spin and keepsake orbit all derive from
      the same eased value, so scrolling back retraces the path.
      ================================================================ */
   function createStage(section, globeCanvas, trailCanvas) {
@@ -594,26 +499,6 @@
 
     var glowTex = makeGlowTexture(THREE);
 
-    // globe lattice (left-back) + orbital ring
-    var globeGeo = buildGlobeGeometry(THREE, makeRandom(7), 2400, 1100, 1.05, 1.9);
-    var globeMat = new THREE.ShaderMaterial({
-      vertexShader: GLOBE_VERT,
-      fragmentShader: GLOBE_FRAG,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      uniforms: {
-        u_time: { value: 0 },
-        u_pointSize: { value: 260 },
-        u_coreColor: { value: new THREE.Color(0xfff3e0) },
-        u_accentColor: { value: new THREE.Color(EMBER) }
-      }
-    });
-    var globe = new THREE.Points(globeGeo, globeMat);
-    globe.frustumCulled = false;
-    globe.position.set(-4.2, 1.1, -3.2);
-    scene.add(globe);
-
     // cake (hero, centre)
     var cakeBuilt = buildCake(THREE, glowTex);
     var cake = cakeBuilt.group;
@@ -648,8 +533,6 @@
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      var px = renderer.getPixelRatio();
-      globeMat.uniforms.u_pointSize.value = 260 * px;
     }
 
     function applyProgress(p) {
@@ -661,8 +544,6 @@
       camBase.z = Math.cos(angle) * radius;
       camera.position.set(camBase.x, camBase.y, camBase.z);
       camera.lookAt(1.9, -0.3 + e * 0.5, -0.6);
-      globe.rotation.y = e * Math.PI * 1.2;
-      globe.rotation.x = Math.sin(e * Math.PI) * 0.14;
       cake.rotation.y = e * Math.PI * 0.7;
       cake.position.y = -0.85 + e * 0.75;
     }
@@ -680,9 +561,7 @@
       pointerEase.x += ((pointer.seen ? pointer.x : 0) - pointerEase.x) * 0.16;
       pointerEase.y += ((pointer.seen ? pointer.y : 0) - pointerEase.y) * 0.16;
 
-      // globe + cake life
-      globeMat.uniforms.u_time.value = t;
-      globe.rotation.y += 0.0009;
+      // cake life
       cake.position.y += Math.sin(t * 0.9) * 0.0007;
       cake.rotation.y += 0.0006;
       candleLight.intensity = 12 + Math.sin(t * 11) * 1.6 + Math.sin(t * 23 + 1) * 1.1;

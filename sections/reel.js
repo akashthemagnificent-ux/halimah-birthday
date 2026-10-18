@@ -1,26 +1,30 @@
 /* reel - scroll-pinned birthday video gifts.
    One active decoder: a single <video> swaps src at the veil peak;
    the echo layer is the active poster (static, blurred). Native
-   scroll drives a per-chapter 0..1 progress via rAF. Only transform,
-   opacity and filter animate. Reduced motion drops the flash and
-   scale choreography for a plain crossfade. */
+   scroll drives a per-chapter 0..1 progress via rAF. Minimal stage:
+   no captions, rails or toggles; sound on by default; bottom
+   letterbox bar + loading spinner. Reduced motion drops the flash
+   and scale choreography for a plain crossfade. */
 
 (() => {
   'use strict';
 
   var SECTION_ID = 'reel';
 
+  var reelEl = document.getElementById(SECTION_ID);
+  var ASSET_BASE = (reelEl && reelEl.getAttribute('data-reel-assets')) || 'assets/reel/';
+
   var GIFTS = [
-    { src: 'assets/reel/gift-1.mp4', poster: 'assets/reel/gift-1-poster.jpg',
-      title: 'for the first smile', accent: '239 106 64', pos: '50% 50%' },
-    { src: 'assets/reel/gift-2.mp4', poster: 'assets/reel/gift-2-poster.jpg',
-      title: 'a late-night one', accent: '224 92 54', pos: '50% 50%' },
-    { src: 'assets/reel/gift-3.mp4', poster: 'assets/reel/gift-3-poster.jpg',
-      title: 'the long one, every take', accent: '198 74 48', pos: '50% 50%' },
-    { src: 'assets/reel/gift-4.mp4', poster: 'assets/reel/gift-4-poster.jpg',
-      title: 'a version of you to keep', accent: '236 130 72', pos: '50% 50%' },
-    { src: 'assets/reel/gift-5.mp4', poster: 'assets/reel/gift-5-poster.jpg',
-      title: 'the one i saved for last', accent: '255 156 88', pos: '50% 50%' }
+    { src: ASSET_BASE + 'gift-1.mp4', poster: 'assets/reel/gift-1-poster.jpg',
+      title: 'for the first smile', accent: '239 106 64', pos: '50% 50%', aspect: 'square' },
+    { src: ASSET_BASE + 'gift-2.mp4', poster: 'assets/reel/gift-2-poster.jpg',
+      title: 'a late-night one', accent: '224 92 54', pos: '50% 50%', aspect: 'wide' },
+    { src: ASSET_BASE + 'gift-3.mp4', poster: 'assets/reel/gift-3-poster.jpg',
+      title: 'the long one, every take', accent: '198 74 48', pos: '50% 50%', aspect: 'wide' },
+    { src: ASSET_BASE + 'gift-4.mp4', poster: 'assets/reel/gift-4-poster.jpg',
+      title: 'a version of you to keep', accent: '236 130 72', pos: '50% 50%', aspect: 'square' },
+    { src: ASSET_BASE + 'gift-5.mp4', poster: 'assets/reel/gift-5-poster.jpg',
+      title: 'the one i saved for last', accent: '255 156 88', pos: '50% 50%', aspect: 'square' }
   ];
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -44,41 +48,21 @@
     var fg = section.querySelector('[data-reel-fg]');
     var echo = section.querySelector('[data-reel-echo]');
     var indexEl = section.querySelector('[data-reel-index]');
-    var titleEl = section.querySelector('[data-reel-title]');
-    var rail = section.querySelector('[data-reel-rail]');
     var flash = section.querySelector('[data-reel-flash]');
     var veil = section.querySelector('[data-reel-veil]');
-    var soundBtn = section.querySelector('[data-reel-sound]');
     if (!track || !stage || !fg || !echo || !veil) return;
 
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     var N = GIFTS.length;
     var active = -1;
-    var soundOn = false;
     var raf = 0;
     var dirty = true;
     var near = false;
     var probe = null; /* metadata preload for the next gift */
+    var unlockArmed = false; /* one gesture-retry latch for audio autoplay */
+    var fgStalled = false; /* true only between waiting/stalled and the next frame */
 
     track.style.setProperty('--reel-count', String(N));
-
-    /* rail dots (also keyboard-reachable jump links) */
-    var dots = [];
-    for (var i = 0; i < N; i++) {
-      (function (idx) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'reel__dot';
-        b.setAttribute('aria-label', 'Gift ' + (idx + 1));
-        b.addEventListener('click', function () {
-          var chapterH = track.offsetHeight / N;
-          var top = track.getBoundingClientRect().top + window.scrollY;
-          window.scrollTo({ top: Math.round(top + chapterH * idx + chapterH * 0.3), behavior: reduced.matches ? 'auto' : 'smooth' });
-        });
-        rail.appendChild(b);
-        dots.push(b);
-      })(i);
-    }
 
     function setActive(i) {
       if (i === active) return;
@@ -91,18 +75,17 @@
         fg.poster = g.poster;
         fg.src = g.src;
         fg.style.objectPosition = g.pos;
-        fg.autoplay = true; /* muted + playsinline: browser replays after load */
+        fg.autoplay = true; /* playsinline: browser replays after load */
         fg.load();
         /* only swap loads bump preload; the first gift stays preload=none
            until the hold zone plays it (never yank 25MB past other sections) */
         try { fg.preload = 'auto'; } catch (e) {}
       }
-      fg.muted = !soundOn;
+      fg.muted = false; /* edits carry audio: sound on by default */
+      fg.setAttribute('data-aspect', g.aspect);
       echo.src = g.poster;
       stage.style.setProperty('--reel-accent', g.accent);
       if (indexEl) indexEl.textContent = (i + 1 < 10 ? '0' : '') + (i + 1);
-      if (titleEl) titleEl.textContent = g.title;
-      for (var d = 0; d < dots.length; d++) dots[d].classList.toggle('is-active', d === i);
       /* metadata-preload only the next gift */
       var nxt = GIFTS[i + 1];
       if (nxt) {
@@ -116,13 +99,43 @@
       /* entering the hold zone commits to loading: bump preload so the
          starved-loader watchdog may recover a fetch that never starts */
       if (fg.preload !== 'auto') { try { fg.preload = 'auto'; } catch (e) {} }
+      fg.muted = false;
       if (!fg.paused) return;
       var pr = fg.play();
-      if (pr && pr.catch) pr.catch(function () { /* poster stays until policy allows */ });
+      if (pr && pr.catch) pr.catch(function () {
+         /* policy blocked audio autoplay: retry once on the first real
+            gesture (she will have tapped begin, but Safari may still
+            demand an in-page gesture for sound) */
+        if (unlockArmed) return;
+        unlockArmed = true;
+        var unlock = function () {
+          unlockArmed = false;
+          fg.muted = false;
+          playActive();
+        };
+        document.addEventListener('pointerdown', unlock, { once: true });
+        document.addEventListener('keydown', unlock, { once: true });
+      });
     }
 
     /* first play can lose a race with load(); retry on canplay + slow tick */
-    fg.addEventListener('canplay', function () { onScroll(); });
+    /* spinner shows only while data is genuinely absent: readyState<2 or a
+       waiting/stalled gap; any frame arrival (readyState>=2, playing) hides it */
+    var stallOn = function () { fgStalled = true; onScroll(); };
+    var stallOff = function () { fgStalled = false; onScroll(); };
+    fg.addEventListener('canplay', stallOff);
+    fg.addEventListener('loadstart', stallOn);
+    fg.addEventListener('waiting', stallOn);
+    fg.addEventListener('stalled', stallOn);
+    fg.addEventListener('loadeddata', stallOff);
+    fg.addEventListener('playing', stallOff);
+    /* aspect: self-heal from the real dims once metadata lands */
+    fg.addEventListener('loadedmetadata', function () {
+      if (fg.videoWidth > 0 && fg.videoHeight > 0) {
+        fg.setAttribute('data-aspect', fg.videoWidth / fg.videoHeight >= 1.3 ? 'wide' : 'square');
+      }
+      onScroll();
+    });
     /* decode/network failure: keep the poster attribute visible (CSS
        already paints the poster under a transparent video); retry once */
     var errRetried = 0;
@@ -187,10 +200,10 @@
       var prep = seg(p, 0.64, 0.80);
       var flashT = seg(p, 0.80, 0.93);
       var veilUp = seg(p, 0.88, 0.96);
-      /* veil carried across the boundary: opaque at p=0, down by p=0.10 */
-      var veilCarry = ci > 0 ? 1 - seg(p, 0.0, 0.10) : 0;
-      var capIn = seg(p, 0.04, 0.14);
-      var capOut = seg(p, 0.64, 0.76);
+      /* veil carried across EVERY boundary including first entry (the
+         "the night" → edit handoff): opaque at p=0, down by p=0.10 */
+      var veilCarry = 1 - seg(p, 0.0, 0.10);
+      var entryT = ci === 0 ? 1 - veilCarry : 0;
 
       var isReduced = reduced.matches;
       var veilK = Math.max(veilUp, veilCarry);
@@ -211,9 +224,13 @@
       var fullScale = 1;
       if (veilK > 0.92 && !isReduced) {
         /* scale-to-cover from the base CSS box (transform must not
-           depend on a rect that the current transform already skews) */
-        var baseW = Math.min(window.innerWidth * 0.56, 620);
-        var baseH = Math.min(window.innerHeight * 0.78, 760);
+           depend on a rect that the current transform already skews).
+           Boxes mirror reel.css: wide = 100vw x 56.25vw; square =
+           min(76dvh, 92vw) on both sides. */
+        var wide = fg.getAttribute('data-aspect') === 'wide';
+        var baseW = wide ? window.innerWidth
+          : Math.min(window.innerHeight * 0.76, window.innerWidth * 0.92);
+        var baseH = wide ? window.innerWidth * 0.5625 : baseW;
         fullScale = Math.max(window.innerWidth / baseW, window.innerHeight / baseH) * 1.04;
         fg.classList.add('is-full');
       } else {
@@ -223,19 +240,19 @@
       fg.style.opacity = String(opacity);
       fg.style.transform = 'translate(-50%, -50%) scale(' + (scale * fullScale).toFixed(4) + ')';
 
-      /* caption + stage flags */
-      var capK = capIn * (1 - capOut);
-      stage.classList.toggle('has-caption', capK > 0.5 && veilK < 0.5);
+      /* stage flags: visible + spinner-while-loading */
       stage.classList.toggle('is-playing', opacity > 0.5);
+      stage.classList.toggle('is-buffering', !!fg.src && !fg.error && (fg.readyState < 2 || fgStalled));
 
       /* flash beam */
       if (flash) {
         if (isReduced) {
           flash.style.opacity = '0';
         } else {
-          var fk = Math.sin(flashT * Math.PI); /* in and out inside the segment */
+          var beamT = Math.max(flashT, entryT);
+          var fk = Math.sin(beamT * Math.PI); /* in and out inside the segment */
           flash.style.opacity = String(fk * 0.95);
-          flash.style.transform = 'scaleX(' + lerp(0.05, 2.6, flashT).toFixed(3) + ')';
+          flash.style.transform = 'scaleX(' + lerp(0.05, 2.6, beamT).toFixed(3) + ')';
         }
       }
 
@@ -248,8 +265,11 @@
         echo.style.filter = 'blur(34px) saturate(1.2) brightness(' + bright.toFixed(3) + ')';
       }
 
-      /* playback policy: one decoder, only while the gift is watchable */
-      var watchable = veilK < 0.65 && p < 0.86;
+      /* playback policy: one decoder, only while the gift is watchable
+         AND the track actually intersects the viewport (never while the
+         previous section is still the one in view) */
+      var inView = rect.top < window.innerHeight && rect.bottom > 0;
+      var watchable = veilK < 0.65 && p < 0.86 && inView;
       if (watchable && !document.hidden) playActive();
       else if (!fg.paused) { try { fg.pause(); } catch (e) {} }
     }
@@ -280,17 +300,6 @@
     });
     reduced.addEventListener ? reduced.addEventListener('change', onScroll) : null;
     window.addEventListener('pagehide', function () { try { fg.pause(); } catch (e) {} });
-
-    /* sound toggle (edits carry their own audio; autoplay stays muted) */
-    if (soundBtn) {
-      soundBtn.addEventListener('click', function () {
-        soundOn = !soundOn;
-        fg.muted = !soundOn;
-        soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-        soundBtn.textContent = soundOn ? 'sound off' : 'sound on';
-        if (soundOn) playActive();
-      });
-    }
 
     /* first gift activates on approach (IO above); kick scroll state */
     onScroll();

@@ -30,6 +30,7 @@
   gap: clamp(1rem, 4vw, 4rem);
   padding: var(--section-padding) var(--gutter) calc(var(--section-padding) + var(--space-12));
   background:
+    linear-gradient(180deg, #14100c 0, transparent 42vh),
     radial-gradient(120vmax 90vmax at 82% 108%, rgba(224, 124, 62, 0.16), transparent 62%),
     radial-gradient(90vmax 70vmax at 8% -12%, rgba(201, 149, 107, 0.12), transparent 60%),
     var(--bday-night);

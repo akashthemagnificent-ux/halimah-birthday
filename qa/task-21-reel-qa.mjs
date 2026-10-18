@@ -228,17 +228,20 @@ try {
     const upIdx = await page.evaluate(() => document.querySelector('[data-reel-index]')?.textContent.trim());
     assert(upIdx === '04', 'scroll up restores earlier gift', `idx=${upIdx}`);
 
-    // sound toggle (evaluate-click: deterministic under swiftshader)
-    await page.evaluate(() => document.querySelector('[data-reel-sound]')?.click());
+    // sound: edits play with audio by default (trusted click above granted
+    // activation); the stage carries no on-page controls any more
     const snd = await page.evaluate(() => {
-      const b = document.querySelector('[data-reel-sound]');
       const fg = document.querySelector('[data-reel-fg]');
-      return { pressed: b ? b.getAttribute('aria-pressed') : '?', muted: fg ? fg.muted : null };
+      return {
+        muted: fg ? fg.muted : null,
+        paused: fg ? fg.paused : null,
+        hasSoundBtn: !!document.querySelector('[data-reel-sound]'),
+        hasCaption: !!document.querySelector('[data-reel-caption]')
+      };
     });
     say('# sound: ' + JSON.stringify(snd));
-    assert(snd.pressed === 'true' && snd.muted === false, 'sound toggle unmutes the active gift', JSON.stringify(snd));
-    // toggle back for cleanliness
-    await page.evaluate(() => document.querySelector('[data-reel-sound]')?.click());
+    assert(snd.muted === false && snd.paused === false, 'sound on by default (unmuted, playing)', JSON.stringify(snd));
+    assert(!snd.hasSoundBtn && !snd.hasCaption, 'minimal canvas (no toggle, no caption)', JSON.stringify(snd));
 
     // console errors: allow known photo-probe noise; on file:// the
     // "Failed to load resource" line carries no URL (attribution lives

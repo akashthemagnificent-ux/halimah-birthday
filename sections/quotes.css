@@ -13,6 +13,7 @@
   isolation: isolate;
   overflow: clip;
   background:
+    linear-gradient(180deg, rgb(28 22 26) 0, rgb(13 11 15) 12vh, transparent 44vh),
     radial-gradient(90% 55% at 50% 0%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
 }
 

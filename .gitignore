@@ -1,0 +1,5 @@
+# gift videos live in Cloudflare R2 — excluded from git (they exceed
+# GitHub's 100MB per-file cap and are not needed to build the site)
+assets/reel/*.mp4
+node_modules/
+*.log

@@ -628,10 +628,8 @@
       <div class="album__book-inner">
         <div class="album__pages">
           <div class="album__page album__page--cover" data-density="hard">
-            <div class="album__placeholder">
-              <span class="album__placeholder-icon" aria-hidden="true">&#10022;</span>
-              <span class="album__placeholder-label">the baby album &#183; PLACEHOLDER</span>
-              <span class="album__placeholder-note">cover art arrives with the first real photo</span>
+            <div class="album__photo">
+              <img class="album__page-img" src="assets/baby/book-front-cover.webp" alt="Halimah album front cover" loading="lazy" decoding="async" />
             </div>
             <div class="album__caption">
               <p class="album__caption-text">open it, zai</p>
@@ -1059,10 +1057,8 @@
             </div>
           </div>
           <div class="album__page album__page--cover" data-density="hard">
-            <div class="album__placeholder">
-              <span class="album__placeholder-icon" aria-hidden="true">&#9825;</span>
-              <span class="album__placeholder-label">to be continued — PLACEHOLDER</span>
-              <span class="album__placeholder-note">more pages when the photos land</span>
+            <div class="album__photo">
+              <img class="album__page-img" src="assets/baby/book-back-cover.webp" alt="Halimah album back cover" loading="lazy" decoding="async" />
             </div>
             <div class="album__caption">
               <p class="album__caption-text">every page after this one is ours to fill</p>
@@ -1142,16 +1138,13 @@
 </section>
 
 <!-- 10b. reel: birthday video gifts (scroll-pinned, one at a time)
-     Cinematic stage: blurred poster echo, accent wash, sharp
-     foreground video, white flash + veil handoff between gifts.
-     Only the active gift plays; neighbours stay paused.
+     Minimal cinematic canvas: blurred poster echo, accent wash, sharp
+     foreground video (aspect-fitted), bottom letterbox bar, loading
+     spinner, white flash + veil handoff between gifts. No captions,
+     rails or toggles on stage. Sound is on by default; only the
+     active gift plays.
      No-JS fallback: plain links to the five files. -->
-<section id="reel" class="section section--reel" aria-label="Birthday video gifts">
-  <div class="reel__intro">
-    <p class="reel__eyebrow">for you &#183; a reel</p>
-    <h2 class="reel__heading">a few things i made for you</h2>
-    <p class="reel__note">scroll slowly. one at a time.</p>
-  </div>
+  <section id="reel" class="section section--reel" aria-label="Birthday video gifts" data-reel-assets="assets/reel/">
   <div class="reel__fallback">
     <ul class="reel__fallback-list">
       <li><a href="assets/reel/gift-1.mp4">play gift 01</a></li>
@@ -1165,19 +1158,13 @@
     <div class="reel__stage" data-reel-stage>
       <img class="reel__echo" data-reel-echo src="assets/reel/gift-1-poster.jpg" alt="" aria-hidden="true" />
       <div class="reel__wash" data-reel-wash aria-hidden="true"></div>
-      <video class="reel__fg" data-reel-fg src="assets/reel/gift-1.mp4" poster="assets/reel/gift-1-poster.jpg" playsinline muted preload="none" aria-label="Birthday gift video"></video>
-      <div class="reel__caption" data-reel-caption>
-        <span class="reel__index" data-reel-index>01</span>
-        <p class="reel__title" data-reel-title>for the first smile</p>
-      </div>
-      <div class="reel__rail" data-reel-rail aria-hidden="true"></div>
+      <video class="reel__fg" data-reel-fg data-aspect="square" src="assets/reel/gift-1.mp4" poster="assets/reel/gift-1-poster.jpg" playsinline preload="none" aria-label="Birthday gift video"></video>
+      <span data-reel-index hidden>01</span>
+      <div class="reel__buffer" data-reel-buffer aria-hidden="true"></div>
+      <div class="reel__bars" aria-hidden="true"></div>
       <div class="reel__flash" data-reel-flash aria-hidden="true"></div>
       <div class="reel__veil" data-reel-veil aria-hidden="true"></div>
-      <button class="reel__sound" type="button" data-reel-sound aria-pressed="false">sound on</button>
     </div>
-  </div>
-  <div class="reel__outro">
-    <p class="reel__outro-line">happy birthday. one more year of you, and i get to keep making things like this for you.</p>
   </div>
 </section>
 
@@ -1449,11 +1436,8 @@
       <h3 class="finale__keepsakes-title">keepsakes</h3>
       <p class="finale__keepsakes-note">take a piece of tonight with you</p>
       <ul class="finale__keepsakes-list">
-        <li><button class="finale__keepsake-link finale__keepsake-link--primary" type="button" data-finale-print>print the letter &#183; save as PDF</button></li>
-        <li><button class="finale__keepsake-link" type="button" data-motion-replay hidden>replay the confetti</button></li>
-        <li><a class="finale__keepsake-link" href="assets/keepsakes/star-map-card.svg" download="star-map-26-aug-2026.svg">download the star-map card</a></li>
-        <li><a class="finale__keepsake-link" href="#album">open the us album</a></li>
-        <li><a class="finale__keepsake-link" href="#story">re-read our story</a></li>
+        <li><button class="finale__keepsake-link finale__keepsake-link--primary" type="button" data-finale-letter-png>download the letter</button></li>
+        <li><button class="finale__keepsake-link finale__keepsake-link--ghost" type="button" data-finale-gifts>download all 5 gifts</button></li>
       </ul>
     </div>
   </div>
@@ -1715,7 +1699,7 @@ button, a, input, select, textarea {
    An instrument, not a card: open panel, hairline rules, a single readout.
    Same night as the gate, one breath dimmer — this is the wait, not the arrival. */
 .section--countdown {
-  background: #14100c;
+  background: linear-gradient(180deg, #14100c 0, transparent 42vh), #14100c;
   overflow: hidden;
 }
 
