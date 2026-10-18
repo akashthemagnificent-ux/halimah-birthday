@@ -9,6 +9,10 @@
    ============================================================ */
 
 .section--physics {
+  /* position:relative is load-bearing: #physics-bg (bg-orb.js) is
+     position:absolute inset:0 and would otherwise anchor to a higher
+     ancestor and cover the whole page. */
+  position: relative;
   background:
     linear-gradient(180deg, #1a1410 0, transparent 42vh),
     radial-gradient(80% 50% at 50% 100%, var(--color-surface) 0%, var(--color-bg) 60%, var(--color-bg) 100%);
@@ -208,4 +212,18 @@
   .physics__stage {
     min-height: 20rem;
   }
+}
+
+/* Full-bleed interactive background (bg-orb.js WebGL ring).
+   Stacking contract, same as .quotes-veil: the canvas sits ABOVE the
+   section's own gradient (it is its own background art) but BELOW
+   .physics__content, which is position:relative so it paints on top
+   with no z-index needed. pointer-events:none keeps it decorative —
+   the orbit canvas and play button still own all interaction. */
+.physics__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
 }
