@@ -6,6 +6,7 @@ Then open http://127.0.0.1:8000/  (or the port you pass).
 Unlike python -m http.server, this answers 206 Partial Content so
 Chrome/Safari can seek and stream the reel videos and song clips.
 """
+
 import os
 import re
 import sys
@@ -13,6 +14,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 RANGE_RE = re.compile(r"bytes=(\d*)-(\d*)")
+
 
 class RangeHandler(SimpleHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
@@ -33,6 +35,9 @@ class RangeHandler(SimpleHTTPRequestHandler):
         if not range_header:
             self.send_response(200)
             self.send_header("Content-Type", ctype)
+            # no-store: the owner hot-tests edits on a phone; without this,
+            # browsers heuristically reuse old builds (only Last-Modified was set).
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(size))
             self.send_header("Accept-Ranges", "bytes")
             self.end_headers()
@@ -66,6 +71,7 @@ class RangeHandler(SimpleHTTPRequestHandler):
         f.seek(start)
         self.send_response(206)
         self.send_header("Content-Type", ctype)
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
         self.send_header("Content-Length", str(length))
         self.send_header("Accept-Ranges", "bytes")
@@ -86,10 +92,12 @@ class RangeHandler(SimpleHTTPRequestHandler):
             outputfile.write(chunk)
             limit -= len(chunk)
 
+
 class _Limited:
     def __init__(self, fp, length):
         self._fp = fp
         self.remaining = length
+
     def read(self, n=-1):
         if self.remaining <= 0:
             return b""
@@ -98,18 +106,23 @@ class _Limited:
         chunk = self._fp.read(min(n, self.remaining))
         self.remaining -= len(chunk)
         return chunk
+
     def close(self):
         self._fp.close()
 
+
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
-    handler = partial(RangeHandler, directory=os.path.dirname(os.path.abspath(__file__)))
+    handler = partial(
+        RangeHandler, directory=os.path.dirname(os.path.abspath(__file__))
+    )
     httpd = ThreadingHTTPServer(("127.0.0.1", port), handler)
     print(f"Serving with Range support at http://127.0.0.1:{port}/  (Ctrl+C to stop)")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+
 
 if __name__ == "__main__":
     main()
