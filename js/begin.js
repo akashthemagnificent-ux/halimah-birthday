@@ -331,13 +331,10 @@
 
     if (unlocked) return;
 
-    if (countdownDone) {
-      onCountdownComplete();
-      return;
-    }
-
-    dom.countdownPanel.hidden = false;
-    if (!rafId) rafId = window.requestAnimationFrame(tick);
+    // Countdown retired with the 19 Oct wait: the tap that starts the
+    // music also unlocks the site — no waiting room in between.
+    countdownDone = true;
+    onCountdownComplete();
   }
 
   function boot() {
@@ -389,13 +386,9 @@
 
     lockContent();
 
-    var past = new Date().getTime() >= dom.target.getTime();
-    if (past) {
-      onCountdownComplete();
-    } else {
-      document.documentElement.setAttribute('data-locked', 'true');
-      renderCountdown(dom.target, new Date());
-    }
+    // The 19 Oct wait is retired (she gets it on the day itself): never
+    // auto-complete on load — the begin tap below is the only gate left.
+    document.documentElement.setAttribute('data-locked', 'true');
 
     beginButton.addEventListener('click', startExperience);
     if (playFallbackButton) {

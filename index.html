@@ -67,9 +67,9 @@
   <svg class="music-control__icon music-control__icon--play" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
 </button>
 
-<!-- 2. countdown — Countdown gate (todo 2)
-     Target is 2026-10-19T00:00 Europe/London, resolved at runtime so the
-     BST/GMT boundary is handled. Stays hidden until Begin is tapped. -->
+<!-- 2. countdown — retired wait room (the 19 Oct gate is gone): Begin now
+     unlocks directly, so this section stays hidden after the tap and only
+     remains as markup for the old structure checks. -->
 <section id="countdown" class="section section--countdown" aria-label="Countdown">
   <div class="countdown__sky" aria-hidden="true">
     <div class="countdown__aurora countdown__aurora--a"></div>
@@ -91,10 +91,10 @@
   </div>
 </section>
 
-<!-- Content region — the countdown gate's target (todo 2).
+<!-- Content region — the begin gate's target (todo 2).
      Every story section lives inside. While locked, js/begin.js detaches
      these nodes into a DocumentFragment, so no story text exists in the
-     DOM or in view-source. At the target they are restored in place. -->
+     DOM or in view-source. On the begin tap they are restored in place. -->
 <div id="content-region">
 
 <!-- 3. birthday — The Night of Her Day (ember-night hero) -->
@@ -1970,7 +1970,7 @@ button, a, input, select, textarea {
 <script src="vendor/confetti.browser.min.js" defer></script>
 <script src="vendor/howler.min.js" defer></script>
 <script src="js/motion.js" defer></script>
-<script src="js/begin.js" defer></script>
+<script src="js/begin.js?v=gate2" defer></script>
 
 <!-- Ambient: ember canvas (gate) + countdown progress hairline. Vanilla only:
      never touches window.confetti / Howl / gsap; idle until painted. -->
