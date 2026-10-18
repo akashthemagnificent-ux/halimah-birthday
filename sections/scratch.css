@@ -4,6 +4,10 @@
    ============================================================ */
 
 .section--scratch {
+  /* position:relative anchors .scratch__bg (bg-ballpit.js), which is
+     absolute inset:0 — without it the canvas would size to a higher
+     ancestor and bleed over the whole page. */
+  position: relative;
   background: linear-gradient(180deg, #1a1410 0, transparent 42vh), var(--color-bg);
   overflow: hidden;
 }
@@ -230,5 +234,17 @@
 .scratch__tap-btn:focus-visible {
   outline: 2px solid var(--color-accent-glow);
   outline-offset: 3px;
+}
+
+/* Full-bleed interactive background (bg-ballpit.js WebGL physics balls).
+   Same stacking contract as .quotes-veil / .physics__bg: above the
+   section gradient, below .scratch__content (which is position:relative).
+   pointer-events:none — scratching is owned by .scratch__cover only. */
+.scratch__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
 }
 
