@@ -73,11 +73,14 @@
     const tagGroup = new THREE.Group();
     scene.add(tagGroup);
     const tags = [];
-    const tagCanvas = document.createElement('canvas');
-    tagCanvas.width = 128;
-    tagCanvas.height = 64;
 
+    /* One canvas per tag: a CanvasTexture tracks the canvas it was built
+       from, so sharing a single scratch canvas makes every sprite sample
+       whatever was drawn last (all 40 chips read the final label). */
     function tagTexture(label, rare) {
+      const tagCanvas = document.createElement('canvas');
+      tagCanvas.width = 128;
+      tagCanvas.height = 64;
       const ctx = tagCanvas.getContext('2d');
       ctx.clearRect(0, 0, 128, 64);
       ctx.fillStyle = rare ? 'rgba(60,38,8,0.92)' : 'rgba(20,14,10,0.92)';
