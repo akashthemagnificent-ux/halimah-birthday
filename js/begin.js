@@ -6,9 +6,10 @@
   var TARGET_MONTH = 10;
   var TARGET_DAY = 19;
 
-  // Music slot owned by todo 6: the <audio> element already lives in index.html.
+  // Music is owned by js/section-music.js: one song per page, crossfaded.
+  // begin.js only arms and toggles it — the tap below is the sole gesture
+  // that can unlock audio, so the director's first fade-in hangs off it.
   var MUSIC_AUDIO_ID = 'bgm';
-  var MUSIC_FALLBACK_SRC = 'assets/music/song.mp3';
 
   // Locked/begin/unlock copy lives in index.html markup, not here, so it stays
   // readable and translatable without touching this script.
@@ -18,7 +19,6 @@
   };
 
   var dom = {};
-  var howl = null;
   var rafId = 0;
   var unlocked = false;
   var countdownDone = false;
@@ -134,141 +134,41 @@
     dom.playFallback.hidden = true;
   }
 
-  function syncMusicControl(playing) {
-    var control = dom.musicControl;
-    if (!control) return;
-    control.hidden = !playing;
-    control.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
-    var pauseIcon = control.querySelector('.music-control__icon--pause');
-    var playIcon = control.querySelector('.music-control__icon--play');
-    if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
-    if (playIcon) playIcon.style.display = playing ? 'none' : '';
+  function setAudioState(state) {
+    dom.audioState = state;
+    document.documentElement.setAttribute('data-audio', state);
+  }
+
+  function music() {
+    return (window.SectionMusic && typeof window.SectionMusic.start === 'function')
+      ? window.SectionMusic
+      : null;
   }
 
   function startMusic() {
     hidePlayFallback();
 
-    var audioEl = document.getElementById(MUSIC_AUDIO_ID);
-    if (!audioEl) {
+    var m = music();
+    if (!m) {
+      // Director failed to load: nothing can produce sound, so say so rather
+      // than leaving a silent tap with no explanation.
+      setAudioState('error');
       showPlayFallback(MESSAGES.musicMissing);
       return;
     }
-    var src = audioEl.getAttribute('src') || MUSIC_FALLBACK_SRC;
 
-    if (typeof window.Howl !== 'function') {
-      // Howler failed to load: fall back to the element's own play() so the
-      // gesture still produces sound instead of silence.
-      audioEl.setAttribute('src', src);
-      playViaElement(audioEl);
-      return;
-    }
-
-    // Constructed inside the click handler on purpose: the first Howl() and the
-    // first play() must land in the same task as the user gesture, or the
-    // browser blocks the audio context. No audio is touched outside this path.
-    // Howler is given `src` (not `node`): with `node:` Howler 2.2.4 leaves
-    // `_sounds` empty, so `howl.playing()` throws on a missing .length.
-    howl = new window.Howl({
-      src: [src],
-      loop: true,
-      volume: 0.6,
-      // html5:true streams through a real <audio> element (better for a long
-      // loop on a phone) and gives QA an inspectable element for real state.
-      html5: true,
-      onplay: function () {
-        dom.audioState = 'playing';
-        document.documentElement.setAttribute('data-audio', 'playing');
-        hidePlayFallback();
-        syncMusicControl(true);
-      },
-      onplayerror: function (id, err) {
-        dom.audioState = 'error';
-        document.documentElement.setAttribute('data-audio', 'error');
-        showPlayFallback(MESSAGES.musicMissing);
-        if (window.console && console.warn) {
-          console.warn('[begin] music could not start:', err);
-        }
-      },
-      onpause: function () {
-        dom.audioState = 'paused';
-        document.documentElement.setAttribute('data-audio', 'paused');
-        syncMusicControl(false);
-      },
-      onresume: function () {
-        dom.audioState = 'playing';
-        document.documentElement.setAttribute('data-audio', 'playing');
-        syncMusicControl(true);
-      },
-      onloaderror: function () {
-        dom.audioState = 'error';
-        document.documentElement.setAttribute('data-audio', 'error');
-        showPlayFallback(MESSAGES.musicMissing);
-      }
-    });
-
-    var playAttempt;
+    // Called inside the click handler on purpose: the first play() must land
+    // in the same task as the user gesture or the browser blocks it.
     try {
-      playAttempt = howl.play();
+      m.start();
     } catch (err) {
-      dom.audioState = 'blocked';
-      document.documentElement.setAttribute('data-audio', 'blocked');
+      setAudioState('blocked');
       showPlayFallback(MESSAGES.playFallback);
       return;
     }
 
-    // Howler returns a sound id synchronously, but a context blocked by the
-    // autoplay policy rejects a promise instead, so guard both shapes.
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt.then(null, function (err) {
-        dom.audioState = 'blocked';
-        document.documentElement.setAttribute('data-audio', 'blocked');
-        showPlayFallback(
-          err && err.name === 'NotAllowedError'
-            ? MESSAGES.playFallback
-            : MESSAGES.musicMissing
-        );
-      });
-    }
-  }
-
-  function playViaElement(audioEl) {
-    try {
-      var p = audioEl.play();
-      if (p && typeof p.then === 'function') {
-        p.then(function () {
-          dom.audioState = 'playing';
-          document.documentElement.setAttribute('data-audio', 'playing');
-          syncMusicControl(true);
-        }, function (err) {
-          dom.audioState = 'blocked';
-          document.documentElement.setAttribute('data-audio', 'blocked');
-          showPlayFallback(
-            err && err.name === 'NotAllowedError'
-              ? MESSAGES.playFallback
-              : MESSAGES.musicMissing
-          );
-        });
-      }
-    } catch (err) {
-      showPlayFallback(MESSAGES.playFallback);
-    }
-  }
-
-  function toggleMusic() {
-    if (!howl) { startMusic(); return; }
-    if (isHowlPlaying()) {
-      howl.pause();
-    } else {
-      howl.play();
-    }
-  }
-
-  function isHowlPlaying() {
-    try {
-      return !!(howl && typeof howl.playing === 'function' && howl.playing());
-    } catch (err) {
-      return false;
-    }
+    setAudioState('playing');
+    hidePlayFallback();
   }
 
   function tick() {
@@ -346,7 +246,6 @@
     var playFallback = document.getElementById('play-fallback');
     var playFallbackReason = document.getElementById('play-fallback-reason');
     var playFallbackButton = document.getElementById('play-fallback-button');
-    var musicControl = document.getElementById('music-control');
     var contentRegion = document.getElementById('content-region');
     var lockedFragment = document.createDocumentFragment();
 
@@ -366,7 +265,6 @@
       playFallback: playFallback,
       playFallbackReason: playFallbackReason,
       playFallbackButton: playFallbackButton,
-      musicControl: musicControl,
       contentRegion: contentRegion,
       lockedFragment: lockedFragment,
       lastAnnouncedDay: null,
@@ -394,9 +292,7 @@
     if (playFallbackButton) {
       playFallbackButton.addEventListener('click', function () { startMusic(); });
     }
-    if (musicControl) {
-      musicControl.addEventListener('click', toggleMusic);
-    }
+    // #music-control is wired by js/section-music.js (it owns the director).
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden || countdownDone || !dom.started) return;
@@ -418,19 +314,15 @@
     get unlocked() { return unlocked; },
     get countdownDone() { return countdownDone; },
     get musicPlaying() {
-      return isHowlPlaying();
+      var m = music();
+      return !!(m && m.isPlaying());
     },
     get audioElement() {
-      // The element Howler actually created, when it has one: this is the
-      // real proof of playback, not a log line.
-      var el = null;
-      try {
-        var sound = howl && howl._sounds && howl._sounds[0];
-        if (sound && sound._node && typeof sound._node.getAttribute === 'function') {
-          el = sound._node;
-        }
-      } catch (err) { el = null; }
-      if (!el) el = document.getElementById(MUSIC_AUDIO_ID);
+      // The element the director is actually playing: this is the real
+      // proof of playback, not a log line.
+      var live = window.__sectionMusic && window.__sectionMusic.element;
+      if (live) return live;
+      var el = document.getElementById(MUSIC_AUDIO_ID);
       if (!el || typeof el.getAttribute !== 'function') return null;
       return {
         tag: el.tagName,

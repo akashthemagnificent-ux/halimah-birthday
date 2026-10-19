@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="sections/reel.css" />
 <link rel="stylesheet" href="sections/world.css" />
 <link rel="stylesheet" href="sections/finale.css" />
+<script src="js/gl-monitor.js"></script><!-- TEMP: WebGL lifecycle diagnostics -->
 </head>
 <body>
 <!-- Opening overlay (todo 2)
@@ -58,14 +59,26 @@
   </section>
 </div>
 
-<!-- Audio — muted by default, plays only on user gesture -->
-<audio id="bgm" src="assets/music/song.mp3" loop preload="none"></audio>
+<!-- Audio element kept as a silent stub: js/section-music.js owns every
+     track, and sections/world.js still pauses/resumes #bgm around its own
+     song clips (harmless — this element is never given a source to play). -->
+<audio id="bgm" preload="none"></audio>
 
-<!-- Music pause/resume control — visible after first tap -->
-<button id="music-control" class="music-control" type="button" aria-label="Pause music" hidden>
-  <svg class="music-control__icon music-control__icon--pause" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-  <svg class="music-control__icon music-control__icon--play" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-</button>
+<!-- Music player — one song per page, crossfaded by js/section-music.js.
+     Reveals the track name on each change, then settles to a small orb.
+     Hidden entirely on the reel and world pages: those carry their own
+     audio and must stay cinematic, with nothing overlaying them. -->
+<div id="music-player" class="music-player" hidden>
+  <span class="music-player__orb" aria-hidden="true"></span>
+  <span class="music-player__meta">
+    <span class="music-player__eyebrow">now playing</span>
+    <span id="music-title" class="music-player__title" aria-live="polite"></span>
+  </span>
+  <button id="music-control" class="music-player__toggle" type="button" aria-label="Pause music">
+    <svg class="music-player__icon music-player__icon--pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    <svg class="music-player__icon music-player__icon--play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none"><path d="M7 4.5c0-.9 1-1.5 1.8-1L18 9.9c.7.5.7 1.6 0 2.1L8.8 18.5c-.8.5-1.8-.1-1.8-1V4.5z"/></svg>
+  </button>
+</div>
 
 <!-- 2. countdown — retired wait room (the 19 Oct gate is gone): Begin now
      unlocks directly, so this section stays hidden after the tap and only
@@ -1935,45 +1948,146 @@ button, a, input, select, textarea {
 
 /* personal site: full motion always — no reduced-motion gate. */
 
-/* ---- Music control ---- */
-.music-control {
+/* ---- Music player ---- */
+/* Collapsed: a small gold orb with a hairline aura — out of the way of the
+   story. On a track change it unfolds into a glass pill carrying the song
+   name, then settles back. */
+.music-player {
   position: fixed;
-  bottom: var(--gutter);
-  right: var(--gutter);
+  bottom: calc(var(--gutter) + var(--safe-bottom));
+  right: calc(var(--gutter) + var(--safe-right));
   z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.3rem;
+  border-radius: var(--radius-pill);
   background: var(--color-surface);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  color: var(--color-text);
+}
+
+.music-player[hidden] {
+  display: none;
+}
+
+/* the orb doubles as the transport: it is the largest tap target */
+.music-player__orb {
+  position: relative;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  background: radial-gradient(circle at 32% 28%, var(--color-accent-glow), var(--color-accent) 58%, #7d3f1c 100%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent-glow) 45%, transparent),
+              0 0 16px var(--color-accent-soft);
+  cursor: pointer;
+}
+
+/* a soft halo breathing behind the orb while the song plays */
+.music-player__orb::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 1px solid var(--color-accent-soft);
+  animation: music-pulse 3.4s var(--ease-in-out) infinite;
+}
+
+.music-player.is-paused .music-player__orb {
+  filter: grayscale(0.7) brightness(0.7);
+}
+
+.music-player.is-paused .music-player__orb::after {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes music-pulse {
+  0%, 100% { transform: scale(0.86); opacity: 0.75; }
+  50%      { transform: scale(1.18); opacity: 0; }
+}
+
+/* the name panel — collapsed to zero width until a track changes */
+.music-player__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.5s var(--ease-out), opacity 0.35s var(--ease-out);
+}
+
+.music-player.is-open .music-player__meta {
+  max-width: min(58vw, 17rem);
+  opacity: 1;
+}
+
+.music-player__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-accent-glow);
+  opacity: 0.75;
+}
+
+.music-player__title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
+}
+
+.music-player__toggle {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 0;
+  border-radius: 50%;
   cursor: pointer;
-  color: var(--color-accent);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  color: var(--color-text-muted);
+  background: transparent;
+  transition: color 0.25s ease, background 0.25s ease;
 }
 
-.music-control[hidden] {
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.8);
+.music-player__toggle:hover,
+.music-player__toggle:focus-visible {
+  color: var(--color-accent-glow);
+  background: var(--color-accent-soft);
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  outline: none;
 }
 
-.music-control:hover {
-  background: var(--color-surface-alt);
-}
-
-.music-control__icon--pause,
-.music-control__icon--play {
+.music-player__icon--pause,
+.music-player__icon--play {
   flex-shrink: 0;
+}
+
+/* tap targets stay comfortable on a phone without enlarging the pill */
+@media (pointer: coarse) {
+  .music-player__orb  { width: 34px; height: 34px; }
+  .music-player__toggle { width: 34px; height: 34px; }
 }
 </style>
 <!-- Critical: motion kill-switch + confetti, then the begin gate (tap-to-begin interaction) -->
 <script src="vendor/confetti.browser.min.js" defer></script>
 <script src="vendor/howler.min.js" defer></script>
 <script src="js/motion.js" defer></script>
-<script src="js/begin.js?v=gate2" defer></script>
+<script src="js/section-music.js?v=pages1" defer></script>
+<script src="js/begin.js?v=pages1" defer></script>
 
 <!-- Ambient: ember canvas (gate) + countdown progress hairline. Vanilla only:
      never touches window.confetti / Howl / gsap; idle until painted. -->
