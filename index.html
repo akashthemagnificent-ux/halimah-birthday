@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="sections/reel.css?v=ambient2" />
 <link rel="stylesheet" href="sections/world.css" />
 <link rel="stylesheet" href="sections/finale.css" />
-<link rel="stylesheet" href="sections/clocks.css?v=clocks1" />
+<link rel="stylesheet" href="sections/clocks.css?v=clocks2" />
 </head>
 <body>
 <!-- Opening overlay (todo 2)
@@ -1464,6 +1464,11 @@
      accessible; three.js draws only the rings behind them. With
      JS off the anchor dates still tell the truth. -->
 <section id="clocks" class="section section--clocks" aria-label="How much time">
+  <div class="clocks__intro">
+    <p class="clocks__eyebrow">how much time</p>
+    <h2 class="clocks__headline">a lifetime in ticks</h2>
+    <p class="clocks__lede">every second since 26 august 2026, counting up — and the ones still to come</p>
+  </div>
   <div class="clocks__track" data-clocks-track>
     <div class="clocks__stage" data-clocks-stage>
       <canvas class="clocks__canvas" data-clocks-canvas aria-hidden="true"></canvas>
@@ -2278,6 +2283,6 @@ button, a, input, select, textarea {
 <script src="sections/finale.js"></script>
 <script src="content/milestones.js?v=clocks1"></script>
 <script src="sections/clocks-core.js?v=clocks1"></script>
-<script src="sections/clocks.js?v=clocks1"></script>
+<script src="sections/clocks.js?v=clocks2"></script>
 </body>
 </html>

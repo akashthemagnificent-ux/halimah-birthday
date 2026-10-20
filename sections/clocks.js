@@ -145,14 +145,21 @@
     '  if (a < 0.0) a += TAU;',
     '  float ang = a / TAU;',
     /* the annulus */
-    '  float band = smoothstep(0.62, 0.68, r) * (1.0 - smoothstep(0.94, 1.0, r));',
+    '  float band = smoothstep(0.60, 0.67, r) * (1.0 - smoothstep(0.96, 1.0, r));',
     /* the travelled arc, trailing edge softened */
     '  float travelled = step(ang, uProgress);',
-    '  float arc = band * mix(0.10, 0.55, travelled);',
+    '  float arc = band * mix(0.12, 0.62, travelled);',
+    /* the leading edge: a bead of light where "now" sits, tapering back */
+    '  float lead = band * smoothstep(uProgress, uProgress + 0.05, ang);',
     /* tick marks every 1/60 of the lap */
     '  float tick = step(0.992, fract(ang * 60.0)) * band;',
-    '  vec3 col = uColor * (0.55 + arc * 1.6 + tick * 1.1);',
-    '  float alpha = (band * 0.20 + arc * 0.75 + tick * 0.55) * uOpacity;',
+    '  // the ring reads as light, not wire: an inner disc, a wide halo,',
+    '  // and a hot leading edge, all tinted by the ring colour',
+    '  float disc = smoothstep(0.60, 0.55, r);',
+    '  float halo = smoothstep(1.0, 0.62, r);',
+    '  vec3 col = uColor * (0.55 + arc * 2.2 + lead * 2.4 + tick * 1.3);',
+    '  float alpha = (disc * 0.10 + halo * 0.06 + band * 0.22 + arc * 0.80',
+    '                 + lead * 0.95 + tick * 0.60) * uOpacity;',
     '  gl_FragColor = vec4(col, alpha);',
     '}'
   ].join('\n');

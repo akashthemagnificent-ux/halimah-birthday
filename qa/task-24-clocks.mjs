@@ -233,6 +233,57 @@ if (mode === 'nojs') {
     assert(first.webgl === 'off', 'no-WebGL sets data-webgl="off"');
     assert(first.days === '142', 'counters still correct without WebGL');
   }
+
+  // Scroll ~40% through the track so at least the first ring is in view
+  // before measuring where the numerals actually land.
+  await page.evaluate(() => {
+    const sec = document.getElementById('clocks');
+    const tr = sec.querySelector('[data-clocks-track]');
+    window.scrollTo(0, sec.getBoundingClientRect().top + window.scrollY +
+      Math.max(0, tr.offsetHeight - window.innerHeight) * 0.42);
+  });
+  await page.waitForTimeout(1200);
+
+  // Geometry guards. Both of these shipped broken once:
+  //  - the stage collapsed to a ~40px strip because the base .section is a
+  //    flex column whose children shrink to fit;
+  //  - the numerals were positioned against the collapsed .clocks__rings
+  //    box instead of the stage, so every block landed hundreds of pixels
+  //    below its ring and the third one sat off-screen.
+  const geo = await page.evaluate(() => {
+    const sec = document.getElementById('clocks');
+    const stage = sec.querySelector('[data-clocks-stage]');
+    const rings = sec.querySelector('.clocks__rings');
+    const sr = stage.getBoundingClientRect();
+    const rr = rings.getBoundingClientRect();
+    const scroll = (els) => Math.max(...els.map((el) => {
+      const b = el.getBoundingClientRect();
+      return b.bottom + window.scrollY;
+    }));
+    const tops = [...sec.querySelectorAll('.clocks__ring')].map((el) => el.getBoundingClientRect().top);
+    const sorted = tops.every((t, i) => i === 0 || t > tops[i - 1]);
+    return {
+      stageW: sr.width, viewportW: window.innerWidth,
+      ringsT: rr.top, ringsH: rr.height, stageT: sr.top, stageH: sr.height,
+      live: stage.classList.contains('is-live'),
+      aboveFold: tops.filter((t) => t > -1 && t < window.innerHeight).length,
+      sorted,
+      stageScrollY: sr.top + window.scrollY,
+      ringsScrollY: rr.top + window.scrollY
+    };
+  });
+
+  assert(geo.stageW >= geo.viewportW * 0.9,
+    'stage spans the viewport, not a strip', `${geo.stageW} of ${geo.viewportW}`);
+  assert(geo.sorted, 'the three numeral blocks stack in DOM order');
+  assert(geo.aboveFold >= 1, 'at least one numeral sits in the viewport', `${geo.aboveFold} visible`);
+  if (geo.live) {
+    // In live mode the JS writes stage-pixel transforms, so the container
+    // must be the stage box or the numbers drift off their rings.
+    assert(Math.abs(geo.ringsT - geo.stageT) <= 2 && Math.abs(geo.ringsH - geo.stageH) <= 2,
+      'live numeral container is the stage box',
+      JSON.stringify({ ringsT: geo.ringsT, stageT: geo.stageT, ringsH: geo.ringsH, stageH: geo.stageH }));
+  }
 }
 
 // Release from the pinned track: past the section, the next element
