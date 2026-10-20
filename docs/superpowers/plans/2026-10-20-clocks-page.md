@@ -1190,7 +1190,6 @@ Add before the closing `}());` of `sections/clocks.js` — replace the final `}(
     return true;
   }
 ```
-```
 
 Then, inside `boot()`, after `window.ClocksPage = {...}` and before `window.dispatchEvent(...)`, add:
 
