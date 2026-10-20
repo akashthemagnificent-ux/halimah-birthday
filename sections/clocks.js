@@ -410,9 +410,26 @@
     window.dispatchEvent(new CustomEvent('clocks:ready'));
   }
 
+  /* begin.js detaches #content-region until the begin tap, so #clocks
+     does not exist yet when this file runs — wait for data-unlocked,
+     the same gate js/section-music.js uses. */
+  function arm() {
+    if (document.documentElement.getAttribute('data-unlocked') === 'true') {
+      boot();
+      return;
+    }
+    var obs = new MutationObserver(function () {
+      if (document.documentElement.getAttribute('data-unlocked') === 'true') {
+        obs.disconnect();
+        boot();
+      }
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-unlocked'] });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', arm);
   } else {
-    boot();
+    arm();
   }
 }());
