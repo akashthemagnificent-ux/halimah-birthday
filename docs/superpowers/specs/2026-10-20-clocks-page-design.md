@@ -141,13 +141,19 @@ the loop, no per-frame layout reads.
 
 - Rings are static geometry; only uniforms change per frame.
 
-**Composition:** three rings arranged on a circle around a shared center,
-each tilted to face outward slightly so all three stay partly in frame.
+**Composition:** three rings **stacked vertically** in world space
+(y = +2.1, 0, −2.1), each tilted back slightly to face the camera. A vertical
+stack is deliberate: the phone is the primary device, and a horizontal circle
+of rings would fall outside the narrow field of view in portrait. Ring outer
+radius 1.0; at camera distance 7.4 (fov 42°) the cluster spans 5.2 vertically
+against 5.5 of visible height and 2.0 horizontally against 2.44 of visible
+width at a 390×844 viewport — it fits on the narrow axis with margin.
 One `Points` dust field behind them, `AdditiveBlending`, slowly drifting.
 
-**Camera:** ridable on scroll progress `p` = 0→1 across the track, orbiting
-from ring 1 → 2 → 3 with a small dolly. Eased, not linear. Pointer parallax
-adds a shallow additive offset on top (coarse pointers keep the authored pose).
+**Camera:** rides scroll progress `p` = 0→1 across the track, travelling down
+the stack from the "us" ring to the anniversary ring, looking at a focus height
+that lerps between them. Eased, not linear. Pointer parallax adds a shallow
+additive offset on top (coarse pointers keep the authored pose).
 
 **Palette:**
 
