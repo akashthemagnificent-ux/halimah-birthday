@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="sections/reel.css?v=ambient2" />
 <link rel="stylesheet" href="sections/world.css" />
 <link rel="stylesheet" href="sections/finale.css" />
+<link rel="stylesheet" href="sections/clocks.css?v=clocks1" />
 </head>
 <body>
 <!-- Opening overlay (todo 2)
@@ -1458,6 +1459,54 @@
   </div>
 </section>
 
+<!-- 12. clocks — live counters (post-letter).
+     Numbers are DOM text, so they stay readable, selectable and
+     accessible; three.js draws only the rings behind them. With
+     JS off the anchor dates still tell the truth. -->
+<section id="clocks" class="section section--clocks" aria-label="How much time">
+  <div class="clocks__track" data-clocks-track>
+    <div class="clocks__stage" data-clocks-stage>
+      <canvas class="clocks__canvas" data-clocks-canvas aria-hidden="true"></canvas>
+      <div class="clocks__ground" aria-hidden="true"></div>
+      <div class="clocks__grain" aria-hidden="true"></div>
+
+      <div class="clocks__rings">
+        <div class="clocks__ring" data-milestone="together">
+          <span class="clocks__hero" data-unit="days">—</span>
+          <span class="clocks__sub" aria-hidden="true">
+            <span data-unit="hours">--</span><i>:</i><span data-unit="minutes">--</span><i>:</i><span data-unit="seconds">--</span>
+          </span>
+          <span class="clocks__label" data-clocks-label>us, so far</span>
+          <span class="clocks__note">together since 26 august 2026</span>
+          <span class="sr-only" data-clocks-sr></span>
+        </div>
+
+        <div class="clocks__ring" data-milestone="birthday">
+          <span class="clocks__hero" data-unit="days">—</span>
+          <span class="clocks__sub" aria-hidden="true">
+            <span data-unit="hours">--</span><i>:</i><span data-unit="minutes">--</span><i>:</i><span data-unit="seconds">--</span>
+          </span>
+          <span class="clocks__label" data-clocks-label>your next birthday</span>
+          <span class="clocks__note">19 october, every year</span>
+          <span class="sr-only" data-clocks-sr></span>
+        </div>
+
+        <div class="clocks__ring" data-milestone="anniversary">
+          <span class="clocks__hero" data-unit="days">—</span>
+          <span class="clocks__sub" aria-hidden="true">
+            <span data-unit="hours">--</span><i>:</i><span data-unit="minutes">--</span><i>:</i><span data-unit="seconds">--</span>
+          </span>
+          <span class="clocks__label" data-clocks-label>one year of us</span>
+          <span class="clocks__note">26 august 2027</span>
+          <span class="sr-only" data-clocks-sr></span>
+        </div>
+      </div>
+
+      <p class="clocks__closer">and it keeps counting</p>
+    </div>
+  </div>
+</section>
+
 </div><!-- /#content-region -->
 
 <!-- Base styles (minimal — most styles live in per-section CSS) -->
@@ -2227,5 +2276,8 @@ button, a, input, select, textarea {
 <script src="sections/reel.js"></script>
 <script src="sections/world.js"></script>
 <script src="sections/finale.js"></script>
+<script src="content/milestones.js?v=clocks1"></script>
+<script src="sections/clocks-core.js?v=clocks1"></script>
+<script src="sections/clocks.js?v=clocks1"></script>
 </body>
 </html>

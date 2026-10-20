@@ -55,7 +55,10 @@
     starmap: 7,
     reel: 'silent',
     world: 'silent',
-    finale: 8
+    finale: 8,
+    /* the clocks page closes the night on the same song — the letter
+       and what comes after it are one movement */
+    clocks: 8
   };
 
   var elements = {};       /* page -> HTMLAudioElement */
