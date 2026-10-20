@@ -5,9 +5,9 @@
    Data-driven: cards render from content/quotes-manifest.json, so new
    quotes merge in with zero markup edits. Layers:
 
-   - Three.js orbit void: numbered evidence tags drifting in depth +
-     rising ember sparks, cursor orbit (camBase pattern: distance fixed,
-     angle follows the hand — nothing can shrink).
+   - Three.js orbit void: rising ember sparks in depth, cursor orbit
+     (camBase pattern: distance fixed, angle follows the hand — nothing
+     can shrink).
    - Threat headline: kinetic word slam-in on entry.
    - Wall: batch-cascade entrance, EVIDENCE stamp on every card, gold
      foil on rares, cursor tilt + glare, tap-to-hold lightbox,
@@ -43,9 +43,9 @@
   }
 
   /* ================================================================
-     Orbit void — evidence tags + embers in depth, cursor orbit.
+     Orbit void — embers in depth, cursor orbit.
      ================================================================ */
-  function createOrbitVoid(section, canvas, count) {
+  function createOrbitVoid(section, canvas) {
     const THREE = window.THREE;
     if (!THREE || !canvas) return null;
 
@@ -68,60 +68,10 @@
     const camBase = { x: 0, y: 0, z: 9 };
     camera.position.set(0, 0, 9);
 
-    // evidence tags: small glowing numbered chips as sprites
-    const tagCount = Math.min(count, 40);
-    const tagGroup = new THREE.Group();
-    scene.add(tagGroup);
-    const tags = [];
-
-    /* One canvas per tag: a CanvasTexture tracks the canvas it was built
-       from, so sharing a single scratch canvas makes every sprite sample
-       whatever was drawn last (all 40 chips read the final label). */
-    function tagTexture(label, rare) {
-      const tagCanvas = document.createElement('canvas');
-      tagCanvas.width = 128;
-      tagCanvas.height = 64;
-      const ctx = tagCanvas.getContext('2d');
-      ctx.clearRect(0, 0, 128, 64);
-      ctx.fillStyle = rare ? 'rgba(60,38,8,0.92)' : 'rgba(20,14,10,0.92)';
-      ctx.strokeStyle = rare ? '#ffe3ae' : '#c9956b';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.roundRect(4, 8, 120, 48, 10);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = rare ? '#ffe3ae' : '#f5ebe0';
-      ctx.font = 'bold 26px monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, 64, 34);
-      const tex = new THREE.CanvasTexture(tagCanvas);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    }
-
-    for (let i = 0; i < tagCount; i += 1) {
-      const rare = i % 7 === 0;
-      const tex = tagTexture(rare ? '★' + String(i + 1).padStart(2, '0') : String(i + 1).padStart(2, '0'), rare);
-      const mat = new THREE.SpriteMaterial({
-        map: tex, transparent: true, depthWrite: false,
-        opacity: rare ? 0.95 : 0.7,
-      });
-      const sp = new THREE.Sprite(mat);
-      const s = rare ? 1.15 : 0.7 + rand() * 0.5;
-      sp.scale.set(s * 1.6, s * 0.8, 1);
-      const ang = rand() * Math.PI * 2;
-      const rad = 2.6 + rand() * 3.4;
-      sp.position.set(Math.cos(ang) * rad, (rand() * 2 - 1) * 3.4, -1 - rand() * 4);
-      sp.userData = {
-        ang, rad, yBase: sp.position.y,
-        speed: 0.05 + rand() * 0.1,
-        bobAmp: 0.15 + rand() * 0.25,
-        phase: rand() * Math.PI * 2,
-      };
-      tagGroup.add(sp);
-      tags.push(sp);
-    }
+    /* No floating evidence chips. They were numbered canvas sprites
+       (rectangles with digits) drifting behind the wall, which read as
+       random floating "40" boxes and fought the quote cards. The void
+       is now embers only. */
 
     // rising embers
     const emberCount = 130;
@@ -145,7 +95,6 @@
 
     const pointer = { x: 0, y: 0, seen: false };
     const ease = { x: 0, y: 0 };
-    let progress = 0;
 
     function resize() {
       const rect = section.getBoundingClientRect();
@@ -165,15 +114,6 @@
       const t = performance.now() * 0.001;
       ease.x += ((pointer.seen ? pointer.x : 0) - ease.x) * 0.14;
       ease.y += ((pointer.seen ? pointer.y : 0) - ease.y) * 0.14;
-
-      for (let i = 0; i < tags.length; i += 1) {
-        const sp = tags[i];
-        const u = sp.userData;
-        const a = u.ang + t * u.speed + progress * 1.2;
-        sp.position.x = Math.cos(a) * u.rad;
-        sp.position.z = -2.4 + Math.sin(a * 0.7) * 1.4;
-        sp.position.y = u.yBase + Math.sin(t * 0.7 + u.phase) * u.bobAmp;
-      }
 
       const arr = egeo.attributes.position.array;
       for (let i = 0; i < emberCount; i += 1) {
@@ -251,10 +191,6 @@
         if (running) resize();
       });
     }, { passive: true });
-
-    return {
-      setProgress(p) { progress = Math.max(0, Math.min(1, p || 0)); },
-    };
   }
 
   /* ================================================================
@@ -795,18 +731,8 @@
       });
     }
 
-    // 3D void behind the wall
-    const orbit = createOrbitVoid(section, canvas, items.length);
-    if (orbit && window.ScrollTrigger) {
-      window.gsap.registerPlugin(window.ScrollTrigger);
-      window.ScrollTrigger.create({
-        trigger: section,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 0.8,
-        onUpdate: (self) => orbit.setProgress(self.progress),
-      });
-    } else if (canvas) {
+    // 3D void behind the wall (embers); no scroll-driven state any more
+    if (!createOrbitVoid(section, canvas) && canvas) {
       canvas.style.display = 'none';
     }
 

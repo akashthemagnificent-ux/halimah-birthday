@@ -101,20 +101,24 @@ html.js-reel .reel__track {
   pointer-events: none;
 }
 
-/* Full-screen ambient fill: soft tinted light so a square (1:1) edit
-   sits in a filled, warm field instead of flat black. Full-bleed and
-   low opacity, sitting above the echo/wash and under the sharp video. */
+/* Full-screen ambient fill: a tinted wash so a square (1:1) edit sits in a
+   filled, warm field instead of flat black. The gradients must stay wide
+   enough to still have colour out at the gutters — a tight centre glow
+   fades to transparent well before the edges and the surround reads black
+   again, which is exactly what the first attempt did. */
 .reel__ambient {
   position: absolute;
-  inset: -12%;
+  inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(60% 46% at 50% 42%, rgb(var(--reel-accent, 239 106 64) / 0.30), transparent 64%),
-    radial-gradient(80% 60% at 50% 88%, rgb(255 180 120 / 0.14), transparent 60%),
-    radial-gradient(70% 55% at 50% 8%, rgb(255 210 160 / 0.10), transparent 62%);
-  filter: blur(30px) saturate(1.15);
-  opacity: 0.9;
+    /* broad body colour that reaches the edges */
+    radial-gradient(140% 120% at 50% 50%, rgb(var(--reel-accent, 239 106 64) / 0.34), rgb(var(--reel-accent, 239 106 64) / 0.16) 62%, rgb(var(--reel-accent, 239 106 64) / 0.10) 100%),
+    /* warm floor bounce + soft top light */
+    radial-gradient(90% 55% at 50% 96%, rgb(255 176 112 / 0.20), transparent 72%),
+    radial-gradient(85% 50% at 50% 4%, rgb(255 214 170 / 0.14), transparent 70%);
+  filter: blur(36px) saturate(1.2);
+  opacity: 1;
   will-change: opacity;
 }
 
