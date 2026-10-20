@@ -43,8 +43,7 @@
         hours: el.querySelector('[data-unit="hours"]'),
         minutes: el.querySelector('[data-unit="minutes"]'),
         seconds: el.querySelector('[data-unit="seconds"]'),
-        sr: el.querySelector('[data-clocks-sr]'),
-        worldY: 0
+        sr: el.querySelector('[data-clocks-sr]')
       });
     }
     return out;
