@@ -358,3 +358,18 @@
 @media (prefers-reduced-motion: reduce) {
   .clocks__ground::after { animation: none; opacity: 0.8; }
 }
+
+/* Gradient text paints nothing on its own: where background-clip: text
+   is unsupported, `color: transparent` would erase the numerals. Fall
+   back to solid warm ink so the numbers always read. */
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .clocks__headline,
+  .clocks__hero {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: #f7e3c6;
+  }
+
+  .clocks__ring[data-milestone="birthday"] .clocks__hero { color: #ffe6ab; }
+  .clocks__ring[data-milestone="anniversary"] .clocks__hero { color: #ffd3dc; }
+}

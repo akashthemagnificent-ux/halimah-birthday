@@ -155,8 +155,10 @@
     '  float tick = step(0.992, fract(ang * 60.0)) * band;',
     '  // the ring reads as light, not wire: an inner disc, a wide halo,',
     '  // and a hot leading edge, all tinted by the ring colour',
-    '  float disc = smoothstep(0.60, 0.55, r);',
-    '  float halo = smoothstep(1.0, 0.62, r);',
+    '  // (smoothstep needs edge0 < edge1; a reversed pair is undefined',
+    '  //   per the GLSL spec, so the descending ramps are written out)',
+    '  float disc = 1.0 - smoothstep(0.55, 0.60, r);',
+    '  float halo = 1.0 - smoothstep(0.62, 1.0, r);',
     '  vec3 col = uColor * (0.55 + arc * 2.2 + lead * 2.4 + tick * 1.3);',
     '  float alpha = (disc * 0.10 + halo * 0.06 + band * 0.22 + arc * 0.80',
     '                 + lead * 0.95 + tick * 0.60) * uOpacity;',
@@ -358,13 +360,19 @@
       else if (inView) startScene();
     });
 
-    /* context loss: hide the canvas, keep the numbers */
+    /* context loss: hide the canvas, keep the numbers.
+       Clearing the placeNumerals() transforms lets the fallback
+       grid re-assert itself so the numerals stay on their rings. */
     canvas.addEventListener('webglcontextlost', function (e) {
       e.preventDefault();
       stopScene();
       stage.classList.remove('is-live');
       page.section.setAttribute('data-webgl', 'off');
       canvas.style.display = 'none';
+      for (var i = 0; i < meshes.length; i += 1) {
+        var b = page.rings[i];
+        if (b && b.el) b.el.style.transform = '';
+      }
     });
 
     window.addEventListener('pagehide', function () {

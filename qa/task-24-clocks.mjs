@@ -283,6 +283,31 @@ if (mode === 'nojs') {
     assert(Math.abs(geo.ringsT - geo.stageT) <= 2 && Math.abs(geo.ringsH - geo.stageH) <= 2,
       'live numeral container is the stage box',
       JSON.stringify({ ringsT: geo.ringsT, stageT: geo.stageT, ringsH: geo.ringsH, stageH: geo.stageH }));
+
+    // Context loss drops back to the CSS grid. The stale stage-pixel
+    // transforms must be cleared or the fallback keeps them off-screen.
+    await page.evaluate(() => {
+      const canvas = document.querySelector('#clocks [data-clocks-canvas]');
+      canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true }));
+    });
+    await page.waitForTimeout(400);
+    const lost = await page.evaluate(() => {
+      const sec = document.getElementById('clocks');
+      const stage = sec.querySelector('[data-clocks-stage]');
+      const vh = window.innerHeight;
+      return {
+        live: stage.classList.contains('is-live'),
+        webgl: sec.getAttribute('data-webgl'),
+        transforms: [...sec.querySelectorAll('.clocks__ring')].map((el) => el.style.transform),
+        visible: [...sec.querySelectorAll('.clocks__ring')]
+          .filter((el) => { const b = el.getBoundingClientRect(); return b.bottom > 0 && b.top < vh; }).length
+      };
+    });
+    assert(!lost.live && lost.webgl === 'off', 'context loss falls back to the CSS layout',
+      JSON.stringify({ live: lost.live, webgl: lost.webgl }));
+    assert(lost.transforms.every((t) => t === ''),
+      'context loss clears the projected transforms', JSON.stringify(lost.transforms));
+    assert(lost.visible >= 1, 'numerals stay on screen after context loss', `${lost.visible} visible`);
   }
 }
 
