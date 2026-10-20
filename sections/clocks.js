@@ -330,11 +330,16 @@
       sceneRaf = 0;
     }
 
-    /* stop the scene when the section leaves the viewport */
+    /* stop the scene when the section leaves the viewport. Same
+       inView guard as the counters: returning to the tab must not
+       resurrect a render loop for a section nobody can see. */
+    var inView = true;
+
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
         for (var i = 0; i < entries.length; i += 1) {
-          if (entries[i].isIntersecting) startScene(); else stopScene();
+          inView = entries[i].isIntersecting;
+          if (inView) startScene(); else stopScene();
         }
       }, { rootMargin: '50%' });
       io.observe(page.section);
@@ -343,7 +348,8 @@
     }
 
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) stopScene(); else startScene();
+      if (document.hidden) stopScene();
+      else if (inView) startScene();
     });
 
     /* context loss: hide the canvas, keep the numbers */
@@ -377,10 +383,16 @@
 
     tickNow(Date.now());
 
+    /* inView tracks the last IntersectionObserver verdict. The
+       visibility handler must honour it: a tab that comes back while the
+       section is forty thousand pixels away must not restart the loop. */
+    var inView = true;
+
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
         for (var i = 0; i < entries.length; i += 1) {
-          if (entries[i].isIntersecting) start(); else stop();
+          inView = entries[i].isIntersecting;
+          if (inView) start(); else stop();
         }
       }, { rootMargin: '100%' });
       io.observe(section);
@@ -389,7 +401,14 @@
     }
 
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { stop(); } else { tickNow(Date.now()); start(); }
+      if (document.hidden) {
+        stop();
+        return;
+      }
+      /* waking up: paint once so the numbers are true immediately,
+         then let the observer decide whether to keep ticking. */
+      tickNow(Date.now());
+      if (inView) start();
     });
 
     window.ClocksPage = {

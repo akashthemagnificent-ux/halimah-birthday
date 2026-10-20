@@ -195,6 +195,40 @@ if (mode === 'nojs') {
     document.querySelector('#clocks [data-milestone="together"] [data-unit="seconds"]').textContent);
   assert(second !== first.secs, 'seconds advance', `${first.secs} -> ${second}`);
 
+  // A tab that comes back while the section is far offscreen must not
+  // restart the loop — only IntersectionObserver gets to decide that.
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(200);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(600);
+  const offscreenA = await page.evaluate(() =>
+    document.querySelector('#clocks [data-milestone="together"] [data-unit="seconds"]').textContent);
+  await page.waitForTimeout(2200);
+  const offscreenB = await page.evaluate(() =>
+    document.querySelector('#clocks [data-milestone="together"] [data-unit="seconds"]').textContent);
+  assert(offscreenA === offscreenB, 'tab return does not tick while offscreen',
+    `${offscreenA} -> ${offscreenB}`);
+
+  // Back into view: the loop must resume.
+  await page.evaluate(() => {
+    const el = document.getElementById('clocks');
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY + 10);
+  });
+  await page.waitForTimeout(1200);
+  const backA = await page.evaluate(() =>
+    document.querySelector('#clocks [data-milestone="together"] [data-unit="seconds"]').textContent);
+  await page.waitForTimeout(2200);
+  const backB = await page.evaluate(() =>
+    document.querySelector('#clocks [data-milestone="together"] [data-unit="seconds"]').textContent);
+  assert(backA !== backB, 'loop resumes when scrolled back into view', `${backA} -> ${backB}`);
+
   if (mode === 'nowebgl') {
     assert(first.webgl === 'off', 'no-WebGL sets data-webgl="off"');
     assert(first.days === '142', 'counters still correct without WebGL');
