@@ -21,8 +21,15 @@
 
 .clocks__track {
   position: relative;
+  width: 100%;
   height: 300vh;
   height: 300dvh;
+}
+
+/* The base .section is a flex column whose children shrink-to-fit;
+   the stage must fill the track so sticky + the canvas render full-bleed. */
+.clocks__stage {
+  width: 100%;
 }
 
 .clocks__stage {
